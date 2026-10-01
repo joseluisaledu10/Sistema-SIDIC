@@ -1,0 +1,953 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+Auditoría del Sistema - Sistema DICyT
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================================================
+       ENCABEZADO
+    ========================================================= */
+
+    .pagina-encabezado {
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        margin-bottom: 25px;
+
+    }
+
+
+    .pagina-titulo h2 {
+
+        margin: 0;
+
+        color: #0d3b66;
+
+        font-size: 26px;
+
+        font-weight: 700;
+
+    }
+
+
+    .pagina-titulo p {
+
+        margin: 6px 0 0;
+
+        color: #6c757d;
+
+        font-size: 14px;
+
+    }
+
+
+    /* =========================================================
+       TARJETA PRINCIPAL
+    ========================================================= */
+
+    .tarjeta {
+
+        background: #ffffff;
+
+        border-radius: 12px;
+
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+
+        padding: 22px;
+
+        margin-bottom: 25px;
+
+    }
+
+
+    /* =========================================================
+       FILTROS
+    ========================================================= */
+
+    .filtros {
+
+        display: grid;
+
+        grid-template-columns:
+            minmax(220px, 2fr)
+            minmax(160px, 1fr)
+            minmax(150px, 1fr)
+            minmax(190px, 1.2fr)
+            minmax(150px, 1fr)
+            minmax(150px, 1fr);
+
+        gap: 14px;
+
+        align-items: end;
+
+    }
+
+
+    .campo-filtro {
+
+        display: flex;
+
+        flex-direction: column;
+
+    }
+
+
+    .campo-filtro label {
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        color: #495057;
+
+        margin-bottom: 6px;
+
+    }
+
+
+    .campo-filtro input,
+    .campo-filtro select {
+
+        width: 100%;
+
+        height: 40px;
+
+        border: 1px solid #ced4da;
+
+        border-radius: 7px;
+
+        padding: 0 11px;
+
+        font-size: 13px;
+
+        color: #343a40;
+
+        background: #ffffff;
+
+        outline: none;
+
+        box-sizing: border-box;
+
+    }
+
+
+    .campo-filtro input:focus,
+    .campo-filtro select:focus {
+
+        border-color: #155d98;
+
+        box-shadow: 0 0 0 2px rgba(21, 93, 152, 0.10);
+
+    }
+
+
+    /* =========================================================
+       BOTONES DE FILTROS
+    ========================================================= */
+
+    .acciones-filtros {
+
+        display: flex;
+
+        gap: 8px;
+
+        margin-top: 16px;
+
+    }
+
+
+    .btn-filtrar {
+
+        background: #0d3b66;
+
+        color: #ffffff;
+
+        border: none;
+
+        border-radius: 7px;
+
+        padding: 9px 17px;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        text-decoration: none;
+
+        cursor: pointer;
+
+        transition: 0.2s;
+
+    }
+
+
+    .btn-filtrar:hover {
+
+        background: #155d98;
+
+        color: #ffffff;
+
+    }
+
+
+    .btn-limpiar {
+
+        background: #f1f3f5;
+
+        color: #495057;
+
+        border: 1px solid #ced4da;
+
+        border-radius: 7px;
+
+        padding: 8px 17px;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        text-decoration: none;
+
+        transition: 0.2s;
+
+    }
+
+
+    .btn-limpiar:hover {
+
+        background: #e9ecef;
+
+        color: #212529;
+
+    }
+
+
+    /* =========================================================
+       CONTADOR
+    ========================================================= */
+
+    .encabezado-tabla {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        margin-bottom: 15px;
+
+    }
+
+
+    .contador {
+
+        color: #6c757d;
+
+        font-size: 14px;
+
+    }
+
+
+    .contador strong {
+
+        color: #0d3b66;
+
+        font-size: 16px;
+
+    }
+
+
+    /* =========================================================
+       TABLA
+    ========================================================= */
+
+    .tabla-contenedor {
+
+        width: 100%;
+
+        overflow-x: auto;
+
+        border: 1px solid #e9ecef;
+
+        border-radius: 9px;
+
+    }
+
+
+    table {
+
+        width: 100%;
+
+        border-collapse: collapse;
+
+        min-width: 1050px;
+
+    }
+
+
+    thead th {
+
+        background: #0d3b66;
+
+        color: #ffffff;
+
+        padding: 12px 10px;
+
+        font-size: 12px;
+
+        font-weight: 600;
+
+        text-align: left;
+
+        white-space: nowrap;
+
+    }
+
+
+    tbody td {
+
+        padding: 11px 10px;
+
+        border-bottom: 1px solid #edf0f2;
+
+        color: #343a40;
+
+        font-size: 13px;
+
+        vertical-align: middle;
+
+    }
+
+
+    tbody tr:hover {
+
+        background: #f8fbff;
+
+    }
+
+
+    tbody tr:last-child td {
+
+        border-bottom: none;
+
+    }
+
+
+    /* =========================================================
+       BADGES DE ACCIÓN
+    ========================================================= */
+
+    .badge-accion {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        min-width: 72px;
+
+        padding: 5px 9px;
+
+        border-radius: 20px;
+
+        font-size: 11px;
+
+        font-weight: 700;
+
+        text-transform: uppercase;
+
+    }
+
+
+    .badge-crear {
+
+        background: #dff3e4;
+
+        color: #217a3c;
+
+    }
+
+
+    .badge-editar {
+
+        background: #dceeff;
+
+        color: #155d98;
+
+    }
+
+
+    .badge-eliminar {
+
+        background: #fde2e2;
+
+        color: #b42318;
+
+    }
+
+
+    .badge-default {
+
+        background: #f1f3f5;
+
+        color: #495057;
+
+    }
+
+
+    /* =========================================================
+       DESCRIPCIÓN
+    ========================================================= */
+
+    .descripcion {
+
+        max-width: 450px;
+
+        line-height: 1.45;
+
+    }
+
+
+    /* =========================================================
+       FECHA
+    ========================================================= */
+
+    .fecha {
+
+        white-space: nowrap;
+
+        color: #495057;
+
+        font-size: 12px;
+
+    }
+
+
+    /* =========================================================
+       SIN REGISTROS
+    ========================================================= */
+
+    .sin-registros {
+
+        text-align: center;
+
+        padding: 50px 20px;
+
+        color: #6c757d;
+
+    }
+
+
+    .sin-registros i {
+
+        font-size: 42px;
+
+        color: #adb5bd;
+
+        margin-bottom: 12px;
+
+    }
+
+
+    .sin-registros p {
+
+        margin: 0;
+
+        font-size: 14px;
+
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1200px) {
+
+        .filtros {
+
+            grid-template-columns:
+                repeat(3, minmax(180px, 1fr));
+
+        }
+
+    }
+
+
+    @media (max-width: 768px) {
+
+        .pagina-encabezado {
+
+            flex-direction: column;
+
+            align-items: flex-start;
+
+            gap: 10px;
+
+        }
+
+
+        .filtros {
+
+            grid-template-columns: 1fr;
+
+        }
+
+
+        .tarjeta {
+
+            padding: 16px;
+
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+
+            <i class="fa-solid fa-clipboard-list"></i>
+
+            Auditoría del Sistema
+
+        </h2>
+
+        <p>
+
+            Registro de actividades realizadas dentro del sistema.
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     FILTROS
+========================================================= -->
+
+<div class="tarjeta">
+
+    <form method="GET"
+          action="{{ url_for('auditoria') }}">
+
+        <div class="filtros">
+
+
+            <!-- BUSCAR -->
+
+            <div class="campo-filtro">
+
+                <label for="buscar">
+
+                    Buscar
+
+                </label>
+
+                <input
+                    type="text"
+                    id="buscar"
+                    name="buscar"
+                    value="{{ buscar }}"
+                    placeholder="Usuario, módulo o descripción..."
+                >
+
+            </div>
+
+
+            <!-- USUARIO -->
+
+            <div class="campo-filtro">
+
+                <label for="usuario">
+
+                    Usuario
+
+                </label>
+
+                <select id="usuario"
+                        name="usuario">
+
+                    <option value="">
+
+                        Todos
+
+                    </option>
+
+                    {% for item in usuarios %}
+
+                        <option
+                            value="{{ item['usuario'] }}"
+                            {% if usuario_filtro == item['usuario'] %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ item['usuario'] }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ACCIÓN -->
+
+            <div class="campo-filtro">
+
+                <label for="accion">
+
+                    Acción
+
+                </label>
+
+                <select id="accion"
+                        name="accion">
+
+                    <option value="">
+
+                        Todas
+
+                    </option>
+
+                    {% for item in acciones %}
+
+                        <option
+                            value="{{ item['accion'] }}"
+                            {% if accion == item['accion'] %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ item['accion'] }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- MÓDULO -->
+
+            <div class="campo-filtro">
+
+                <label for="modulo">
+
+                    Módulo
+
+                </label>
+
+                <select id="modulo"
+                        name="modulo">
+
+                    <option value="">
+
+                        Todos
+
+                    </option>
+
+                    {% for item in modulos %}
+
+                        <option
+                            value="{{ item['modulo'] }}"
+                            {% if modulo == item['modulo'] %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ item['modulo'] }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- DESDE -->
+
+            <div class="campo-filtro">
+
+                <label for="fecha_desde">
+
+                    Desde
+
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha_desde"
+                    name="fecha_desde"
+                    value="{{ fecha_desde }}"
+                >
+
+            </div>
+
+
+            <!-- HASTA -->
+
+            <div class="campo-filtro">
+
+                <label for="fecha_hasta">
+
+                    Hasta
+
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha_hasta"
+                    name="fecha_hasta"
+                    value="{{ fecha_hasta }}"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="acciones-filtros">
+
+            <button type="submit"
+                    class="btn-filtrar">
+
+                <i class="fa-solid fa-filter"></i>
+
+                Filtrar
+
+            </button>
+
+
+            <a href="{{ url_for('auditoria') }}"
+               class="btn-limpiar">
+
+                <i class="fa-solid fa-rotate-left"></i>
+
+                Limpiar
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     RESULTADOS
+========================================================= -->
+
+<div class="tarjeta">
+
+    <div class="encabezado-tabla">
+
+        <div class="contador">
+
+            Registros encontrados:
+
+            <strong>
+
+                {{ registros|length }}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    {% if registros %}
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>FECHA Y HORA</th>
+
+                        <th>USUARIO</th>
+
+                        <th>ACCIÓN</th>
+
+                        <th>MÓDULO</th>
+
+                        <th>REGISTRO</th>
+
+                        <th>DESCRIPCIÓN</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for registro in registros %}
+
+                        <tr>
+
+
+                            <!-- FECHA -->
+
+                            <td class="fecha">
+
+                                {{ registro['fecha'] }}
+
+                            </td>
+
+
+                            <!-- USUARIO -->
+
+                            <td>
+
+                                <strong>
+
+                                    {{ registro['usuario'] }}
+
+                                </strong>
+
+                            </td>
+
+
+                            <!-- ACCIÓN -->
+
+                            <td>
+
+                                {% if registro['accion'] == 'CREAR' %}
+
+                                    <span class="badge-accion badge-crear">
+
+                                        <i class="fa-solid fa-plus"></i>
+
+                                        CREAR
+
+                                    </span>
+
+                                {% elif registro['accion'] == 'EDITAR' %}
+
+                                    <span class="badge-accion badge-editar">
+
+                                        <i class="fa-solid fa-pen"></i>
+
+                                        EDITAR
+
+                                    </span>
+
+                                {% elif registro['accion'] == 'ELIMINAR' %}
+
+                                    <span class="badge-accion badge-eliminar">
+
+                                        <i class="fa-solid fa-trash"></i>
+
+                                        ELIMINAR
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge-accion badge-default">
+
+                                        {{ registro['accion'] }}
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- MÓDULO -->
+
+                            <td>
+
+                                {{ registro['modulo'] }}
+
+                            </td>
+
+
+                            <!-- REGISTRO -->
+
+                            <td>
+
+                                {% if registro['registro_id'] %}
+
+                                    #{{ registro['registro_id'] }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- DESCRIPCIÓN -->
+
+                            <td class="descripcion">
+
+                                {{ registro['descripcion'] }}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="sin-registros">
+
+            <i class="fa-solid fa-clipboard-check"></i>
+
+            <p>
+
+                No se encontraron registros de auditoría con los filtros seleccionados.
+
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

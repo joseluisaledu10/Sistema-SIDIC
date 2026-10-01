@@ -1,0 +1,1019 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver Texto en asignatura - Sistema DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 24px;
+}
+
+.pagina-titulo p {
+
+    margin: 6px 0 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   PANEL PRINCIPAL
+========================================================= */
+
+.detalle-panel {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 25px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.seccion-detalle {
+
+    margin-bottom: 28px;
+
+    padding-bottom: 22px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.seccion-detalle:last-child {
+
+    border-bottom: none;
+
+    margin-bottom: 0;
+
+    padding-bottom: 0;
+}
+
+.seccion-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 18px;
+
+    color: #0d3b66;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+.seccion-titulo i {
+
+    color: #155d98;
+}
+
+
+/* =========================================================
+   DATOS
+========================================================= */
+
+.detalle-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 18px 30px;
+}
+
+.detalle-campo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.detalle-campo.completo {
+
+    grid-column: 1 / -1;
+}
+
+.detalle-label {
+
+    font-size: 12px;
+
+    color: #6b7280;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+.detalle-valor {
+
+    color: #1f2937;
+
+    font-size: 14px;
+
+    min-height: 20px;
+}
+
+.detalle-valor.principal {
+
+    color: #1f2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   INVESTIGADORES
+========================================================= */
+
+.lista-autores {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.autor-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 13px;
+
+    background: #f5f8fb;
+
+    border-radius: 7px;
+}
+
+.autor-numero {
+
+    width: 25px;
+
+    height: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #0d3b66;
+
+    color: white;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.autor-nombre {
+
+    color: #155d98;
+
+    font-weight: 600;
+
+    font-size: 14px;
+}
+
+.autor-tipo {
+
+    margin-left: auto;
+
+    color: #6b7280;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   ARCHIVO
+========================================================= */
+
+.archivo-documento {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 15px 18px;
+
+    background: #f5f8fb;
+
+    border: 1px solid #dce5ee;
+
+    border-radius: 8px;
+}
+
+.archivo-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+.archivo-icono {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #0d3b66;
+
+    color: white;
+
+    font-size: 19px;
+
+    flex-shrink: 0;
+}
+
+.archivo-nombre {
+
+    color: #1f2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+.btn-abrir-archivo {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 15px;
+
+    background: #0d3b66;
+
+    color: white;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    transition: 0.2s;
+}
+
+.btn-abrir-archivo:hover {
+
+    background: #155d98;
+
+    color: white;
+}
+
+.sin-archivo {
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+    font-style: italic;
+}
+
+
+/* =========================================================
+   BOTONES FINALES
+========================================================= */
+
+.formulario-acciones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    border-top: 1px solid #e5e7eb;
+
+    padding-top: 20px;
+
+    margin-top: 20px;
+}
+
+.btn-cancelar,
+.btn-guardar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.btn-cancelar {
+
+    background: #6b7280;
+
+    color: white;
+}
+
+.btn-cancelar:hover {
+
+    background: #4b5563;
+
+    color: white;
+}
+
+.btn-guardar {
+
+    background: #0d3b66;
+
+    color: white;
+}
+
+.btn-guardar:hover {
+
+    background: #155d98;
+
+    color: white;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .pagina-encabezado {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .detalle-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .detalle-campo.completo {
+
+        grid-column: auto;
+    }
+
+    .archivo-documento {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .btn-abrir-archivo {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+
+    .formulario-acciones {
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .btn-cancelar,
+    .btn-guardar {
+
+        width: 100%;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fa-solid fa-book-open"></i>
+            Texto en asignatura
+        </h2>
+
+        <p>
+            Información completa del texto registrado.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PANEL
+========================================================= -->
+
+<div class="detalle-panel">
+
+
+    <!-- =====================================================
+         INFORMACIÓN PRINCIPAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-file-lines"></i>
+
+            Información principal
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Código
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['codigo'] }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Año
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['anio'] }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-item">
+
+                <div class="detalle-label">
+                    Asignatura
+                </div>
+
+                <div class="detalle-valor">
+                    {{ texto['asignatura'] }}
+                </div>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Carrera
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['carrera'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Facultad
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['facultad'] or '—' }}
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INVESTIGADORES / AUTORES
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-users"></i>
+
+            Investigadores / Autores
+
+        </div>
+
+
+        {% if investigadores %}
+
+        <div class="lista-autores">
+
+            {% for investigador in investigadores %}
+
+            <div class="autor-item">
+
+                <span class="autor-numero">
+                    {{ loop.index }}
+                </span>
+
+                <span class="autor-nombre">
+
+                    {{ investigador['apellido'] }},
+                    {{ investigador['nombre'] }}
+
+                </span>
+
+                <span class="autor-tipo">
+
+                    {{ investigador['tipo'] }}
+
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="sin-archivo">
+
+            No se registraron investigadores o autores.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN EDITORIAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-building"></i>
+
+            Información editorial
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Editorial
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['editorial'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Institución
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['institucion'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Edición
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['edicion'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Lugar de publicación
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['lugar_publicacion'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Fecha de publicación
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['fecha_publicacion'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Páginas
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['paginas'] or '—' }}
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         IDENTIFICACIÓN DIGITAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-fingerprint"></i>
+
+            Identificación digital
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    ISBN
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['isbn'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    DOI
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if texto['doi'] %}
+
+                        <a
+                            href="{{ texto['doi'] }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ texto['doi'] }}
+                        </a>
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo completo">
+
+                <span class="detalle-label">
+                    URL
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if texto['url'] %}
+
+                        <a
+                            href="{{ texto['url'] }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ texto['url'] }}
+                        </a>
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ARCHIVO DIGITAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+            Archivo digital
+
+        </div>
+
+
+        {% if texto['archivo'] %}
+
+        <div class="archivo-documento">
+
+            <div class="archivo-info">
+
+                <div class="archivo-icono">
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                </div>
+
+                <div class="archivo-nombre">
+
+                    {{ nombre_archivo or 'Archivo digital' }}
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('abrir_archivo', archivo_id=texto['archivo']) }}"
+                target="_blank"
+                class="btn-abrir-archivo"
+            >
+
+                <i class="fa-solid fa-eye"></i>
+
+                Ver documento
+
+            </a>
+
+        </div>
+
+        {% else %}
+
+        <div class="sin-archivo">
+
+            No se adjuntó un archivo digital.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN ADICIONAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            Información adicional
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Estado
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if texto['estado'] == 1 %}
+
+                        Activo
+
+                    {% else %}
+
+                        Inactivo
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Registrado por
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['usuario'] }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo completo">
+
+                <span class="detalle-label">
+                    Observaciones
+                </span>
+
+                <span class="detalle-valor">
+                    {{ texto['observaciones'] or '—' }}
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     BOTONES FINALES
+===================================================== -->
+
+<div class="formulario-acciones">
+
+    <a
+        href="{{ url_for('textos_asignatura') }}"
+        class="btn-cancelar"
+    >
+
+        <i class="fa-solid fa-arrow-left"></i>
+
+        Volver
+
+    </a>
+
+
+    <a
+        href="{{ url_for('editar_texto_asignatura', id=texto['id']) }}"
+        class="btn-guardar"
+    >
+
+        <i class="fa-solid fa-edit"></i>
+
+        Editar texto en asignatura
+
+    </a>
+
+</div>
+
+
+{% endblock %}

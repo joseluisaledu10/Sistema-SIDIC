@@ -1,0 +1,568 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nueva actividad - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       CONTENEDOR
+    ========================= */
+
+    .contenedor-formulario {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+
+    /* =========================
+       TARJETA
+    ========================= */
+
+    .tarjeta-actividad {
+        width: 100%;
+        max-width: 850px;
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        box-sizing: border-box;
+    }
+
+
+    /* =========================
+       TITULO
+    ========================= */
+
+    .titulo-formulario {
+        color: #0d3b66;
+        font-size: 22px;
+        margin: 0 0 5px 0;
+        text-align: center;
+    }
+
+    .descripcion-formulario {
+        color: #777;
+        font-size: 14px;
+        margin: 0 0 25px 0;
+        text-align: center;
+    }
+
+
+    /* =========================
+       GRID
+    ========================= */
+
+    .fila-formulario {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .grupo-actividad {
+        margin-bottom: 20px;
+    }
+
+    .grupo-actividad label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #444;
+    }
+
+    .grupo-actividad input,
+    .grupo-actividad select,
+    .grupo-actividad textarea {
+
+        width: 100%;
+        padding: 11px;
+
+        border: 1px solid #d5dbe1;
+        border-radius: 7px;
+
+        font-size: 14px;
+
+        outline: none;
+
+        background-color: white;
+
+        box-sizing: border-box;
+    }
+
+    .grupo-actividad textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .grupo-actividad input:focus,
+    .grupo-actividad select:focus,
+    .grupo-actividad textarea:focus {
+
+        border-color: #145da0;
+
+        box-shadow:
+            0 0 0 2px rgba(20,93,160,0.10);
+    }
+
+
+    /* =========================
+       CAMPOS COMPLETOS
+    ========================= */
+
+    .campo-completo {
+        grid-column: 1 / -1;
+    }
+
+
+    /* =========================
+       AVISO
+    ========================= */
+
+    .aviso-actividad {
+
+        background-color: #f4f7fb;
+
+        border-left: 4px solid #0d3b66;
+
+        padding: 12px 15px;
+
+        border-radius: 7px;
+
+        margin-bottom: 25px;
+
+        font-size: 14px;
+
+        color: #555;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .acciones-actividad {
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+
+        margin-top: 10px;
+    }
+
+    .btn-actividad {
+
+        border: none;
+
+        padding: 11px 20px;
+
+        border-radius: 7px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        text-decoration: none;
+    }
+
+    .btn-guardar {
+
+        background-color: #0d3b66;
+
+        color: white;
+    }
+
+    .btn-guardar:hover {
+
+        background-color: #092c4c;
+    }
+
+    .btn-cancelar {
+
+        background-color: #e5e7eb;
+
+        color: #374151;
+    }
+
+    .btn-cancelar:hover {
+
+        background-color: #d1d5db;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .fila-formulario {
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo {
+            grid-column: auto;
+        }
+
+        .tarjeta-actividad {
+            padding: 20px;
+        }
+
+        .acciones-actividad {
+            flex-direction: column;
+        }
+
+        .btn-actividad {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        📅 Nueva actividad
+    </h1>
+
+    <p>
+        Registra una nueva actividad de DICyT
+    </p>
+
+</div>
+
+
+<!-- =========================
+     FORMULARIO
+========================= -->
+
+<div class="contenedor-formulario">
+
+    <div class="tarjeta-actividad">
+
+        <h2 class="titulo-formulario">
+            Registro de actividad
+        </h2>
+
+        <p class="descripcion-formulario">
+            Completa la información de la actividad.
+        </p>
+
+
+        <div class="aviso-actividad">
+
+            ℹ️ Los campos marcados son necesarios para registrar
+            correctamente la actividad.
+
+        </div>
+
+
+        <form method="POST">
+
+
+            <div class="fila-formulario">
+
+
+                <!-- CÓDIGO -->
+
+                <div class="grupo-actividad">
+
+                    <label for="codigo">
+                        Código
+                    </label>
+
+                    <input
+                        type="text"
+                        id="codigo"
+                        name="codigo"
+                        placeholder="Ej. ACT-001"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- TIPO -->
+
+                <div class="grupo-actividad">
+
+                    <label for="tipo">
+                        Tipo de actividad
+                    </label>
+
+                    <select
+                        name="tipo"
+                        id="tipo"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione un tipo
+                        </option>
+
+                        {% for tipo in tipos_actividad %}
+
+                            <option value="{{ tipo }}">
+                                {{ tipo }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- ASUNTO -->
+
+                <div class="grupo-actividad campo-completo">
+
+                    <label for="asunto">
+                        Nombre de la actividad
+                    </label>
+
+                    <input
+                        type="text"
+                        id="asunto"
+                        name="asunto"
+                        placeholder="Ingrese el nombre de la actividad"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- RESPONSABLE -->
+
+                <div class="grupo-actividad">
+
+                    <label for="responsable">
+                        Responsable
+                    </label>
+
+                    <input
+                        type="text"
+                        id="responsable"
+                        name="responsable"
+                        placeholder="Nombre del responsable"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- FECHA INICIO -->
+
+                <div class="grupo-actividad">
+
+                    <label for="fecha_inicio">
+                        Fecha de inicio
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fecha_inicio"
+                        name="fecha_inicio"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- FECHA LÍMITE -->
+
+                <div class="grupo-actividad">
+
+                    <label for="fecha_limite">
+                        Fecha límite
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fecha_limite"
+                        name="fecha_limite"
+                    >
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="grupo-actividad">
+
+                    <label for="estado">
+                        Estado
+                    </label>
+
+                    <select
+                        id="estado"
+                        name="estado"
+                        required
+                    >
+
+                        <option value="Pendiente">
+                            Pendiente
+                        </option>
+
+                        <option value="En proceso">
+                            En proceso
+                        </option>
+
+                        <option value="Concluida">
+                            Concluida
+                        </option>
+
+                        <option value="Cancelada">
+                            Cancelada
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- PRIORIDAD -->
+
+                <div class="grupo-actividad">
+
+                    <label for="prioridad">
+                        Prioridad
+                    </label>
+
+                    <select
+                        id="prioridad"
+                        name="prioridad"
+                        required
+                    >
+
+                        <option value="Baja">
+                            Baja
+                        </option>
+
+                        <option value="Media" selected>
+                            Media
+                        </option>
+
+                        <option value="Alta">
+                            Alta
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DESCRIPCIÓN -->
+
+                <div class="grupo-actividad campo-completo">
+
+                    <label for="descripcion">
+                        Descripción
+                    </label>
+
+                    <textarea
+                        id="descripcion"
+                        name="descripcion"
+                        placeholder="Describa brevemente la actividad..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- OBSERVACIONES -->
+
+                <div class="grupo-actividad campo-completo">
+
+                    <label for="observaciones">
+                        Observaciones
+                    </label>
+
+                    <textarea
+                        id="observaciones"
+                        name="observaciones"
+                        placeholder="Ingrese observaciones adicionales..."
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =========================
+                 BOTONES
+            ========================= -->
+
+            <div class="acciones-actividad">
+
+                <button
+                    type="button"
+                    class="btn-actividad btn-cancelar"
+                    onclick="window.location.href='{{ url_for('gestiones') }}'"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-actividad btn-guardar"
+                >
+                    💾 Guardar actividad
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

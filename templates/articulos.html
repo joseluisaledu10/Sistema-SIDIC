@@ -1,0 +1,1020 @@
+{% extends "base.html" %}
+
+{% block title %}
+Artículos - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 24px;
+}
+
+.pagina-titulo p {
+
+    margin-top: 6px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   BOTÓN NUEVO
+========================================================= */
+
+.btn-nuevo {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    background-color: #0d3b66;
+
+    color: white;
+
+    padding: 11px 18px;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.btn-nuevo:hover {
+
+    background-color: #155d98;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   PANEL DE FILTROS
+========================================================= */
+
+.panel-filtros {
+
+    background-color: white;
+
+    padding: 20px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    margin-bottom: 20px;
+}
+
+
+.filtros-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 180px 180px auto;
+
+    gap: 12px;
+
+    align-items: end;
+}
+
+
+.campo-filtro {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.campo-filtro label {
+
+    margin-bottom: 7px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #374151;
+}
+
+
+.campo-filtro input,
+.campo-filtro select {
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    box-sizing: border-box;
+
+    width: 100%;
+}
+
+
+.campo-filtro input:focus,
+.campo-filtro select:focus {
+
+    border-color: #1e3a8a;
+
+    box-shadow:
+        0 0 0 2px rgba(30,58,138,0.10);
+}
+
+
+/* =========================================================
+   BOTÓN BUSCAR
+========================================================= */
+
+.btn-buscar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 10px 18px;
+
+    background-color: #0d3b66;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    height: 39px;
+}
+
+
+.btn-buscar:hover {
+
+    background-color: #155d98;
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-panel {
+
+    background-color: white;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    overflow: hidden;
+}
+
+
+.tabla-contenedor {
+
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 1000px;
+}
+
+
+thead {
+
+    background-color: #0d3b66;
+
+    color: white;
+}
+
+
+th {
+
+    padding: 13px 12px;
+
+    text-align: left;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+td {
+
+    padding: 12px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    color: #374151;
+
+    font-size: 13px;
+
+    vertical-align: middle;
+}
+
+
+tbody tr:hover {
+
+    background-color: #f8fafc;
+}
+
+
+tbody tr:last-child td {
+
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   CÓDIGO
+========================================================= */
+
+.codigo-articulo {
+
+    font-weight: 700;
+
+    color: #0d3b66;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   TÍTULO
+========================================================= */
+
+.titulo-articulo {
+
+    font-weight: 600;
+
+    color: #374151;
+
+    max-width: 320px;
+}
+
+
+/* =========================================================
+   REVISTA
+========================================================= */
+
+.revista-articulo {
+
+    color: #4b5563;
+
+    max-width: 220px;
+}
+
+
+/* =========================================================
+   AUTORES
+========================================================= */
+
+.autores-articulo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    min-width: 180px;
+}
+
+
+.autor-item {
+
+    font-size: 12px;
+
+    color: #4b5563;
+}
+
+
+.autor-item:first-child {
+
+    font-weight: 600;
+
+    color: #374151;
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.estado-badge {
+
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+.estado-activo {
+
+    background-color: #e8f5e9;
+
+    color: #2e7d32;
+}
+
+
+.estado-inactivo {
+
+    background-color: #ffebee;
+
+    color: #c62828;
+}
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    white-space: nowrap;
+}
+
+
+.acciones a,
+.acciones button {
+
+    width: 32px;
+
+    height: 32px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   VER
+========================================================= */
+
+.accion-ver {
+
+    background-color: #e3f2fd;
+
+    color: #1565c0;
+}
+
+
+.accion-ver:hover {
+
+    background-color: #bbdefb;
+
+    transform: scale(1.05);
+}
+
+
+/* =========================================================
+   EDITAR
+========================================================= */
+
+.accion-editar {
+
+    background-color: #fff3e0;
+
+    color: #ef6c00;
+}
+
+
+.accion-editar:hover {
+
+    background-color: #bbdefb;
+
+    transform: scale(1.05);
+}
+
+
+/* =========================================================
+   ELIMINAR
+========================================================= */
+
+.accion-eliminar {
+
+    border: none;
+
+    background-color: #ffebee;
+
+    color: #c62828;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+
+.accion-eliminar:hover {
+
+    background-color: #ffcdd2;
+
+    transform: scale(1.05);
+}
+
+/* =========================================================
+   SIN REGISTROS
+========================================================= */
+
+.sin-registros {
+
+    text-align: center;
+
+    padding: 45px 20px;
+
+    color: #6b7280;
+}
+
+
+.sin-registros i {
+
+    font-size: 38px;
+
+    margin-bottom: 12px;
+
+    color: #9ca3af;
+}
+
+
+.sin-registros p {
+
+    margin: 5px 0;
+}
+
+
+.sin-registros .texto-secundario {
+
+    font-size: 13px;
+
+    color: #9ca3af;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .filtros-grid {
+
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .btn-buscar {
+
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .pagina-encabezado {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .filtros-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .btn-nuevo {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+
+            <i class="fa-solid fa-newspaper"></i>
+
+            Artículos
+
+        </h2>
+
+        <p>
+
+            Registro y gestión de artículos científicos.
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('nuevo_articulo') }}"
+        class="btn-nuevo"
+    >
+
+        <i class="fa-solid fa-plus"></i>
+
+        Nuevo artículo
+
+    </a>
+
+</div>
+
+
+<!-- =========================================================
+     FILTROS
+========================================================= -->
+
+<div class="panel-filtros">
+
+    <form
+        method="GET"
+        action="{{ url_for('articulos') }}"
+    >
+
+        <div class="filtros-grid">
+
+
+            <!-- BUSCAR -->
+
+            <div class="campo-filtro">
+
+                <label for="buscar">
+
+                    Buscar artículo
+
+                </label>
+
+                <input
+                    type="text"
+                    id="buscar"
+                    name="buscar"
+                    placeholder="Código, título, DOI, ISSN..."
+                    value="{{ request.args.get('buscar', '') }}"
+                >
+
+            </div>
+
+
+            <!-- AÑO -->
+
+            <div class="campo-filtro">
+
+                <label for="anio">
+
+                    Año
+
+                </label>
+
+                <input
+                    type="number"
+                    id="anio"
+                    name="anio"
+                    min="1900"
+                    max="2100"
+                    placeholder="Todos"
+                    value="{{ request.args.get('anio', '') }}"
+                >
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="campo-filtro">
+
+                <label for="estado">
+
+                    Estado
+
+                </label>
+
+                <select
+                    id="estado"
+                    name="estado"
+                >
+
+                    <option value="">
+
+                        Todos
+
+                    </option>
+
+
+                    <option
+                        value="1"
+                        {% if request.args.get('estado') == '1' %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Activos
+
+                    </option>
+
+
+                    <option
+                        value="0"
+                        {% if request.args.get('estado') == '0' %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Inactivos
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- BUSCAR -->
+
+            <div>
+
+                <button
+                    type="submit"
+                    class="btn-buscar"
+                >
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     TABLA
+========================================================= -->
+
+<div class="tabla-panel">
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        N.º
+                    </th>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Título
+                    </th>
+
+                    <th>
+                        Revista
+                    </th>
+
+                    <th>
+                        Año
+                    </th>
+
+                    <th>
+                        Autores
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% if articulos %}
+
+                    {% for articulo in articulos %}
+
+                    <tr>
+
+
+                        <!-- NÚMERO -->
+
+                        <td>
+
+                            {{ loop.index }}
+
+                        </td>
+
+
+                        <!-- CÓDIGO -->
+
+                        <td>
+
+                            <span class="codigo-articulo">
+
+                                {{ articulo['codigo'] }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- TÍTULO -->
+
+                        <td>
+
+                            <div class="titulo-articulo">
+
+                                {{ articulo['titulo'] }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- REVISTA -->
+
+                        <td>
+
+                            <div class="revista-articulo">
+
+                                {{ articulo['revista_nombre'] or '-' }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- AÑO -->
+
+                        <td>
+
+                            {{ articulo['anio'] }}
+
+                        </td>
+
+
+                        <!-- AUTORES -->
+
+                        <td>
+
+                            <div class="autores-articulo">
+
+                                <span class="autor-item">
+
+                                    <i class="fa-solid fa-user-pen"></i>
+
+                                    Autores registrados
+
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- ESTADO -->
+
+                        <td>
+
+                            {% if articulo['estado'] == 1 %}
+
+                                <span class="estado-badge estado-activo">
+
+                                    Activo
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="estado-badge estado-inactivo">
+
+                                    Inactivo
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td>
+
+                        
+                            <div class="acciones">
+
+                                <!-- VER -->
+                                <a
+                                    href="{{ url_for('ver_articulo', id=articulo['id']) }}"
+                                    class="accion-ver"
+                                    title="Ver artículo"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+                                <!-- EDITAR -->
+                                <a
+                                    href="{{ url_for('editar_articulo', id=articulo['id']) }}"
+                                    class="accion-editar"
+                                    title="Editar artículo"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+                                <!-- ELIMINAR -->
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('eliminar_articulo', id=articulo['id']) }}"
+                                    style="display:inline;"
+                                    onsubmit="return confirmarEliminar();"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="accion-eliminar"
+                                        title="Eliminar artículo"
+                                    >
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+
+
+
+                        </td>
+
+
+                    </tr>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            <div class="sin-registros">
+
+                                <i class="fa-solid fa-newspaper"></i>
+
+                                <p>
+
+                                    No existen artículos registrados.
+
+                                </p>
+
+                                <p class="texto-secundario">
+
+                                    Cuando agregues un artículo,
+
+                                    aparecerá aquí.
+
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+function confirmarEliminar() {
+
+    return confirm(
+        "¿Está seguro de eliminar este artículo?\n\n" +
+        "Esta acción no se puede deshacer."
+    );
+
+}
+
+</script>
+
+{% endblock %}

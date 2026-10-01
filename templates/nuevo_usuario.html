@@ -1,0 +1,579 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuevo usuario - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO DEL MÓDULO
+    ========================= */
+
+    .modulo-encabezado {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       CONTENEDOR
+    ========================= */
+
+    .contenedor-formulario {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+
+    /* =========================
+       FORMULARIO
+    ========================= */
+
+    .formulario-usuario {
+        width: 100%;
+        max-width: 600px;
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+    }
+
+    .formulario-usuario h2 {
+        color: #0d3b66;
+        margin: 0 0 25px 0;
+        text-align: center;
+        font-size: 22px;
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .campo-usuario {
+        margin-bottom: 18px;
+    }
+
+    .campo-usuario label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .campo-usuario input,
+    .campo-usuario select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+        outline: none;
+    }
+
+    .campo-usuario input:focus,
+    .campo-usuario select:focus {
+        border-color: #0d3b66;
+    }
+
+
+    /* =========================
+       CONTRASEÑA
+    ========================= */
+
+    .contenedor-password {
+        display: flex;
+        gap: 8px;
+    }
+
+    .contenedor-password input {
+        flex: 1;
+    }
+
+    .boton-password {
+        width: 50px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .boton-password:hover {
+        background: #f4f6f9;
+    }
+
+    /* =========================
+    REQUISITOS CONTRASEÑA
+    ========================= */
+
+    .requisitos-password {
+        background-color: #f5f8fb;
+        border: 1px solid #dce5ee;
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-top: -5px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .requisitos-password strong {
+        display: block;
+        color: #0d3b66;
+        margin-bottom: 7px;
+    }
+
+    .requisitos-password ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .requisitos-password li {
+        margin-bottom: 4px;
+    }
+
+
+    /* =========================
+       ERROR
+    ========================= */
+
+    .error-usuario {
+        background-color: #ffe5e5;
+        color: #b30000;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .botones-usuario {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .btn-usuario {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .btn-guardar-usuario {
+        background-color: #0d3b66;
+        color: white;
+    }
+
+    .btn-guardar-usuario:hover {
+        background-color: #155d98;
+    }
+
+    .btn-cancelar-usuario {
+        background-color: #777;
+        color: white;
+    }
+
+    .btn-cancelar-usuario:hover {
+        background-color: #555;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .formulario-usuario {
+            padding: 20px;
+        }
+
+        .botones-usuario {
+            flex-direction: column;
+        }
+
+        .btn-usuario {
+            text-align: center;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        👤 Gestión de Usuarios
+    </h1>
+
+    <p>
+        Registrar un nuevo usuario en el sistema DICyT
+    </p>
+
+</div>
+
+
+<!-- =========================
+     FORMULARIO
+========================= -->
+
+<div class="contenedor-formulario">
+
+    <div class="formulario-usuario">
+
+        <h2>
+            ➕ Nuevo usuario
+        </h2>
+
+
+        {% if error %}
+
+            <div class="error-usuario">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+
+            <!-- NOMBRE -->
+
+            <div class="campo-usuario">
+
+                <label for="nombre">
+                    Nombre completo
+                </label>
+
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    placeholder="Ej.: José Alarcon"
+                    required
+                >
+
+            </div>
+
+
+            <!-- USUARIO -->
+
+            <div class="campo-usuario">
+
+                <label for="usuario">
+                    Nombre de usuario
+                </label>
+
+                <input
+                    type="text"
+                    id="usuario"
+                    name="usuario"
+                    placeholder="Ej.: jose"
+                    required
+                >
+
+            </div>
+
+
+            <!-- CONTRASEÑA -->
+
+            <div class="campo-usuario">
+
+                <label for="contraseña">
+                    Contraseña
+                </label>
+
+                <div class="contenedor-password">
+
+                    <input
+                        type="password"
+                        id="contraseña"
+                        name="contraseña"
+                        placeholder="Ingrese una contraseña"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        onclick="mostrarContraseña()"
+                        class="boton-password"
+                        id="botonContraseña"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- CONFIRMAR CONTRASEÑA -->
+
+            <div class="campo-usuario">
+
+                <label for="confirmar_contraseña">
+                    Confirmar contraseña
+                </label>
+
+                <div class="contenedor-password">
+
+                    <input
+                        type="password"
+                        id="confirmar_contraseña"
+                        name="confirmar_contraseña"
+                        placeholder="Repita la contraseña"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        onclick="mostrarConfirmarContraseña()"
+                        class="boton-password"
+                        id="botonConfirmarContraseña"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- REQUISITOS DE CONTRASEÑA -->
+
+            <div class="requisitos-password">
+
+                <strong>
+                    Requisitos de la contraseña:
+                </strong>
+
+                <ul>
+
+                    <li id="req-longitud">
+                        ❌ Mínimo 8 caracteres
+                    </li>
+
+                    <li id="req-mayuscula">
+                        ❌ Una letra mayúscula
+                    </li>
+
+                    <li id="req-minuscula">
+                        ❌ Una letra minúscula
+                    </li>
+
+                    <li id="req-numero">
+                        ❌ Un número
+                    </li>
+
+                    <li id="req-especial">
+                        ❌ Un carácter especial (@, #, !, $, etc.)
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <!-- ROL -->
+
+            <div class="campo-usuario">
+
+                <label for="rol">
+                    Rol
+                </label>
+
+                <select
+                    id="rol"
+                    name="rol"
+                    required
+                >
+
+                    <option value="">
+                        Seleccione un rol
+                    </option>
+
+                    <option value="Administrador">
+                        Administrador
+                    </option>
+
+                    <option value="Operador">
+                        Operador
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="botones-usuario">
+
+                <a
+                    href="{{ url_for('usuarios') }}"
+                    class="btn-usuario btn-cancelar-usuario"
+                >
+                    Cancelar
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn-usuario btn-guardar-usuario"
+                >
+                    💾 Guardar usuario
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+function mostrarContraseña() {
+
+    const campo = document.getElementById("contraseña");
+    const boton = document.getElementById("botonContraseña");
+
+    if (campo.type === "password") {
+
+        campo.type = "text";
+        boton.innerHTML = "🙈";
+
+    } else {
+
+        campo.type = "password";
+        boton.innerHTML = "👁️";
+
+    }
+
+}
+
+function mostrarConfirmarContraseña() {
+
+    const campo = document.getElementById("confirmar_contraseña");
+    const boton = document.getElementById("botonConfirmarContraseña");
+
+    if (campo.type === "password") {
+
+        campo.type = "text";
+        boton.innerHTML = "🙈";
+
+    } else {
+
+        campo.type = "password";
+        boton.innerHTML = "👁️";
+
+    }
+
+}
+
+const campoContraseña = document.getElementById("contraseña");
+
+campoContraseña.addEventListener("input", function () {
+
+    const contraseña = campoContraseña.value;
+
+    // Mínimo 8 caracteres
+    actualizarRequisito(
+        "req-longitud",
+        contraseña.length >= 8,
+        "Mínimo 8 caracteres"
+    );
+
+    // Mayúscula
+    actualizarRequisito(
+        "req-mayuscula",
+        /[A-Z]/.test(contraseña),
+        "Una letra mayúscula"
+    );
+
+    // Minúscula
+    actualizarRequisito(
+        "req-minuscula",
+        /[a-z]/.test(contraseña),
+        "Una letra minúscula"
+    );
+
+    // Número
+    actualizarRequisito(
+        "req-numero",
+        /[0-9]/.test(contraseña),
+        "Un número"
+    );
+
+    // Carácter especial
+    actualizarRequisito(
+        "req-especial",
+        /[^A-Za-z0-9]/.test(contraseña),
+        "Un carácter especial (@, #, !, $, etc.)"
+    );
+
+});
+
+
+function actualizarRequisito(id, cumple, texto) {
+
+    const elemento = document.getElementById(id);
+
+    if (cumple) {
+
+        elemento.innerHTML = "✅ " + texto;
+        elemento.style.color = "#198754";
+
+    } else {
+
+        elemento.innerHTML = "❌ " + texto;
+        elemento.style.color = "#dc3545";
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

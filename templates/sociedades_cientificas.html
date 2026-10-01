@@ -1,0 +1,726 @@
+{% extends "base.html" %}
+
+{% block title %}
+Sociedades Científicas - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+    margin: 0;
+    color: #0d3b66;
+    font-size: 24px;
+}
+
+.pagina-titulo p {
+    margin: 5px 0 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* =========================================================
+   BOTÓN NUEVO
+========================================================= */
+
+.btn-nuevo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #0d3b66;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-nuevo:hover {
+    background: #155d98;
+    color: white;
+}
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.filtros {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.filtros-formulario {
+    display: grid;
+    grid-template-columns: 2fr repeat(4, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+}
+
+.filtro-grupo label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.filtro-grupo input,
+.filtro-grupo select {
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 0 10px;
+    font-size: 13px;
+    background: white;
+}
+
+.filtro-grupo input:focus,
+.filtro-grupo select:focus {
+    outline: none;
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 2px rgba(13, 59, 102, 0.1);
+}
+
+.btn-filtrar {
+    height: 38px;
+    border: none;
+    background: #0d3b66;
+    color: white;
+    padding: 0 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-filtrar:hover {
+    background: #155d98;
+}
+
+.btn-limpiar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 12px;
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    color: #495057;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn-limpiar:hover {
+    background: #e9ecef;
+    color: #212529;
+}
+
+/* =========================================================
+   CONTADOR
+========================================================= */
+
+.resumen-listado {
+    margin-bottom: 15px;
+    color: #495057;
+    font-size: 14px;
+}
+
+.resumen-listado strong {
+    color: #0d3b66;
+}
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-contenedor {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla thead {
+    background: #0d3b66;
+    color: white;
+}
+
+.tabla th {
+    padding: 12px 10px;
+    font-size: 12px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabla td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 13px;
+    color: #343a40;
+    vertical-align: middle;
+}
+
+.tabla tbody tr:hover {
+    background: #f8fbff;
+}
+
+.tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-activo {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-inactivo {
+    background: #f8d7da;
+    color: #842029;
+}
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-accion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn-ver {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.btn-ver:hover {
+    background: #b6d4fe;
+    color: #084298;
+}
+
+.btn-editar {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.btn-editar:hover {
+    background: #ffecb5;
+    color: #997404;
+}
+
+.btn-eliminar {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.btn-eliminar:hover {
+    background: #f1bfc4;
+    color: #842029;
+}
+
+/* =========================================================
+   SIN RESULTADOS
+========================================================= */
+
+.sin-resultados {
+    text-align: center;
+    padding: 45px 20px;
+    color: #6c757d;
+}
+
+.sin-resultados i {
+    font-size: 35px;
+    margin-bottom: 12px;
+    color: #adb5bd;
+}
+
+.sin-resultados p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .filtros-formulario {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .pagina-encabezado {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .filtros-formulario {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fa-solid fa-users-rectangle"></i>
+            Sociedades Científicas
+        </h2>
+
+        <p>
+            Gestión de sociedades científicas estudiantiles
+        </p>
+
+    </div>
+
+    <a
+        href="{{ url_for('nueva_sociedad_cientifica') }}"
+        class="btn-nuevo"
+    >
+        <i class="fa-solid fa-plus"></i>
+        Nueva Sociedad Científica
+    </a>
+
+</div>
+
+
+<!-- =========================================================
+     FILTROS
+========================================================= -->
+
+<div class="filtros">
+
+    <form
+        method="GET"
+        action="{{ url_for('sociedades_cientificas') }}"
+        class="filtros-formulario"
+    >
+
+        <!-- BUSCAR -->
+
+        <div class="filtro-grupo">
+
+            <label for="buscar">
+                Buscar
+            </label>
+
+            <input
+                type="text"
+                name="buscar"
+                id="buscar"
+                value="{{ buscar }}"
+                placeholder="Código, nombre o sigla"
+            >
+
+        </div>
+
+
+        <!-- GESTIÓN -->
+
+        <div class="filtro-grupo">
+
+            <label for="gestion">
+                Gestión
+            </label>
+
+            <select name="gestion" id="gestion">
+
+                <option value="">
+                    Todas
+                </option>
+
+                {% for item in gestiones %}
+
+                    <option
+                        value="{{ item['gestion'] }}"
+                        {% if gestion == item['gestion']|string %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ item['gestion'] }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- CARRERA -->
+
+        <div class="filtro-grupo">
+
+            <label for="carrera">
+                Carrera
+            </label>
+
+            <select name="carrera" id="carrera">
+
+                <option value="">
+                    Todas
+                </option>
+
+                {% for item in carreras %}
+
+                    <option
+                        value="{{ item['carrera'] }}"
+                        {% if carrera == item['carrera'] %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ item['carrera'] }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- FACULTAD -->
+
+        <div class="filtro-grupo">
+
+            <label for="facultad">
+                Facultad
+            </label>
+
+            <select name="facultad" id="facultad">
+
+                <option value="">
+                    Todas
+                </option>
+
+                {% for item in facultades %}
+
+                    <option
+                        value="{{ item['facultad'] }}"
+                        {% if facultad == item['facultad'] %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ item['facultad'] }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- ESTADO -->
+
+        <div class="filtro-grupo">
+
+            <label for="estado">
+                Estado
+            </label>
+
+            <select name="estado" id="estado">
+
+                <option value="">
+                    Todos
+                </option>
+
+                <option
+                    value="1"
+                    {% if estado == "1" %}
+                        selected
+                    {% endif %}
+                >
+                    Activas
+                </option>
+
+                <option
+                    value="0"
+                    {% if estado == "0" %}
+                        selected
+                    {% endif %}
+                >
+                    Inactivas
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div style="display:flex; gap:6px;">
+
+            <button
+                type="submit"
+                class="btn-filtrar"
+                title="Filtrar"
+            >
+                <i class="fa-solid fa-filter"></i>
+            </button>
+
+            <a
+                href="{{ url_for('sociedades_cientificas') }}"
+                class="btn-limpiar"
+                title="Limpiar filtros"
+            >
+                <i class="fa-solid fa-rotate-left"></i>
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     CONTADOR
+========================================================= -->
+
+<div class="resumen-listado">
+
+    Total de sociedades:
+
+    <strong>
+        {{ sociedades|length }}
+    </strong>
+
+</div>
+
+
+<!-- =========================================================
+     TABLA
+========================================================= -->
+
+<div class="tabla-contenedor">
+
+    {% if sociedades %}
+
+        <table class="tabla">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Sociedad Científica
+                    </th>
+
+                    <th>
+                        Sigla
+                    </th>
+
+                    <th>
+                        Carrera
+                    </th>
+
+                    <th>
+                        Facultad
+                    </th>
+
+                    <th>
+                        Gestión
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for sociedad in sociedades %}
+
+                    <tr>
+
+                        <td>
+                            {{ sociedad['codigo'] }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ sociedad['nombre'] }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ sociedad['sigla'] or '—' }}
+                        </td>
+
+                        <td>
+                            {{ sociedad['carrera'] or '—' }}
+                        </td>
+
+                        <td>
+                            {{ sociedad['facultad'] or '—' }}
+                        </td>
+
+                        <td>
+                            {{ sociedad['gestion'] }}
+                        </td>
+
+                        <td>
+
+                            {% if sociedad['estado'] == 1 %}
+
+                                <span class="badge badge-activo">
+                                    Activa
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-inactivo">
+                                    Inactiva
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="acciones">
+
+                                <!-- VER -->
+
+                                <a
+                                    href="{{ url_for('ver_sociedad_cientifica', id=sociedad['id']) }}"
+                                    class="btn-accion btn-ver"
+                                    title="Ver sociedad"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+
+                                <!-- EDITAR -->
+
+                                <a
+                                    href="{{ url_for('editar_sociedad_cientifica', id=sociedad['id']) }}"
+                                    class="btn-accion btn-editar"
+                                    title="Editar sociedad"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+
+                                <!-- ELIMINAR -->
+
+                                <a
+                                    href="{{ url_for('eliminar_sociedad_cientifica', id=sociedad['id']) }}"
+                                    class="btn-accion btn-eliminar"
+                                    title="Eliminar sociedad"
+                                    onclick="return confirm('¿Está seguro de eliminar esta sociedad científica?');"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="sin-resultados">
+
+            <i class="fa-solid fa-users-rectangle"></i>
+
+            <p>
+                No se encontraron sociedades científicas.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

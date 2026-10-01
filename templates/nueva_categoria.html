@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nueva categoría - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+    .encabezado-modulo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .encabezado-modulo h1 {
+        margin: 0;
+        color: #1e3a8a;
+    }
+
+    .encabezado-modulo p {
+        margin-top: 6px;
+        color: #666;
+    }
+
+    .panel {
+        background: white;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .campo {
+        margin-bottom: 20px;
+    }
+
+    .campo label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: 600;
+    }
+
+    .campo input,
+    .campo textarea {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 15px;
+    }
+
+    .campo textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .botones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .btn {
+        border: none;
+        padding: 11px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-cancelar {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-guardar {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="encabezado-modulo">
+
+```
+<div>
+
+    <h1>➕ Nueva categoría</h1>
+
+    <p>
+        Registrar una nueva categoría de documentos
+    </p>
+
+</div>
+```
+
+</div>
+
+<div class="panel">
+
+```
+<form method="POST">
+
+    <div class="campo">
+
+        <label for="codigo">
+            Código
+        </label>
+
+        <input
+            type="text"
+            id="codigo"
+            name="codigo"
+            placeholder="Ej.: CAT-001"
+            required
+        >
+
+    </div>
+
+
+    <div class="campo">
+
+        <label for="categoria">
+            Categoría
+        </label>
+
+        <input
+            type="text"
+            id="categoria"
+            name="categoria"
+            placeholder="Ej.: Artículos Científicos"
+            required
+        >
+
+    </div>
+
+
+    <div class="campo">
+
+        <label for="descripcion">
+            Descripción
+        </label>
+
+        <textarea
+            id="descripcion"
+            name="descripcion"
+            placeholder="Descripción de la categoría..."
+        ></textarea>
+
+    </div>
+
+
+    <div class="botones">
+
+        <button
+            type="button"
+            class="btn btn-cancelar"
+            onclick="window.location.href='{{ url_for('categorias') }}'"
+        >
+            ↩️ Cancelar
+        </button>
+
+
+        <button
+            type="submit"
+            class="btn btn-guardar"
+        >
+            💾 Guardar categoría
+        </button>
+
+    </div>
+
+</form>
+```
+
+</div>
+
+{% endblock %}

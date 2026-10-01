@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+
+{% block title %}
+Documentos - Sistema DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BARRA DE ACCIONES
+    ========================= */
+
+    .barra-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+    }
+
+
+    /* =========================
+       BUSCADOR
+    ========================= */
+
+    .buscador {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        max-width: 650px;
+    }
+
+    .buscador input {
+        width: 100%;
+        padding: 11px 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .buscador input:focus {
+        border-color: #1e3a8a;
+        box-shadow: 0 0 0 2px rgba(30,58,138,0.10);
+    }
+
+    .buscador select {
+        padding: 11px 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .buscador select:focus {
+        border-color: #1e3a8a;
+    }
+
+    .btn-buscar {
+        border: none;
+        padding: 11px 18px;
+        background-color: #1e3a8a;
+        color: white;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .btn-buscar:hover {
+        background-color: #163172;
+    }
+
+    .btn-limpiar {
+        display: inline-flex;
+        align-items: center;
+        padding: 11px 8px;
+        color: #1e3a8a;
+        text-decoration: none;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .btn-limpiar:hover {
+        text-decoration: underline;
+    }
+
+
+    /* =========================
+       BOTÓN NUEVO DOCUMENTO
+    ========================= */
+
+    .btn-nuevo {
+        display: inline-block;
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .btn-nuevo:hover {
+        background-color: #092c4c;
+    }
+
+
+    /* =========================
+       CONTENEDOR DE TABLA
+    ========================= */
+
+    .contenedor-tabla {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+
+    /* =========================
+       TABLA
+    ========================= */
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+    thead {
+        background-color: #0d3b66;
+        color: white;
+    }
+
+    th {
+        padding: 13px 12px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #edf0f2;
+        font-size: 13px;
+        color: #444;
+        vertical-align: middle;
+    }
+
+    tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+
+    /* =========================
+       CÓDIGO
+    ========================= */
+
+    .codigo-documento {
+        font-weight: 600;
+        color: #1e3a8a;
+        white-space: nowrap;
+    }
+
+
+    /* =========================
+       NOMBRE DEL DOCUMENTO
+    ========================= */
+
+    .nombre-documento {
+        color: #333;
+        font-weight: 500;
+    }
+
+
+    /* =========================
+       CATEGORÍA
+    ========================= */
+
+    .categoria-documento {
+        color: #555;
+    }
+
+
+    /* =========================
+       FECHA
+    ========================= */
+
+    .fecha-documento {
+        color: #666;
+        white-space: nowrap;
+    }
+
+
+   /* =========================
+    ACCIONES
+    ========================= */
+
+    th:last-child {
+        text-align: center;
+    }
+
+    td:last-child {
+        text-align: center;
+    }
+
+    .acciones {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .btn-accion {
+        border: none;
+        width: 32px;
+        height: 30px;
+        padding: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-ver {
+        background-color: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .btn-editar {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .btn-eliminar {
+        background-color: #fde2e2;
+        color: #b91c1c;
+    }
+
+    .btn-accion:hover {
+        opacity: 0.8;
+    }
+
+    .acciones form {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* =========================
+       SIN REGISTROS
+    ========================= */
+
+    .sin-registros {
+        text-align: center;
+        padding: 45px 20px;
+        color: #777;
+    }
+
+    .sin-registros .icono {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .sin-registros p {
+        margin: 5px 0;
+    }
+
+    .sin-registros small {
+        color: #999;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+        .barra-acciones {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .buscador {
+            max-width: none;
+            flex-wrap: wrap;
+        }
+
+        .buscador input {
+            min-width: 200px;
+        }
+
+        .btn-nuevo {
+            text-align: center;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        📁 Documentos
+    </h1>
+
+    <p>
+        Gestión y registro de documentos del sistema DICyT
+    </p>
+
+</div>
+
+
+<!-- =========================
+     BARRA DE ACCIONES
+========================= -->
+
+<div class="barra-acciones">
+
+    <!-- BUSCADOR -->
+
+    <form
+        method="GET"
+        action="{{ url_for('documentos') }}"
+        class="buscador"
+    >
+
+        <input
+            type="text"
+            name="buscar"
+            placeholder="🔎 Buscar documento..."
+            value="{{ busqueda or '' }}"
+        >
+
+        <select name="categoria">
+
+            <option value="">
+                Todas las categorías
+            </option>
+
+            {% for categoria in categorias %}
+
+                <option
+                    value="{{ categoria['categoria'] }}"
+                    {% if categoria_seleccionada == categoria['categoria'] %}
+                        selected
+                    {% endif %}
+                >
+                    {{ categoria['categoria'] }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+        <button
+            type="submit"
+            class="btn-buscar"
+        >
+            🔍 Buscar
+        </button>
+
+        {% if busqueda or categoria_seleccionada %}
+
+            <a
+                href="{{ url_for('documentos') }}"
+                class="btn-limpiar"
+            >
+                Limpiar
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    <!-- NUEVO DOCUMENTO -->
+
+    <a
+        href="{{ url_for('nuevo_documento') }}"
+        class="btn-nuevo"
+    >
+        ➕ Nuevo documento
+    </a>
+
+</div>
+
+
+<!-- =========================
+     TABLA DE DOCUMENTOS
+========================= -->
+
+<div class="contenedor-tabla">
+
+    {% if documentos %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Documento
+                    </th>
+
+                    <th>
+                        Categoría
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for documento in documentos %}
+
+                    <tr>
+
+                        <td>
+                            <span class="codigo-documento">
+                                {{ documento["codigo"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="nombre-documento">
+                                {{ documento["nombre"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="categoria-documento">
+                                {{ documento["categoria"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="fecha-documento">
+                                {{ documento["fecha"] }}
+                            </span>
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td>
+
+                            <div class="acciones">
+
+                                <!-- VER -->
+
+                                <a
+                                    href="{{ url_for('ver_documento', id=documento['id']) }}"
+                                    class="btn-accion btn-ver"
+                                    title="Ver documento"
+                                >
+                                    👁️
+                                </a>
+
+
+                                <!-- EDITAR -->
+
+                                <a
+                                    href="{{ url_for('editar_documento', id=documento['id']) }}"
+                                    class="btn-accion btn-editar"
+                                    title="Editar documento"
+                                >
+                                    ✏️
+                                </a>
+
+
+                                <!-- ELIMINAR -->
+
+                                {% if rol == "Administrador" %}
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('eliminar_documento', id=documento['id']) }}"
+                                        onsubmit="return confirmarEliminarDocumento();"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="btn-accion btn-eliminar"
+                                            title="Eliminar documento"
+                                        >
+                                            🗑️
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="sin-registros">
+
+            <div class="icono">
+                📁
+            </div>
+
+            <p>
+                <strong>
+                    No hay documentos registrados
+                </strong>
+            </p>
+
+            <small>
+                Cuando registres un nuevo documento aparecerá aquí.
+            </small>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function confirmarEliminarDocumento() {
+
+    return confirm(
+        "¿Está seguro de que desea eliminar este documento?\n\n" +
+        "Esta acción no se puede deshacer."
+    );
+
+}
+
+</script>
+
+
+{% endblock %}

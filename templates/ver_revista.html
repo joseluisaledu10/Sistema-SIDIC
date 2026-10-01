@@ -1,0 +1,730 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver Revista - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+    .pagina-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .pagina-titulo h2 {
+        margin: 0;
+        color: #0d3b66;
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .pagina-titulo p {
+        margin: 6px 0 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 7px;
+        padding: 10px 16px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+    .tarjeta {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 22px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+        border: 1px solid #e9ecef;
+    }
+
+    .tarjeta-titulo {
+        color: #0d3b66;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e8f1f8;
+    }
+
+    .datos-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px 30px;
+    }
+
+    .dato {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .dato-completo {
+        grid-column: 1 / -1;
+    }
+
+    .dato-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+
+    .dato-valor {
+        font-size: 15px;
+        color: #212529;
+    }
+
+    .estado {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        width: fit-content;
+    }
+
+    .estado-activo {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .estado-inactivo {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .enlace {
+        color: #0d6efd;
+        text-decoration: none;
+        word-break: break-all;
+    }
+
+    .enlace:hover {
+        text-decoration: underline;
+    }
+
+    .tabla-contenedor {
+        overflow-x: auto;
+    }
+
+    .tabla-articulos {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tabla-articulos th {
+        background: #0d3b66;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-size: 13px;
+    }
+
+    .tabla-articulos td {
+        padding: 12px;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 14px;
+        color: #343a40;
+    }
+
+    .tabla-articulos tr:hover {
+        background: #f7fbff;
+    }
+
+    .btn-articulo {
+        background: #e8f1f8;
+        color: #0d3b66;
+        padding: 6px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .btn-articulo:hover {
+        background: #0d3b66;
+        color: white;
+    }
+
+    .sin-registros {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+    }
+
+    .archivo-box {
+        background: #f5f9fc;
+        border: 1px solid #dbe8f2;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .botones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 7px;
+        padding: 11px 18px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .btn-cancelar {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-guardar {
+        background: #0d3b66;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fas fa-book-open"></i>
+            Ver Revista
+        </h2>
+
+        <p>
+            Información y artículos asociados a la revista
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACIÓN PRINCIPAL
+===================================================== -->
+
+<div class="tarjeta">
+
+    <div class="tarjeta-titulo">
+        <i class="fas fa-info-circle"></i>
+        Información de la revista
+    </div>
+
+    <div class="datos-grid">
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Código
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['codigo'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Estado
+            </span>
+
+            <span class="dato-valor">
+
+                {% if revista['estado'] == 1 %}
+
+                    <span class="estado estado-activo">
+                        Activa
+                    </span>
+
+                {% else %}
+
+                    <span class="estado estado-inactivo">
+                        Inactiva
+                    </span>
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="dato dato-completo">
+
+            <span class="dato-label">
+                Nombre de la revista
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['nombre'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                ISSN
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['issn'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                ISSN Electrónico
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['issn_electronico'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Editorial
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['editorial'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Institución
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['institucion'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                País
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['pais'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Ciudad
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['ciudad'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Periodicidad
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['periodicidad'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Área temática
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['area_tematica'] or '-' }}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     IDENTIFICACIÓN DIGITAL
+===================================================== -->
+
+<div class="tarjeta">
+
+    <div class="tarjeta-titulo">
+        <i class="fas fa-globe"></i>
+        Identificación digital e indexación
+    </div>
+
+    <div class="datos-grid">
+
+        <div class="dato dato-completo">
+
+            <span class="dato-label">
+                URL
+            </span>
+
+            <span class="dato-valor">
+
+                {% if revista['url'] %}
+
+                    <a
+                        href="{{ revista['url'] }}"
+                        target="_blank"
+                        class="enlace"
+                    >
+                        {{ revista['url'] }}
+                    </a>
+
+                {% else %}
+
+                    -
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                DOI
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['doi'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Indexación
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['indexacion'] or '-' }}
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Fecha de inicio
+            </span>
+
+            <span class="dato-valor">
+                {{ revista['fecha_inicio'] or '-' }}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ARCHIVO
+===================================================== -->
+
+<div class="tarjeta">
+
+    <div class="tarjeta-titulo">
+        <i class="fas fa-file-pdf"></i>
+        Archivo de la revista
+    </div>
+
+    {% if revista['archivo'] %}
+    <div class="archivo-box">
+
+        <a
+            href="{{ url_for('abrir_archivo_revista', id=revista['id']) }}"
+            target="_blank"
+            style="
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                color: #0d6efd;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 15px;
+            "
+            title="Abrir archivo"
+        >
+            <i class="fas fa-file-pdf" style="font-size: 24px;"></i>
+
+            {{ revista['nombre_archivo'] or 'Abrir archivo de la revista' }}
+
+        </a>
+
+    </div>
+    {% else %}
+
+        <div class="sin-registros">
+            No se ha registrado un archivo para esta revista.
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     OBSERVACIONES
+===================================================== -->
+
+<div class="tarjeta">
+
+    <div class="tarjeta-titulo">
+        <i class="fas fa-comment-alt"></i>
+        Observaciones
+    </div>
+
+    <div class="dato-valor">
+
+        {% if revista['observaciones'] %}
+
+            {{ revista['observaciones'] }}
+
+        {% else %}
+
+            <span style="color:#6c757d;">
+                No se registraron observaciones.
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ARTÍCULOS ASOCIADOS
+===================================================== -->
+
+<div class="tarjeta">
+
+    <div class="tarjeta-titulo">
+
+        <i class="fas fa-newspaper"></i>
+
+        Artículos asociados
+
+    </div>
+
+
+    {% if articulos %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-articulos">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Código
+                        </th>
+
+                        <th>
+                            Título
+                        </th>
+
+                        <th>
+                            Año
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th>
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for articulo in articulos %}
+
+                        <tr>
+
+                            <td>
+                                {{ articulo['codigo'] or '-' }}
+                            </td>
+
+                            <td>
+                                {{ articulo['titulo'] or '-' }}
+                            </td>
+
+                            <td>
+                                {{ articulo['anio'] or '-' }}
+                            </td>
+
+                            <td>
+
+                                {% if articulo['estado'] == 1 %}
+
+                                    <span class="estado estado-activo">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="estado estado-inactivo">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if 'ver_articulo' in config.get('RUTAS', []) %}
+
+                                    <a
+                                        href="{{ url_for('ver_articulo', id=articulo['id']) }}"
+                                        class="btn-articulo"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                        Ver
+                                    </a>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="sin-registros">
+
+            <i
+                class="fas fa-newspaper"
+                style="font-size:30px; margin-bottom:10px;"
+            ></i>
+
+            <br>
+
+            Esta revista todavía no tiene artículos asociados.
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<!-- =====================================================
+     BOTONES FINALES
+===================================================== -->
+
+<div class="botones">
+
+    <a
+        href="{{ url_for('revistas') }}"
+        class="btn btn-cancelar"
+    >
+        <i class="fas fa-arrow-left"></i>
+        Volver
+    </a>
+
+    <a
+        href="{{ url_for('editar_revista', id=revista['id']) }}"
+        class="btn btn-guardar"
+    >
+        <i class="fas fa-edit"></i>
+        Editar revista
+    </a>
+
+</div>
+
+{% endblock %}

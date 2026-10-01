@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar usuario - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO DEL MÓDULO
+    ========================= */
+
+    .modulo-encabezado {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       CONTENEDOR
+    ========================= */
+
+    .contenedor-formulario {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+
+    /* =========================
+       TARJETA
+    ========================= */
+
+    .tarjeta-usuario {
+        width: 100%;
+        max-width: 700px;
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .titulo-formulario {
+        color: #0d3b66;
+        font-size: 22px;
+        margin: 0 0 5px 0;
+        text-align: center;
+    }
+
+    .descripcion-formulario {
+        color: #777;
+        font-size: 14px;
+        margin: 0 0 25px 0;
+        text-align: center;
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .grupo-usuario {
+        margin-bottom: 20px;
+    }
+
+    .grupo-usuario label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #444;
+    }
+
+    .grupo-usuario input,
+    .grupo-usuario select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d5dbe1;
+        border-radius: 7px;
+        font-size: 14px;
+        outline: none;
+        background-color: white;
+    }
+
+    .grupo-usuario input:focus,
+    .grupo-usuario select:focus {
+        border-color: #145da0;
+        box-shadow: 0 0 0 2px rgba(20,93,160,0.10);
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .acciones-usuario {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .btn-guardar-usuario {
+        border: none;
+        padding: 11px 20px;
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-guardar-usuario:hover {
+        background-color: #092c4c;
+    }
+
+    .btn-cancelar-usuario {
+        display: inline-block;
+        padding: 11px 20px;
+        background-color: #e9ecef;
+        color: #444;
+        text-decoration: none;
+        border-radius: 7px;
+        font-size: 14px;
+    }
+
+    .btn-cancelar-usuario:hover {
+        background-color: #dfe3e6;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .tarjeta-usuario {
+            padding: 20px;
+        }
+
+        .acciones-usuario {
+            flex-direction: column;
+        }
+
+        .btn-guardar-usuario,
+        .btn-cancelar-usuario {
+            width: 100%;
+            text-align: center;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        ✏️ Editar usuario
+    </h1>
+
+    <p>
+        Modificar la información del usuario seleccionado
+    </p>
+
+</div>
+
+
+<!-- =========================
+     FORMULARIO
+========================= -->
+
+<div class="contenedor-formulario">
+
+    <div class="tarjeta-usuario">
+
+        <h2 class="titulo-formulario">
+            Modificar datos del usuario
+        </h2>
+
+        <p class="descripcion-formulario">
+            Actualiza la información y los permisos del usuario seleccionado.
+        </p>
+
+
+        <form method="POST">
+
+
+            <!-- NOMBRE -->
+
+            <div class="grupo-usuario">
+
+                <label for="nombre">
+                    Nombre completo
+                </label>
+
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value="{{ usuario['nombre'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- USUARIO -->
+
+            <div class="grupo-usuario">
+
+                <label for="usuario">
+                    Nombre de usuario
+                </label>
+
+                <input
+                    type="text"
+                    id="usuario"
+                    name="usuario"
+                    value="{{ usuario['usuario'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- ROL -->
+
+            <div class="grupo-usuario">
+
+                <label for="rol">
+                    Rol
+                </label>
+
+                {% if usuario['id'] == session['usuario_id'] %}
+
+                    <!-- ROL PROPIO: BLOQUEADO -->
+
+                    <input
+                        type="text"
+                        value="{{ usuario['rol'] }}"
+                        disabled
+                    >
+
+                    <div class="ayuda-password">
+                        🔒 No puedes modificar el rol de tu propia cuenta.
+                    </div>
+
+                {% else %}
+
+                    <!-- ROL DE OTRO USUARIO: EDITABLE -->
+
+                    <select
+                        id="rol"
+                        name="rol"
+                        required
+                    >
+
+                        <option
+                            value="Administrador"
+                            {% if usuario['rol'] == 'Administrador' %}
+                                selected
+                            {% endif %}
+                        >
+                            Administrador
+                        </option>
+
+                        <option
+                            value="Operador"
+                            {% if usuario['rol'] == 'Operador' %}
+                                selected
+                            {% endif %}
+                        >
+                            Operador
+                        </option>
+
+                    </select>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="grupo-usuario">
+
+                <label for="estado">
+                    Estado
+                </label>
+
+                <select
+                    id="estado"
+                    name="estado"
+                    required
+                >
+
+                    <option
+                        value="1"
+                        {% if usuario['estado'] == 1 %}
+                            selected
+                        {% endif %}
+                    >
+                        Activo
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if usuario['estado'] == 0 %}
+                            selected
+                        {% endif %}
+                    >
+                        Inactivo
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="acciones-usuario">
+
+                <a
+                    href="{{ url_for('usuarios') }}"
+                    class="btn-cancelar-usuario"
+                >
+                    Cancelar
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn-guardar-usuario"
+                >
+                    💾 Guardar cambios
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

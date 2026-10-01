@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block title %}
+Solicitudes - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BARRA DE ACCIONES
+    ========================= */
+
+    .barra-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================
+       BUSCADOR
+    ========================= */
+
+    .busqueda {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .busqueda input {
+        width: 400px;
+        max-width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .busqueda input:focus {
+        border-color: #1e3a8a;
+        box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.10);
+    }
+
+    .busqueda button {
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .busqueda button:hover {
+        background-color: #092c4c;
+    }
+
+    .busqueda a {
+        color: #1e3a8a;
+        text-decoration: none;
+        font-size: 14px;
+        padding: 11px 5px;
+    }
+
+    .busqueda a:hover {
+        text-decoration: underline;
+    }
+
+
+    /* =========================
+       BOTÓN NUEVA SOLICITUD
+    ========================= */
+
+    .btn-nueva {
+        display: inline-block;
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-nueva:hover {
+        background-color: #092c4c;
+    }
+
+
+    /* =========================
+       CONTENEDOR DE TABLA
+    ========================= */
+
+    .contenedor-tabla {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+
+    /* =========================
+       TABLA
+    ========================= */
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 950px;
+    }
+
+    thead {
+        background-color: #0d3b66;
+        color: white;
+    }
+
+    th {
+        padding: 13px 12px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #edf0f2;
+        font-size: 13px;
+        color: #444;
+        vertical-align: middle;
+    }
+
+    tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+
+    /* =========================
+       CÓDIGO
+    ========================= */
+
+    .codigo-solicitud {
+        font-weight: 600;
+        color: #1e3a8a;
+        white-space: nowrap;
+    }
+
+
+    /* =========================
+       SOLICITANTE
+    ========================= */
+
+    .solicitante {
+        color: #333;
+        font-weight: 500;
+    }
+
+
+    /* =========================
+       ASUNTO
+    ========================= */
+
+    .asunto {
+        color: #444;
+    }
+
+
+    /* =========================
+       ESTADO
+    ========================= */
+
+    .estado {
+        display: inline-block !important;
+        padding: 5px 10px !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        white-space: nowrap;
+    }
+
+    .estado-pendiente {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+    }
+
+    .estado-proceso {
+        background-color: #dbeafe !important;
+        color: #1e40af !important;
+    }
+
+    .estado-atendida {
+        background-color: #d1e7dd !important;
+        color: #146c43 !important;
+    }
+
+    .estado-cancelada {
+        background-color: #f8d7da !important;
+        color: #842029 !important;
+    }
+
+
+    /* =========================
+       ACCIONES
+    ========================= */
+
+    th:last-child {
+        text-align: center;
+    }
+
+    td:last-child {
+        text-align: center;
+    }
+
+    .acciones {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .btn-accion {
+        border: none;
+        width: 32px;
+        height: 30px;
+        padding: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-ver {
+        background-color: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .btn-editar {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .btn-eliminar {
+        background-color: #fde2e2;
+        color: #b91c1c;
+    }
+
+    .btn-accion:hover {
+        opacity: 0.8;
+    }
+
+    .acciones form {
+        margin: 0;
+        padding: 0;
+    }
+
+
+    /* =========================
+       SIN REGISTROS
+    ========================= */
+
+    .sin-registros {
+        text-align: center;
+        padding: 45px 20px;
+        color: #777;
+    }
+
+    .sin-registros .icono {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .sin-registros p {
+        margin: 5px 0;
+    }
+
+    .sin-registros small {
+        color: #999;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+
+        .barra-acciones {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .busqueda {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .busqueda input {
+            width: 100%;
+        }
+
+        .busqueda button {
+            flex: 0 0 auto;
+        }
+
+        .btn-nueva {
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+
+<h1>
+    📝 Solicitudes
+</h1>
+
+<p>
+    Gestión y seguimiento de solicitudes del sistema DICyT
+</p>
+
+
+</div>
+
+<!-- =========================
+     BARRA DE ACCIONES
+========================= -->
+
+<div class="barra-acciones">
+
+
+<!-- BUSCADOR -->
+
+<form
+    method="GET"
+    action="{{ url_for('solicitudes') }}"
+    class="busqueda"
+>
+
+    <input
+        type="text"
+        name="buscar"
+        placeholder="🔎 Buscar solicitud..."
+        value="{{ buscar or '' }}"
+    >
+
+    <button type="submit">
+        Buscar
+    </button>
+
+    {% if buscar %}
+
+        <a href="{{ url_for('solicitudes') }}">
+            Limpiar
+        </a>
+
+    {% endif %}
+
+</form>
+
+
+<!-- NUEVA SOLICITUD -->
+
+<button
+    type="button"
+    class="btn-nueva"
+    onclick="window.location.href='{{ url_for('nueva_solicitud') }}'"
+>
+    ➕ Nueva solicitud
+</button>
+
+
+</div>
+
+<!-- =========================
+     TABLA DE SOLICITUDES
+========================= -->
+
+<div class="contenedor-tabla">
+
+{% if solicitudes %}
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Código
+                </th>
+
+                <th>
+                    Solicitante
+                </th>
+
+                <th>
+                    Tipo
+                </th>
+
+                <th>
+                    Asunto
+                </th>
+
+                <th>
+                    Fecha
+                </th>
+
+                <th>
+                    Estado
+                </th>
+
+                <th>
+                    Acciones
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for solicitud in solicitudes %}
+
+                <tr>
+
+                    <td>
+                        <span class="codigo-solicitud">
+                            {{ solicitud["codigo"] }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="solicitante">
+                            {{ solicitud["solicitante"] }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ solicitud["tipo"] }}
+                    </td>
+
+                    <td>
+                        <span class="asunto">
+                            {{ solicitud["asunto"] }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ solicitud["fecha"] }}
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        {% if solicitud['estado'] == 'Pendiente' %}
+
+                            <span class="estado estado-pendiente">
+                                🟡 Pendiente
+                            </span>
+
+                        {% elif solicitud['estado'] == 'En proceso' %}
+
+                            <span class="estado estado-proceso">
+                                🔵 En proceso
+                            </span>
+
+                        {% elif solicitud['estado'] == 'Atendida' or solicitud['estado'] == 'Completada' %}
+
+                            <span class="estado estado-atendida">
+                                🟢 {{ solicitud['estado'] }}
+                            </span>
+
+                        {% elif solicitud['estado'] == 'Cancelada' %}
+
+                            <span class="estado estado-cancelada">
+                                🔴 Cancelada
+                            </span>
+
+                        {% else %}
+
+                            <span class="estado estado-pendiente">
+                                🟡 {{ solicitud['estado'] }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ACCIONES -->
+
+                    <td>
+
+                        <div class="acciones">
+
+                            <!-- VER -->
+
+                            <a
+                                href="{{ url_for('ver_solicitud', id=solicitud['id']) }}"
+                                class="btn-accion btn-ver"
+                                title="Ver solicitud"
+                            >
+                                👁️
+                            </a>
+
+
+                            <!-- EDITAR -->
+
+                            <a
+                                href="{{ url_for('editar_solicitud', id=solicitud['id']) }}"
+                                class="btn-accion btn-editar"
+                                title="Editar solicitud"
+                            >
+                                ✏️
+                            </a>
+
+
+                            <!-- ELIMINAR -->
+
+                            <form
+                                action="{{ url_for('eliminar_solicitud', id=solicitud['id']) }}"
+                                method="POST"
+                                onsubmit="return confirmarEliminarSolicitud();"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="btn-accion btn-eliminar"
+                                    title="Eliminar solicitud"
+                                >
+                                    🗑️
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+{% else %}
+
+    <div class="sin-registros">
+
+        <div class="icono">
+            📝
+        </div>
+
+        <p>
+            <strong>
+                No hay solicitudes registradas
+            </strong>
+        </p>
+
+        <small>
+            Cuando registres una nueva solicitud aparecerá aquí.
+        </small>
+
+    </div>
+
+{% endif %}
+
+</div>
+
+<script>
+
+function confirmarEliminarSolicitud() {
+
+    return confirm(
+        "¿Está seguro de que desea eliminar esta solicitud?\n\n" +
+        "Esta acción no se puede deshacer."
+    );
+
+}
+
+</script>
+
+{% endblock %}

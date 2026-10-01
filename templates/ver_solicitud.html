@@ -1,0 +1,521 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver solicitud - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       TARJETA
+    ========================= */
+
+    .tarjeta-solicitud {
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+
+        background-color: white;
+
+        padding: 30px;
+
+        border-radius: 12px;
+
+        box-shadow:
+            0 3px 12px rgba(0,0,0,0.08);
+
+        box-sizing: border-box;
+    }
+
+
+    /* =========================
+       TITULO
+    ========================= */
+
+    .titulo-solicitud {
+        color: #0d3b66;
+        font-size: 22px;
+        text-align: center;
+
+        margin: 0 0 25px 0;
+    }
+
+
+    /* =========================
+       INFORMACIÓN
+    ========================= */
+
+    .fila-informacion {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 18px 25px;
+
+        margin-bottom: 20px;
+    }
+
+
+    .dato {
+        background-color: #f5f8fb;
+
+        border: 1px solid #e0e6ec;
+
+        border-radius: 8px;
+
+        padding: 13px 15px;
+    }
+
+
+    .dato-completo {
+        grid-column: 1 / -1;
+    }
+
+
+    .dato-label {
+        display: block;
+
+        font-size: 12px;
+
+        color: #777;
+
+        margin-bottom: 5px;
+
+        font-weight: bold;
+
+        text-transform: uppercase;
+    }
+
+
+    .dato-valor {
+        font-size: 14px;
+
+        color: #333;
+
+        line-height: 1.5;
+    }
+
+
+    /* =========================
+       ESTADO
+    ========================= */
+
+    .estado {
+        display: inline-block;
+
+        padding: 5px 10px;
+
+        border-radius: 15px;
+
+        font-size: 12px;
+
+        font-weight: bold;
+    }
+
+    .estado-pendiente {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .estado-proceso {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .estado-atendida {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .estado-rechazada {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .estado-cancelada {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .acciones {
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+
+        margin-top: 25px;
+    }
+
+
+    .btn {
+
+        padding: 11px 20px;
+
+        border-radius: 7px;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        border: none;
+
+        cursor: pointer;
+    }
+
+
+    .btn-volver {
+
+        background-color: #e5e7eb;
+
+        color: #374151;
+    }
+
+
+    .btn-editar {
+
+        background-color: #0d3b66;
+
+        color: white;
+    }
+
+
+    .btn:hover {
+
+        opacity: 0.9;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .fila-informacion {
+
+            grid-template-columns: 1fr;
+        }
+
+        .dato-completo {
+
+            grid-column: auto;
+        }
+
+        .tarjeta-solicitud {
+
+            padding: 20px;
+        }
+
+        .acciones {
+
+            flex-direction: column;
+        }
+
+        .btn {
+
+            width: 100%;
+
+            text-align: center;
+
+            box-sizing: border-box;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        📝 Solicitudes
+    </h1>
+
+    <p>
+        Información detallada de la solicitud
+    </p>
+
+</div>
+
+
+<!-- =========================
+     TARJETA
+========================= -->
+
+<div class="tarjeta-solicitud">
+
+    <h2 class="titulo-solicitud">
+
+        {{ solicitud["asunto"] }}
+
+    </h2>
+
+
+    <div class="fila-informacion">
+
+
+        <!-- CÓDIGO -->
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Código
+            </span>
+
+            <span class="dato-valor">
+                {{ solicitud["codigo"] }}
+            </span>
+
+        </div>
+
+
+        <!-- TIPO -->
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Tipo de solicitud
+            </span>
+
+            <span class="dato-valor">
+                {{ solicitud["tipo"] }}
+            </span>
+
+        </div>
+
+
+        <!-- SOLICITANTE -->
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Solicitante
+            </span>
+
+            <span class="dato-valor">
+                {{ solicitud["solicitante"] }}
+            </span>
+
+        </div>
+
+
+        <!-- USUARIO -->
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Registrado por
+            </span>
+
+            <span class="dato-valor">
+                {{ solicitud["usuario"] }}
+            </span>
+
+        </div>
+
+
+        <!-- FECHA -->
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Fecha
+            </span>
+
+            <span class="dato-valor">
+                {{ solicitud["fecha"] }}
+            </span>
+
+        </div>
+
+
+        <!-- ESTADO -->
+
+        <div class="dato">
+
+            <span class="dato-label">
+                Estado
+            </span>
+
+            <span class="dato-valor">
+
+                {% if solicitud["estado"] == "Pendiente" %}
+
+                    <span class="estado estado-pendiente">
+                        Pendiente
+                    </span>
+
+                {% elif solicitud["estado"] == "En proceso" %}
+
+                    <span class="estado estado-proceso">
+                        En proceso
+                    </span>
+
+                {% elif solicitud["estado"] == "Atendida" %}
+
+                    <span class="estado estado-atendida">
+                        Atendida
+                    </span>
+
+                {% elif solicitud["estado"] == "Cancelada" %}
+
+                    <span class="estado estado-cancelada">
+                        Cancelada
+                    </span>    
+
+                {% else %}
+
+                    <span class="estado estado-rechazada">
+                        {{ solicitud["estado"] }}
+                    </span>
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <!-- ASUNTO -->
+
+        <div class="dato dato-completo">
+
+            <span class="dato-label">
+                Asunto
+            </span>
+
+            <span class="dato-valor">
+
+                {{ solicitud["asunto"] }}
+
+            </span>
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+
+        <div class="dato dato-completo">
+
+            <span class="dato-label">
+                Descripción
+            </span>
+
+            <span class="dato-valor">
+
+                {{ solicitud["descripcion"] or "Sin descripción" }}
+
+            </span>
+
+        </div>
+
+        <!-- =========================
+            ARCHIVO ADJUNTO
+        ========================= -->
+
+        <div class="dato dato-completo">
+
+            <span class="dato-label">
+                Archivo adjunto
+            </span>
+
+            <span class="dato-valor">
+
+                {% if solicitud["archivo"] %}
+
+                    <a
+                        href="{{ url_for('archivo_solicitud', id=solicitud['id']) }}"
+                        target="_blank"
+                        style="
+                            color:#0369a1;
+                            text-decoration:none;
+                            font-weight:600;
+                        "
+                    >
+                        📎 {{ solicitud["archivo"] }}
+                    </a>
+
+                {% else %}
+
+                    <span style="color:#777;">
+                        Sin archivo adjunto
+                    </span>
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================
+         BOTONES
+    ========================= -->
+
+    <div class="acciones">
+
+        <a
+            href="{{ url_for('solicitudes') }}"
+            class="btn btn-volver"
+        >
+            ← Volver
+        </a>
+
+        <a
+            href="{{ url_for('editar_solicitud', id=solicitud['id']) }}"
+            class="btn btn-editar"
+        >
+            ✏️ Editar
+        </a>
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

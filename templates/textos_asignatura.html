@@ -1,0 +1,957 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+Textos en asignatura - Sistema DICyT
+
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 25px;
+
+    font-weight: 700;
+
+}
+
+.pagina-titulo p {
+
+    margin: 5px 0 0 0;
+
+    color: #777;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   BOTÓN NUEVO
+========================================================= */
+
+.btn-nuevo {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 17px;
+
+    background: #0d3b66;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: 0.2s;
+
+}
+
+.btn-nuevo:hover {
+
+    background: #155d98;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.filtros-contenedor {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+    margin-bottom: 20px;
+
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+
+}
+
+.filtros-form {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr 1fr auto;
+
+    gap: 12px;
+
+    align-items: end;
+
+}
+
+.filtro-grupo {
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+.filtro-grupo label {
+
+    margin-bottom: 6px;
+
+    color: #555;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+.filtro-grupo input,
+.filtro-grupo select {
+
+    width: 100%;
+
+    padding: 9px 11px;
+
+    border: 1px solid #ced4da;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    box-sizing: border-box;
+
+}
+
+.filtro-botones {
+
+    display: flex;
+
+    gap: 8px;
+
+}
+
+.btn-filtrar {
+
+    padding: 9px 15px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #155d98;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+}
+
+.btn-filtrar:hover {
+
+    background: #0d3b66;
+
+}
+
+.btn-limpiar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 9px 13px;
+
+    border-radius: 6px;
+
+    background: #6c757d;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+}
+
+.btn-limpiar:hover {
+
+    background: #5a6268;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-contenedor {
+
+    background: white;
+
+    border-radius: 10px;
+
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+
+    overflow: hidden;
+
+}
+
+.tabla-scroll {
+
+    overflow-x: auto;
+
+}
+
+.tabla-datos {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 950px;
+
+}
+
+.tabla-datos thead {
+
+    background: #0d3b66;
+
+    color: white;
+
+}
+
+.tabla-datos th {
+
+    padding: 12px 10px;
+
+    font-size: 13px;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+.tabla-datos td {
+
+    padding: 11px 10px;
+
+    border-bottom: 1px solid #e9ecef;
+
+    font-size: 13px;
+
+    color: #444;
+
+    vertical-align: middle;
+
+}
+
+.tabla-datos tbody tr:hover {
+
+    background: #f7fafc;
+
+}
+
+
+/* =========================================================
+   CÓDIGO
+========================================================= */
+
+.codigo {
+
+    color: #0d3b66;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   ASIGNATURA
+========================================================= */
+
+.asignatura {
+
+    color: #0d3b66;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.estado {
+
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+.estado-activo {
+
+    background: #d1e7dd;
+
+    color: #0f5132;
+
+}
+
+.estado-inactivo {
+
+    background: #f8d7da;
+
+    color: #842029;
+
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones {
+
+    display: flex;
+
+    gap: 5px;
+
+}
+
+.btn-accion {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 5px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   VER
+========================================================= */
+
+.btn-ver {
+
+    background: #cfe2ff;
+
+    color: #084298;
+
+}
+
+.btn-ver:hover {
+
+    background: #b6d4fe;
+
+    color: #084298;
+
+}
+
+
+/* =========================================================
+   EDITAR
+========================================================= */
+
+.btn-editar {
+
+    background: #fff3cd;
+
+    color: #997404;
+
+}
+
+.btn-editar:hover {
+
+    background: #ffecb5;
+
+    color: #997404;
+
+}
+
+
+/* =========================================================
+   ELIMINAR
+========================================================= */
+
+.btn-eliminar {
+
+    background: #f8d7da;
+
+    color: #842029;
+
+}
+
+.btn-eliminar:hover {
+
+    background: #f1bfc4;
+
+    color: #842029;
+
+}
+
+
+/* =========================================================
+   SIN REGISTROS
+========================================================= */
+
+.sin-registros {
+
+    text-align: center;
+
+    padding: 50px 20px;
+
+    color: #777;
+
+}
+
+.sin-registros i {
+
+    font-size: 40px;
+
+    margin-bottom: 12px;
+
+    color: #adb5bd;
+
+}
+
+.sin-registros p {
+
+    margin: 5px 0;
+
+}
+
+
+/* =========================================================
+   CONTADOR
+========================================================= */
+
+.contador {
+
+    padding: 12px 18px;
+
+    color: #666;
+
+    font-size: 13px;
+
+    border-bottom: 1px solid #e9ecef;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .filtros-form {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .pagina-encabezado {
+
+        align-items: flex-start;
+
+        gap: 15px;
+
+        flex-direction: column;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     ENCABEZADO
+===================================================== -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+
+            <i class="fas fa-book-open"></i>
+
+            Textos en asignatura
+
+        </h2>
+
+        <p>
+
+            Registro de materiales académicos utilizados en asignaturas
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('nuevo_texto_asignatura') }}"
+        class="btn-nuevo"
+    >
+
+        <i class="fas fa-plus"></i>
+
+        Nuevo texto
+
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+===================================================== -->
+
+<div class="filtros-contenedor">
+
+    <form
+        method="GET"
+        action="{{ url_for('textos_asignatura') }}"
+        class="filtros-form"
+    >
+
+
+        <!-- BUSCAR -->
+
+        <div class="filtro-grupo">
+
+            <label>
+
+                Buscar
+
+            </label>
+
+            <input
+                type="text"
+                name="buscar"
+                value="{{ buscar }}"
+                placeholder="Código, asignatura, carrera, facultad..."
+            >
+
+        </div>
+
+
+        <!-- AÑO -->
+
+        <div class="filtro-grupo">
+
+            <label>
+
+                Año
+
+            </label>
+
+            <input
+                type="number"
+                name="anio"
+                value="{{ anio }}"
+                placeholder="Ej. 2026"
+            >
+
+        </div>
+
+
+        <!-- ESTADO -->
+
+        <div class="filtro-grupo">
+
+            <label>
+
+                Estado
+
+            </label>
+
+            <select name="estado">
+
+                <option value="">
+
+                    Todos
+
+                </option>
+
+                <option
+                    value="1"
+                    {% if estado == "1" %}selected{% endif %}
+                >
+
+                    Activos
+
+                </option>
+
+                <option
+                    value="0"
+                    {% if estado == "0" %}selected{% endif %}
+                >
+
+                    Inactivos
+
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div class="filtro-botones">
+
+            <button
+                type="submit"
+                class="btn-filtrar"
+            >
+
+                <i class="fas fa-search"></i>
+
+                Buscar
+
+            </button>
+
+
+            <a
+                href="{{ url_for('textos_asignatura') }}"
+                class="btn-limpiar"
+            >
+
+                <i class="fas fa-undo"></i>
+
+            </a>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     TABLA
+===================================================== -->
+
+<div class="tabla-contenedor">
+
+
+    <!-- CONTADOR -->
+
+    <div class="contador">
+
+        <i class="fas fa-book"></i>
+
+        Registros encontrados:
+
+        <strong>
+
+            {{ textos|length }}
+
+        </strong>
+
+    </div>
+
+
+    <div class="tabla-scroll">
+
+        {% if textos %}
+
+        <table class="tabla-datos">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+
+                        Código
+
+                    </th>
+
+                    <th>
+
+                        Asignatura
+
+                    </th>
+
+                    <th>
+
+                        Carrera
+
+                    </th>
+
+                    <th>
+
+                        Facultad
+
+                    </th>
+
+                    <th>
+
+                        Año
+
+                    </th>
+
+                    <th>
+
+                        Editorial
+
+                    </th>
+
+                    <th>
+
+                        Estado
+
+                    </th>
+
+                    <th>
+
+                        Acciones
+
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for texto in textos %}
+
+                <tr>
+
+
+                    <!-- CÓDIGO -->
+
+                    <td>
+
+                        <span class="codigo">
+
+                            {{ texto.codigo }}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- ASIGNATURA -->
+
+                    <td>
+
+                        <span class="asignatura">
+
+                            {{ texto.asignatura }}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- CARRERA -->
+
+                    <td>
+
+                        {{ texto.carrera or '-' }}
+
+                    </td>
+
+
+                    <!-- FACULTAD -->
+
+                    <td>
+
+                        {{ texto.facultad or '-' }}
+
+                    </td>
+
+
+                    <!-- AÑO -->
+
+                    <td>
+
+                        {{ texto.anio }}
+
+                    </td>
+
+
+                    <!-- EDITORIAL -->
+
+                    <td>
+
+                        {{ texto.editorial or '-' }}
+
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        {% if texto.estado == 1 %}
+
+                            <span class="estado estado-activo">
+
+                                Activo
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="estado estado-inactivo">
+
+                                Inactivo
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ACCIONES -->
+
+                    <td>
+
+                        <div class="acciones">
+
+
+                            <!-- VER -->
+
+                            <a
+                                href="{{ url_for('ver_texto_asignatura', id=texto['id']) }}"
+                                class="btn-accion btn-ver"
+                                title="Ver texto"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+
+
+                            <!-- EDITAR -->
+
+                            <a
+                                href="{{ url_for('editar_texto_asignatura', id=texto['id']) }}"
+                                class="btn-accion btn-editar"
+                                title="Editar texto"
+                            >
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+
+                             <!-- ELIMINAR -->
+
+                            <a
+                                href="{{ url_for('eliminar_texto_asignatura', id=texto['id']) }}"
+                                class="btn-accion btn-eliminar"
+                                title="Eliminar texto"
+                                onclick="return confirm('¿Está seguro de eliminar este texto en asignatura?');"
+                            >
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+
+                        </div>
+
+                    </td>
+
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <div class="sin-registros">
+
+            <i class="fas fa-book-open"></i>
+
+            <p>
+
+                No se encontraron textos en asignatura.
+
+            </p>
+
+            <p>
+
+                Registra el primer texto utilizando el botón
+
+                <strong>Nuevo texto</strong>.
+
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

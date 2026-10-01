@@ -1,0 +1,684 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nueva Revista - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.formulario-encabezado {
+    margin-bottom: 25px;
+}
+
+.formulario-encabezado h2 {
+    margin: 0;
+    color: #0d3b66;
+    font-size: 25px;
+}
+
+.formulario-encabezado p {
+    margin: 5px 0 0;
+    color: #777;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.formulario-contenedor {
+    background: white;
+    border-radius: 10px;
+    padding: 28px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.seccion-formulario {
+    margin-bottom: 30px;
+}
+
+.seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e5e9ed;
+}
+
+.seccion-titulo i {
+    color: #155d98;
+    font-size: 17px;
+}
+
+.seccion-titulo h3 {
+    margin: 0;
+    color: #0d3b66;
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.form-grupo.completo {
+    grid-column: 1 / -1;
+}
+
+.form-grupo label {
+    color: #444;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.form-grupo label span {
+    color: #d93025;
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d5dce3;
+    border-radius: 6px;
+    padding: 10px 11px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    background: white;
+}
+
+.form-grupo input,
+.form-grupo select {
+    height: 40px;
+}
+
+.form-grupo textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+    border-color: #155d98;
+    box-shadow: 0 0 0 2px rgba(21,93,152,0.08);
+}
+
+
+/* =========================================================
+   AYUDA
+========================================================= */
+
+.form-ayuda {
+    color: #888;
+    font-size: 11px;
+    margin-top: -2px;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.formulario-botones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e9ed;
+}
+
+.btn-cancelar,
+.btn-guardar {
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancelar {
+    background: #f1f3f5;
+    color: #555;
+}
+
+.btn-cancelar:hover {
+    background: #e3e6e9;
+    color: #333;
+}
+
+.btn-guardar {
+    border: none;
+    background: #0d3b66;
+    color: white;
+}
+
+.btn-guardar:hover {
+    background: #155d98;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grupo.completo {
+        grid-column: auto;
+    }
+
+    .formulario-contenedor {
+        padding: 20px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     ENCABEZADO
+===================================================== -->
+
+<div class="formulario-encabezado">
+
+    <h2>
+        <i class="fa-solid fa-book-open"></i>
+        Nueva Revista
+    </h2>
+
+    <p>
+        Registra la información de una revista científica o académica.
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     FORMULARIO
+===================================================== -->
+
+<div class="formulario-contenedor">
+
+<form
+    method="POST"
+    action="{{ url_for('nueva_revista') }}"
+    enctype="multipart/form-data"
+>
+
+
+<!-- =====================================================
+     INFORMACIÓN PRINCIPAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        <h3>Información principal</h3>
+
+    </div>
+
+
+    <div class="form-grid">
+
+        <div class="form-grupo">
+
+            <label>
+                Código <span>*</span>
+            </label>
+
+            <input
+                type="text"
+                name="codigo"
+                value="{{ revista.codigo if revista else '' }}"
+                placeholder="Ej. REV-001"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Nombre de la revista <span>*</span>
+            </label>
+
+            <input
+                type="text"
+                name="nombre"
+                value="{{ revista.nombre if revista else '' }}"
+                placeholder="Nombre completo de la revista"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                ISSN
+            </label>
+
+            <input
+                type="text"
+                name="issn"
+                value="{{ revista.issn if revista else '' }}"
+                placeholder="Ej. 1234-5678"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                E-ISSN
+            </label>
+
+            <input
+                type="text"
+                name="issn_electronico"
+                value="{{ revista.issn_electronico if revista else '' }}"
+                placeholder="Ej. 1234-5678"
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACIÓN EDITORIAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fa-solid fa-building"></i>
+
+        <h3>Información editorial</h3>
+
+    </div>
+
+
+    <div class="form-grid">
+
+        <div class="form-grupo">
+
+            <label>
+                Editorial
+            </label>
+
+            <input
+                type="text"
+                name="editorial"
+                value="{{ revista.editorial if revista else '' }}"
+                placeholder="Editorial"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Institución
+            </label>
+
+            <input
+                type="text"
+                name="institucion"
+                value="{{ revista.institucion if revista else '' }}"
+                placeholder="Universidad o institución responsable"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                País
+            </label>
+
+            <input
+                type="text"
+                name="pais"
+                value="{{ revista.pais if revista else '' }}"
+                placeholder="País"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Ciudad
+            </label>
+
+            <input
+                type="text"
+                name="ciudad"
+                value="{{ revista.ciudad if revista else '' }}"
+                placeholder="Ciudad"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Periodicidad
+            </label>
+
+            <select name="periodicidad">
+
+                <option value="">
+                    Seleccionar...
+                </option>
+
+                <option value="Mensual">
+                    Mensual
+                </option>
+
+                <option value="Bimestral">
+                    Bimestral
+                </option>
+
+                <option value="Trimestral">
+                    Trimestral
+                </option>
+
+                <option value="Cuatrimestral">
+                    Cuatrimestral
+                </option>
+
+                <option value="Semestral">
+                    Semestral
+                </option>
+
+                <option value="Anual">
+                    Anual
+                </option>
+
+                <option value="Irregular">
+                    Irregular
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Área temática
+            </label>
+
+            <input
+                type="text"
+                name="area_tematica"
+                value="{{ revista.area_tematica if revista else '' }}"
+                placeholder="Ej. Ciencias Sociales"
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     IDENTIFICACIÓN DIGITAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fa-solid fa-globe"></i>
+
+        <h3>Identificación digital e indexación</h3>
+
+    </div>
+
+
+    <div class="form-grid">
+
+        <div class="form-grupo completo">
+
+            <label>
+                URL
+            </label>
+
+            <input
+                type="url"
+                name="url"
+                value="{{ revista.url if revista else '' }}"
+                placeholder="https://..."
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                DOI
+            </label>
+
+            <input
+                type="text"
+                name="doi"
+                value="{{ revista.doi if revista else '' }}"
+                placeholder="DOI de la revista"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Indexación
+            </label>
+
+            <input
+                type="text"
+                name="indexacion"
+                value="{{ revista.indexacion if revista else '' }}"
+                placeholder="Ej. Scopus, SciELO, Latindex..."
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Fecha de inicio
+            </label>
+
+            <input
+                type="date"
+                name="fecha_inicio"
+                value="{{ revista.fecha_inicio if revista else '' }}"
+            >
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Estado
+            </label>
+
+            <select name="estado">
+
+                <option value="1"
+                    {% if not revista or revista.estado == 1 %}
+                    selected
+                    {% endif %}>
+                    Activa
+                </option>
+
+                <option value="0"
+                    {% if revista and revista.estado == 0 %}
+                    selected
+                    {% endif %}>
+                    Inactiva
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACIÓN ADICIONAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fa-solid fa-file-lines"></i>
+
+        <h3>Información adicional</h3>
+
+    </div>
+
+
+    <div class="form-grid">
+
+        <div class="form-grupo completo">
+
+            <label>
+                Archivo de la revista
+            </label>
+
+            <input
+                type="file"
+                name="archivo"
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+            >
+
+            <span class="form-ayuda">
+                Archivo opcional. Se almacenará en Google Drive dentro de la carpeta REVISTAS.
+            </span>
+
+        </div>
+
+        <div class="form-grupo completo">
+
+            <label>
+                Observaciones
+            </label>
+
+            <textarea
+                name="observaciones"
+                placeholder="Observaciones o información adicional..."
+            >{{ revista.observaciones if revista else '' }}</textarea>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     BOTONES
+===================================================== -->
+
+<div class="formulario-botones">
+
+    <a
+        href="{{ url_for('revistas') }}"
+        class="btn-cancelar"
+    >
+
+        <i class="fa-solid fa-xmark"></i>
+
+        Cancelar
+
+    </a>
+
+
+    <button
+        type="submit"
+        class="btn-guardar"
+    >
+
+        <i class="fa-solid fa-floppy-disk"></i>
+
+        Guardar revista
+
+    </button>
+
+</div>
+
+
+</form>
+
+</div>
+
+{% endblock %}

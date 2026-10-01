@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuevo Documento - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO DEL MÓDULO
+    ========================= */
+
+    .modulo-encabezado {
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 6px;
+        color: #666;
+    }
+
+
+    /* =========================
+       PANEL DEL FORMULARIO
+    ========================= */
+
+    .panel-formulario {
+        background: white;
+        padding: 30px;
+        max-width: 900px;
+        margin: 0 auto;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .fila {
+        display: flex;
+        gap: 20px;
+    }
+
+    .campo {
+        margin-bottom: 20px;
+        flex: 1;
+    }
+
+    .campo label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+        color: #374151;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 11px;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        background: white;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #1e3a8a;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .botones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .btn-formulario {
+        padding: 11px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-cancelar {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .btn-guardar {
+        background: #1e3a8a;
+        color: white;
+    }
+
+    .btn-formulario:hover {
+        opacity: 0.9;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .fila {
+            flex-direction: column;
+            gap: 0;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        📄 Nuevo documento
+    </h1>
+
+    <p>
+        Registrar un nuevo documento en el sistema DICyT
+    </p>
+
+</div>
+
+
+<!-- =========================
+     FORMULARIO
+========================= -->
+
+<div class="panel-formulario">
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+
+        <!-- CÓDIGO Y FECHA -->
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="codigo">
+                    Código
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    name="codigo"
+                    placeholder="Ej. DOC-001"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="fecha">
+                    Fecha
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha"
+                    name="fecha"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- NOMBRE -->
+
+        <div class="campo">
+
+            <label for="nombre">
+                Nombre del documento
+            </label>
+
+            <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                placeholder="Ingrese el nombre del documento"
+                required
+            >
+
+        </div>
+
+
+        <!-- CATEGORÍA -->
+
+        <div class="campo">
+
+            <label for="categoria">
+                Categoría
+            </label>
+
+            <select
+                id="categoria"
+                name="categoria"
+                required
+            >
+
+                <option value="">
+                    Seleccionar categoría
+                </option>
+
+
+                {% for categoria in categorias %}
+
+                    <option
+                        value="{{ categoria['categoria'] }}"
+                    >
+                        {{ categoria['categoria'] }}
+                    </option>
+
+                {% endfor %}
+
+
+            </select>
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+
+        <div class="campo">
+
+            <label for="descripcion">
+                Descripción
+            </label>
+
+            <textarea
+                id="descripcion"
+                name="descripcion"
+                placeholder="Descripción del documento..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- ARCHIVO -->
+
+        <div class="campo">
+
+            <label for="archivo">
+                Archivo
+            </label>
+
+            <input
+                type="file"
+                id="archivo"
+                name="archivo"
+            >
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div class="botones">
+
+            <button
+                type="button"
+                class="btn-formulario btn-cancelar"
+                onclick="window.location.href='{{ url_for('documentos') }}'"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                type="submit"
+                class="btn-formulario btn-guardar"
+            >
+                💾 Guardar documento
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+{% endblock %}

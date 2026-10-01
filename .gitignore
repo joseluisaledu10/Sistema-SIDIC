@@ -1,0 +1,30 @@
+# Credenciales y secretos
+token.json
+credentials.json
+credentialsweb.json
+**/token.json
+**/credentials.json
+**/credentialsweb.json
+
+# Entornos y archivos generados por Python
+venv/
+__pycache__/
+*.pyc
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Carpetas generadas / temporales
+build/
+dist/
+temp/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Variables de entorno
+.env
+.env.*

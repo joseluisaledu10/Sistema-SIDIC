@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar información institucional - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.modulo-encabezado {
+
+    margin-bottom: 25px;
+
+}
+
+
+.modulo-encabezado h1 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+}
+
+
+.modulo-encabezado p {
+
+    margin-top: 6px;
+
+    color: #666;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.panel-formulario {
+
+    background: white;
+
+    max-width: 700px;
+
+    margin: 0 auto;
+
+    padding: 28px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    border: 1px solid #e8edf2;
+
+}
+
+
+/* =========================================================
+   CAMPOS
+========================================================= */
+
+.campo {
+
+    margin-bottom: 20px;
+
+}
+
+
+.campo label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #374151;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+}
+
+
+.campo input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+
+    color: #333;
+
+    transition: 0.2s;
+
+}
+
+
+.campo input:focus {
+
+    outline: none;
+
+    border-color: #0d3b66;
+
+    box-shadow:
+        0 0 0 2px rgba(13,59,102,0.08);
+
+}
+
+
+/* =========================================================
+   AYUDA
+========================================================= */
+
+.ayuda {
+
+    margin-top: 5px;
+
+    color: #888;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.botones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #edf0f3;
+
+}
+
+
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 9px 13px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.btn-guardar {
+
+    background: #0d3b66;
+
+    color: white;
+
+}
+
+
+.btn-guardar:hover {
+
+    background: #155d98;
+
+}
+
+
+.btn-cancelar {
+
+    background: #eef3f7;
+
+    color: #0d3b66;
+
+}
+
+
+.btn-cancelar:hover {
+
+    background: #dfe8ef;
+
+}
+
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="modulo-encabezado">
+
+    <h1>
+
+        <i class="fa-solid fa-building-columns"></i>
+
+        Editar información institucional
+
+    </h1>
+
+    <p>
+
+        Actualiza los datos institucionales utilizados
+        por el sistema y sus reportes.
+
+    </p>
+
+</div>
+
+
+<div class="panel-formulario">
+
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+
+        <!-- =================================================
+             UNIVERSIDAD
+        ================================================== -->
+
+        <div class="campo">
+
+            <label for="universidad">
+
+                Universidad
+
+            </label>
+
+            <input
+                type="text"
+                id="universidad"
+                name="universidad"
+                value="{{ institucion['universidad'] }}"
+                required
+            >
+
+            <div class="ayuda">
+
+                Nombre oficial de la institución.
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DIRECCIÓN
+        ================================================== -->
+
+        <div class="campo">
+
+            <label for="direccion">
+
+                Dirección
+
+            </label>
+
+            <input
+                type="text"
+                id="direccion"
+                name="direccion"
+                value="{{ institucion['direccion'] }}"
+                required
+            >
+
+            <div class="ayuda">
+
+                Unidad o dirección responsable.
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NOMBRE DEL SISTEMA
+        ================================================== -->
+
+        <div class="campo">
+
+            <label for="nombre_sistema">
+
+                Nombre del sistema
+
+            </label>
+
+            <input
+                type="text"
+                id="nombre_sistema"
+                name="nombre_sistema"
+                value="{{ institucion['nombre_sistema'] }}"
+                required
+            >
+
+            <div class="ayuda">
+
+                Nombre completo que aparecerá en reportes y documentos.
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SIGLA
+        ================================================== -->
+
+        <div class="campo">
+
+            <label for="sigla_sistema">
+
+                Sigla del sistema
+
+            </label>
+
+            <input
+                type="text"
+                id="sigla_sistema"
+                name="sigla_sistema"
+                value="{{ institucion['sigla_sistema'] }}"
+            >
+
+            <div class="ayuda">
+
+                Sigla utilizada para identificar el sistema.
+
+            </div>
+
+        </div>
+
+        <!-- =================================================
+            LOGO INSTITUCIONAL
+        ================================================== -->
+
+        <div class="campo">
+
+            <label for="logo">
+
+                Logo institucional
+
+            </label>
+
+            <input
+                type="file"
+                id="logo"
+                name="logo"
+                accept=".png,.jpg,.jpeg,.webp"
+            >
+
+            <div class="ayuda">
+
+                Selecciona el logo institucional en formato
+                PNG, JPG, JPEG o WEBP.
+
+            </div>
+
+        </div>
+
+        <!-- =================================================
+             BOTONES
+        ================================================== -->
+
+        <div class="botones">
+
+            <a
+                href="{{ url_for('configuracion') }}"
+                class="btn btn-cancelar"
+            >
+
+                Cancelar
+
+            </a>
+
+
+            <button
+                type="submit"
+                class="btn btn-guardar"
+            >
+
+                <i class="fa-solid fa-floppy-disk"></i>
+
+                Guardar cambios
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+{% endblock %}

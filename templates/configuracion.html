@@ -1,0 +1,1057 @@
+{% extends "base.html" %}
+
+{% block title %}
+Configuración - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+.configuracion-container {
+
+    width: 100%;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.configuracion-header {
+
+    background: white;
+
+    padding: 25px 28px;
+
+    border-radius: 10px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    border-left: 4px solid #0d3b66;
+
+}
+
+
+.configuracion-header h2 {
+
+    margin: 0 0 8px 0;
+
+    color: #0d3b66;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+}
+
+
+.configuracion-header p {
+
+    margin: 0;
+
+    color: #666;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   GRID DE CONFIGURACIÓN
+========================================================= */
+
+.configuracion-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 20px;
+
+}
+
+
+/* =========================================================
+   TARJETAS DE CONFIGURACIÓN
+========================================================= */
+
+.config-card {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    border: 1px solid #e8edf2;
+
+    transition: 0.2s;
+
+}
+
+
+.config-card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 14px rgba(0,0,0,0.11);
+
+}
+
+
+/* =========================================================
+   CABECERA DE TARJETA
+========================================================= */
+
+.config-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding-bottom: 15px;
+
+    margin-bottom: 16px;
+
+    border-bottom: 1px solid #edf0f3;
+
+}
+
+
+.config-icono {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 18px;
+
+    flex-shrink: 0;
+
+}
+
+
+.config-card-header h3 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+}
+
+
+.config-card-header p {
+
+    margin: 3px 0 0;
+
+    color: #888;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================================
+   COLORES DE ICONOS
+========================================================= */
+
+.config-azul {
+
+    background: #e8f1f8;
+
+    color: #0d3b66;
+
+}
+
+
+.config-verde {
+
+    background: #e8f5e9;
+
+    color: #2e7d32;
+
+}
+
+
+.config-ambar {
+
+    background: #fff5df;
+
+    color: #c27c0e;
+
+}
+
+
+.config-morado {
+
+    background: #f1eafb;
+
+    color: #6a4c93;
+
+}
+
+
+/* =========================================================
+   INFORMACIÓN
+========================================================= */
+
+.config-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+}
+
+
+.config-fila {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #f0f2f4;
+
+}
+
+
+.config-fila:last-child {
+
+    border-bottom: none;
+
+}
+
+
+.config-label {
+
+    color: #777;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+.config-valor {
+
+    color: #333;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-align: right;
+
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.config-acciones {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    margin-top: 15px;
+
+}
+
+
+.btn-config {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    padding: 9px 13px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition: 0.2s;
+
+}
+
+
+.btn-config-azul {
+
+    background: #0d3b66;
+
+    color: white;
+
+}
+
+
+.btn-config-azul:hover {
+
+    background: #155d98;
+
+}
+
+
+.btn-config-secundario {
+
+    background: #eef3f7;
+
+    color: #0d3b66;
+
+}
+
+
+.btn-config-secundario:hover {
+
+    background: #dfe8ef;
+
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.estado-conectado {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    background: #e8f5e9;
+
+    color: #2e7d32;
+
+    padding: 5px 9px;
+
+    border-radius: 12px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+.estado-conectado i {
+
+    font-size: 8px;
+
+}
+
+
+/* =========================================================
+   INFORMACIÓN DEL SISTEMA
+========================================================= */
+
+.sistema-card {
+
+    grid-column: span 2;
+
+}
+
+
+.sistema-contenido {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
+    gap: 15px;
+
+}
+
+
+.sistema-item {
+
+    background: #f7f9fb;
+
+    border-radius: 8px;
+
+    padding: 13px;
+
+}
+
+
+.sistema-item .label {
+
+    display: block;
+
+    color: #888;
+
+    font-size: 10px;
+
+    margin-bottom: 5px;
+
+}
+
+
+.sistema-item .valor {
+
+    display: block;
+
+    color: #0d3b66;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .configuracion-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .sistema-card {
+
+        grid-column: span 1;
+
+    }
+
+
+    .sistema-contenido {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .sistema-contenido {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .config-fila {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 4px;
+
+    }
+
+
+    .config-valor {
+
+        text-align: left;
+
+    }
+
+}
+
+/* =========================================================
+   BOTÓN CAMBIAR CONTRASEÑA
+========================================================= */
+
+.config-acciones .btn-config-azul {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    background: #0d3b66;
+
+    color: #ffffff;
+
+    border: none;
+
+    border-radius: 6px;
+
+    padding: 9px 13px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: normal;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.config-acciones .btn-config-azul:hover {
+
+    background: #155d98;
+
+    color: #ffffff;
+
+}
+
+/* =========================================================
+   LOGO INSTITUCIONAL
+========================================================= */
+
+.logo-institucional-config {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    margin-bottom: 18px;
+
+    padding: 5px;
+}
+
+
+.logo-institucional-config img {
+
+    max-width: 110px;
+
+    max-height: 80px;
+
+    object-fit: contain;
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="configuracion-container">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="configuracion-header">
+
+        <h2>
+
+            <i class="fa-solid fa-gear"></i>
+
+            Configuración
+
+        </h2>
+
+        <p>
+
+            Administración de las preferencias y parámetros
+            generales del Sistema Integral de Documentación
+            e Información Científica.
+
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         GRID
+    ====================================================== -->
+
+    <div class="configuracion-grid">
+
+
+        <!-- =================================================
+             INFORMACIÓN INSTITUCIONAL
+        ================================================== -->
+
+        <div class="config-card">
+
+            <div class="config-card-header">
+
+                <div class="config-icono config-azul">
+
+                    <i class="fa-solid fa-building-columns"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        Información institucional
+                    </h3>
+
+                    <p>
+                        Datos utilizados por el sistema y reportes
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="logo-institucional-config">
+
+                {% if institucion and institucion["logo"] %}
+
+                    <img
+                        src="{{ url_for('static', filename='uploads/logos/' + institucion['logo']) }}"
+                        alt="Logo institucional"
+                    >
+
+                {% endif %}
+
+            </div>
+
+            <div class="config-info">
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Universidad
+                    </span>
+
+                    <span class="config-valor">
+                        {{ institucion["universidad"] }}
+                    </span>
+
+                </div>
+
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Dirección
+                    </span>
+
+                    <span class="config-valor">
+                        {{ institucion["direccion"] }}
+                    </span>
+
+                </div>
+
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Sistema
+                    </span>
+
+                    <span class="config-valor">
+                        {{ institucion["sigla_sistema"] }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="config-acciones">
+
+                <a
+                    href="{{ url_for('editar_informacion_institucional') }}"
+                    class="btn-config btn-config-azul"
+                >
+                    <i class="fa-solid fa-pen"></i>
+                    Editar información
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CUENTA Y SEGURIDAD
+        ================================================== -->
+
+        <div class="config-card">
+
+            <div class="config-card-header">
+
+                <div class="config-icono config-verde">
+
+                    <i class="fa-solid fa-user-shield"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        Cuenta y seguridad
+                    </h3>
+
+                    <p>
+                        Información de la cuenta actualmente conectada
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="config-info">
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Usuario
+                    </span>
+
+                    <span class="config-valor">
+                        {{ session["usuario"] }}
+                    </span>
+
+                </div>
+
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Rol
+                    </span>
+
+                    <span class="config-valor">
+                        {{ session["rol"] }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="config-acciones">
+
+                <a
+                    href="{{ url_for('cambiar_contraseña', origen='configuracion') }}"
+                    class="btn-config btn-config-azul"
+                >
+                    <i class="fa-solid fa-key"></i>
+                    Cambiar Contraseña
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DATOS Y DOCUMENTOS
+        ================================================== -->
+
+        <div class="config-card">
+
+            <div class="config-card-header">
+
+                <div class="config-icono config-ambar">
+
+                    <i class="fa-solid fa-database"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        Datos y documentos
+                    </h3>
+
+                    <p>
+                        Estado de la información y almacenamiento
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="config-info">
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Base de datos
+                    </span>
+
+                    <span class="estado-conectado">
+
+                        <i class="fa-solid fa-circle"></i>
+
+                        Conectada
+
+                    </span>
+
+                </div>
+
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Google Drive
+                    </span>
+
+                    <span class="estado-conectado">
+
+                        <i class="fa-solid fa-circle"></i>
+
+                        Disponible
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="config-acciones">
+
+                <button
+                    type="button"
+                    class="btn-config btn-config-secundario"
+                >
+
+                    <i class="fa-solid fa-file-excel"></i>
+
+                    Importar Excel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn-config btn-config-secundario"
+                >
+
+                    <i class="fa-solid fa-file-export"></i>
+
+                    Exportar Excel
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PREFERENCIAS
+        ================================================== -->
+
+        <div class="config-card">
+
+            <div class="config-card-header">
+
+                <div class="config-icono config-morado">
+
+                    <i class="fa-solid fa-sliders"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        Preferencias del sistema
+                    </h3>
+
+                    <p>
+                        Parámetros generales de funcionamiento
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="config-info">
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Gestión actual
+                    </span>
+
+                    <span class="config-valor">
+                        2026
+                    </span>
+
+                </div>
+
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Formato de fecha
+                    </span>
+
+                    <span class="config-valor">
+                        DD/MM/AAAA
+                    </span>
+
+                </div>
+
+                <div class="config-fila">
+
+                    <span class="config-label">
+                        Reportes
+                    </span>
+
+                    <span class="config-valor">
+                        PDF / Excel
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             INFORMACIÓN DEL SISTEMA
+        ================================================== -->
+
+        <div class="config-card sistema-card">
+
+            <div class="config-card-header">
+
+                <div class="config-icono config-azul">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        Información del sistema
+                    </h3>
+
+                    <p>
+                        Información general de la plataforma
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="sistema-contenido">
+
+                <div class="sistema-item">
+
+                    <span class="label">
+                        Nombre del sistema
+                    </span>
+
+                    <span class="valor">
+                        Sistema Integral de Documentación
+                        e Información Científica
+                    </span>
+
+                </div>
+
+
+                <div class="sistema-item">
+
+                    <span class="label">
+                        Institución
+                    </span>
+
+                    <span class="valor">
+                        Universidad Amazónica de Pando
+                    </span>
+
+                </div>
+
+
+                <div class="sistema-item">
+
+                    <span class="label">
+                        Versión
+                    </span>
+
+                    <span class="valor">
+                        1.0
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

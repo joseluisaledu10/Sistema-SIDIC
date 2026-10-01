@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cambiar contraseña - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    .modulo-encabezado {
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 6px;
+        color: #666;
+    }
+
+
+    .panel-formulario {
+        background: white;
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+
+    .campo {
+        margin-bottom: 20px;
+    }
+
+    .campo label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+        color: #374151;
+    }
+
+    .campo input {
+        width: 100%;
+        padding: 11px;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 14px;
+    }
+
+    .campo input:focus {
+        outline: none;
+        border-color: #1e3a8a;
+    }
+
+
+    .error {
+        background: #fdeaea;
+        color: #b91c1c;
+        padding: 12px;
+        border-radius: 7px;
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================
+    BOTONES
+    ========================= */
+
+    .botones {
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        align-items: center;
+
+        gap: 10px;
+
+        margin-top: 25px;
+
+    }
+
+
+    .btn {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 7px;
+
+        padding: 9px 13px;
+
+        border: none;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-size: 11px;
+
+        font-weight: 600;
+
+        text-decoration: none;
+
+        transition: 0.2s;
+
+    }
+
+
+    .btn-guardar {
+
+        background: #0d3b66;
+
+        color: white;
+
+    }
+
+
+    .btn-guardar:hover {
+
+        background: #155d98;
+
+    }
+
+
+    .btn-cancelar {
+
+        background: #eef3f7;
+
+        color: #0d3b66;
+
+    }
+
+
+    .btn-cancelar:hover {
+
+        background: #dfe8ef;
+
+    }
+
+    /* =========================
+    REQUISITOS CONTRASEÑA
+    ========================= */
+
+    .requisitos-password {
+        background-color: #f5f8fb;
+        border: 1px solid #dce5ee;
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .requisitos-password strong {
+        display: block;
+        color: #0d3b66;
+        margin-bottom: 7px;
+    }
+
+    .requisitos-password ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .requisitos-password li {
+        margin-bottom: 4px;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="modulo-encabezado">
+
+    <h1>
+        🔐 Cambiar contraseña
+    </h1>
+
+    <p>
+        Actualiza la contraseña de tu cuenta de usuario
+    </p>
+
+</div>
+
+
+<div class="panel-formulario">
+
+
+    {% if error %}
+
+        <div class="error">
+            ⚠️ {{ error }}
+        </div>
+
+    {% endif %}
+
+
+    <form method="POST">
+
+
+        <input
+            type="hidden"
+            name="origen"
+            value="{{ origen }}"
+        >
+
+        <div class="campo">
+
+            <label for="contraseña_actual">
+                Contraseña actual
+            </label>
+
+            <input
+                type="password"
+                id="contraseña_actual"
+                name="contraseña_actual"
+                required
+            >
+
+        </div>
+
+
+        <div class="campo">
+
+            <label for="nueva_contraseña">
+                Nueva contraseña
+            </label>
+
+            <input
+                type="password"
+                id="nueva_contraseña"
+                name="nueva_contraseña"
+                required
+            >
+
+            <div class="requisitos-password">
+
+                <strong>
+                    Requisitos de la contraseña:
+                </strong>
+
+                <ul>
+
+                    <li id="req-longitud">
+                        ❌ Mínimo 8 caracteres
+                    </li>
+
+                    <li id="req-mayuscula">
+                        ❌ Una letra mayúscula
+                    </li>
+
+                    <li id="req-minuscula">
+                        ❌ Una letra minúscula
+                    </li>
+
+                    <li id="req-numero">
+                        ❌ Un número
+                    </li>
+
+                    <li id="req-especial">
+                        ❌ Un carácter especial (@, #, !, $, etc.)
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <div class="campo">
+
+            <label for="confirmar_contraseña">
+                Confirmar nueva contraseña
+            </label>
+
+            <input
+                type="password"
+                id="confirmar_contraseña"
+                name="confirmar_contraseña"
+                required
+            >
+
+        </div>
+
+
+        <div class="botones">
+
+            <a
+                href="{% if origen == 'configuracion' %}{{ url_for('configuracion') }}{% elif origen and origen.startswith('/') %}{{ origen }}{% else %}{{ url_for('inicio') }}{% endif %}"
+                class="btn btn-cancelar"
+            >
+                Cancelar
+            </a>
+
+
+            <button
+                type="submit"
+                class="btn btn-guardar"
+            >
+                💾 Cambiar contraseña
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+<script>
+
+    const campoNuevaPassword = document.getElementById("nueva_contraseña");
+
+
+    campoNuevaPassword.addEventListener("input", function () {
+
+        const contraseña = campoNuevaPassword.value;
+
+        actualizarRequisito(
+            "req-longitud",
+            contraseña.length >= 8,
+            "Mínimo 8 caracteres"
+        );
+
+        actualizarRequisito(
+            "req-mayuscula",
+            /[A-Z]/.test(contraseña),
+            "Una letra mayúscula"
+        );
+
+        actualizarRequisito(
+            "req-minuscula",
+            /[a-z]/.test(contraseña),
+            "Una letra minúscula"
+        );
+
+        actualizarRequisito(
+            "req-numero",
+            /[0-9]/.test(contraseña),
+            "Un número"
+        );
+
+        actualizarRequisito(
+            "req-especial",
+            /[^A-Za-z0-9]/.test(contraseña),
+            "Un carácter especial (@, #, !, $, etc.)"
+        );
+
+    });
+
+
+    function actualizarRequisito(id, cumple, texto) {
+
+        const elemento = document.getElementById(id);
+
+        if (cumple) {
+
+            elemento.innerHTML = "✅ " + texto;
+            elemento.style.color = "#198754";
+
+        } else {
+
+            elemento.innerHTML = "❌ " + texto;
+            elemento.style.color = "#dc3545";
+
+        }
+
+    }
+
+</script>
+
+
+{% endblock %}

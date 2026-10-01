@@ -1,0 +1,896 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+Revistas - Sistema DICyT
+
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.pagina-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+}
+
+.pagina-titulo i {
+
+    font-size: 30px;
+
+    color: #155d98;
+
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 25px;
+
+    font-weight: 700;
+
+}
+
+.pagina-titulo p {
+
+    margin: 3px 0 0;
+
+    color: #777;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   BOTÓN NUEVA REVISTA
+========================================================= */
+
+.btn-nuevo {
+
+    background: #0d3b66;
+
+    color: white;
+
+    text-decoration: none;
+
+    padding: 11px 18px;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    transition: 0.2s;
+
+}
+
+.btn-nuevo:hover {
+
+    background: #155d98;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   PANEL DE FILTROS
+========================================================= */
+
+.panel-filtros {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+    margin-bottom: 20px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+
+}
+
+.form-filtros {
+
+    display: flex;
+
+    align-items: end;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+
+}
+
+.campo-filtro {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+}
+
+.campo-filtro label {
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #555;
+
+}
+
+.campo-filtro input,
+
+.campo-filtro select {
+
+    height: 38px;
+
+    border: 1px solid #d5dce3;
+
+    border-radius: 6px;
+
+    padding: 0 11px;
+
+    font-size: 13px;
+
+    outline: none;
+
+    background: white;
+
+}
+
+.campo-busqueda {
+
+    flex: 1;
+
+    min-width: 260px;
+
+}
+
+.campo-busqueda input {
+
+    width: 100%;
+
+}
+
+.campo-filtro input:focus,
+
+.campo-filtro select:focus {
+
+    border-color: #155d98;
+
+}
+
+
+/* =========================================================
+   BOTÓN BUSCAR
+========================================================= */
+
+.btn-buscar {
+
+    height: 38px;
+
+    border: none;
+
+    background: #155d98;
+
+    color: white;
+
+    padding: 0 18px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+}
+
+.btn-buscar:hover {
+
+    background: #0d3b66;
+
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-contenedor {
+
+    background: white;
+
+    border-radius: 10px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+
+    overflow-x: auto;
+
+}
+
+.tabla-revistas {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 950px;
+
+}
+
+.tabla-revistas thead {
+
+    background: #0d3b66;
+
+    color: white;
+
+}
+
+.tabla-revistas th {
+
+    padding: 13px 12px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+.tabla-revistas td {
+
+    padding: 12px;
+
+    border-bottom: 1px solid #edf0f3;
+
+    font-size: 13px;
+
+    color: #444;
+
+    vertical-align: middle;
+
+}
+
+.tabla-revistas tbody tr:hover {
+
+    background: #f7faff;
+
+}
+
+.codigo {
+
+    color: #155d98;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+.nombre-revista {
+
+    color: #0d3b66;
+
+    font-weight: 600;
+
+}
+
+.issn {
+
+    font-family: monospace;
+
+    color: #555;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.estado {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+.estado-activo {
+
+    background: #e8f7ee;
+
+    color: #218739;
+
+}
+
+.estado-inactivo {
+
+    background: #f1f1f1;
+
+    color: #777;
+
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones {
+
+    display: flex;
+
+    gap: 6px;
+
+    white-space: nowrap;
+
+}
+
+.btn-accion {
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 6px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    transition: 0.2s;
+
+}
+
+.btn-ver {
+
+    background: #e8f2fb;
+
+    color: #155d98;
+
+}
+
+.btn-ver:hover {
+
+    background: #155d98;
+
+    color: white;
+
+}
+
+.btn-editar {
+
+    background: #fff4df;
+
+    color: #c47a00;
+
+}
+
+.btn-editar:hover {
+
+    background: #c47a00;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   ELIMINAR
+========================================================= */
+
+.btn-eliminar {
+
+    background: #fdeaea;
+
+    color: #c62828;
+
+    border: none;
+
+    cursor: pointer;
+
+}
+
+.btn-eliminar:hover {
+
+    background: #c62828;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   SIN REGISTROS
+========================================================= */
+
+.sin-registros {
+
+    text-align: center;
+
+    padding: 50px 20px;
+
+    color: #888;
+
+}
+
+.sin-registros i {
+
+    font-size: 40px;
+
+    margin-bottom: 12px;
+
+    color: #b7c3ce;
+
+}
+
+.sin-registros h3 {
+
+    margin: 0 0 5px;
+
+    color: #666;
+
+    font-size: 16px;
+
+}
+
+.sin-registros p {
+
+    margin: 0;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   CONTADOR
+========================================================= */
+
+.contador-registros {
+
+    padding: 12px 16px;
+
+    font-size: 12px;
+
+    color: #777;
+
+    border-bottom: 1px solid #edf0f3;
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     ENCABEZADO
+===================================================== -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <i class="fa-solid fa-book-open"></i>
+
+        <div>
+
+            <h2>Revistas</h2>
+
+            <p>Gestión y registro de revistas científicas y académicas</p>
+
+        </div>
+
+    </div>
+
+    <a href="{{ url_for('nueva_revista') }}" class="btn-nuevo">
+
+        <i class="fa-solid fa-plus"></i>
+
+        Nueva revista
+
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     FILTROS
+===================================================== -->
+
+<div class="panel-filtros">
+
+    <form method="GET"
+
+          action="{{ url_for('revistas') }}"
+
+          class="form-filtros">
+
+        <div class="campo-filtro campo-busqueda">
+
+            <label>Buscar revista</label>
+
+            <input
+
+                type="text"
+
+                name="buscar"
+
+                value="{{ buscar }}"
+
+                placeholder="Código, nombre, ISSN, editorial o institución..."
+
+            >
+
+        </div>
+
+
+        <div class="campo-filtro">
+
+            <label>Estado</label>
+
+            <select name="estado">
+
+                <option value="">Todos</option>
+
+                <option value="1"
+
+                    {% if estado == "1" %}selected{% endif %}>
+
+                    Activas
+
+                </option>
+
+                <option value="0"
+
+                    {% if estado == "0" %}selected{% endif %}>
+
+                    Inactivas
+
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button type="submit" class="btn-buscar">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            Buscar
+
+        </button>
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     TABLA
+===================================================== -->
+
+<div class="tabla-contenedor">
+
+    {% if revistas %}
+
+        <div class="contador-registros">
+
+            <i class="fa-solid fa-list"></i>
+
+            {{ revistas|length }} revista{% if revistas|length != 1 %}s{% endif %} encontrada{% if revistas|length != 1 %}s{% endif %}
+
+        </div>
+
+
+        <table class="tabla-revistas">
+
+            <thead>
+
+                <tr>
+
+                    <th>Código</th>
+
+                    <th>Revista</th>
+
+                    <th>ISSN</th>
+
+                    <th>E-ISSN</th>
+
+                    <th>Editorial</th>
+
+                    <th>Institución</th>
+
+                    <th>Periodicidad</th>
+
+                    <th>Estado</th>
+
+                    <th>Acciones</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for revista in revistas %}
+
+                <tr>
+
+                    <td>
+
+                        <span class="codigo">
+
+                            {{ revista.codigo }}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="nombre-revista">
+
+                            {{ revista.nombre }}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        {% if revista.issn %}
+
+                            <span class="issn">
+
+                                {{ revista.issn }}
+
+                            </span>
+
+                        {% else %}
+
+                            <span style="color:#aaa;">—</span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if revista.issn_electronico %}
+
+                            <span class="issn">
+
+                                {{ revista.issn_electronico }}
+
+                            </span>
+
+                        {% else %}
+
+                            <span style="color:#aaa;">—</span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ revista.editorial or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ revista.institucion or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ revista.periodicidad or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if revista.estado == 1 %}
+
+                            <span class="estado estado-activo">
+
+                                <i class="fa-solid fa-circle-check"></i>
+
+                                Activa
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="estado estado-inactivo">
+
+                                <i class="fa-solid fa-circle-xmark"></i>
+
+                                Inactiva
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="acciones">
+
+                            <a
+
+                                href="{{ url_for('ver_revista', id=revista.id) }}"
+
+                                class="btn-accion btn-ver"
+
+                                title="Ver revista"
+
+                            >
+
+                                <i class="fa-solid fa-eye"></i>
+
+                            </a>
+
+
+                            <a
+
+                                href="{{ url_for('editar_revista', id=revista.id) }}"
+
+                                class="btn-accion btn-editar"
+
+                                title="Editar revista"
+
+                            >
+
+                                <i class="fa-solid fa-pen"></i>
+
+                            </a>
+
+
+                            <form
+
+                                method="POST"
+
+                                action="{{ url_for('eliminar_revista', id=revista.id) }}"
+
+                                style="display: inline;"
+
+                                onsubmit="return confirm('¿Está seguro de eliminar esta revista? La revista y su documento de Google Drive serán eliminados, pero los artículos asociados se conservarán.');"
+
+                            >
+
+                                <button
+
+                                    type="submit"
+
+                                    class="btn-accion btn-eliminar"
+
+                                    title="Eliminar revista"
+
+                                >
+
+                                    <i class="fa-solid fa-trash"></i>
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+
+    {% else %}
+
+        <div class="sin-registros">
+
+            <i class="fa-solid fa-book-open"></i>
+
+            <h3>No se encontraron revistas</h3>
+
+            <p>
+
+                No existen revistas que coincidan con los criterios de búsqueda.
+
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

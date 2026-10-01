@@ -1,0 +1,521 @@
+{% extends "base.html" %}
+
+{% block title %}
+Usuarios - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO DEL MÓDULO
+    ========================= */
+
+    .modulo-encabezado {
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       TARJETA
+    ========================= */
+
+    .tarjeta-usuarios {
+        background-color: white;
+        padding: 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+
+    /* =========================
+       CABECERA TABLA
+    ========================= */
+
+    .cabecera-tabla {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        gap: 20px;
+    }
+
+    .titulo-usuarios {
+        color: #0d3b66;
+        font-size: 22px;
+        margin: 0;
+    }
+
+    .descripcion-usuarios {
+        color: #777;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+
+    /* =========================
+       BOTÓN NUEVO
+    ========================= */
+
+    .btn-nuevo {
+        display: inline-block;
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        text-decoration: none;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .btn-nuevo:hover {
+        background-color: #092c4c;
+    }
+
+
+    /* =========================
+       TABLA
+    ========================= */
+
+    .tabla-contenedor {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background-color: #0d3b66;
+        color: white;
+        padding: 14px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    td {
+        padding: 14px;
+        border-bottom: 1px solid #e5e5e5;
+        font-size: 14px;
+    }
+
+    tr:hover {
+        background-color: #f5f8fb;
+    }
+
+
+    /* =========================
+       ESTADOS
+    ========================= */
+
+    .activo {
+        color: #198754;
+        font-weight: bold;
+        background-color: #e8f7ee;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .inactivo {
+        color: #dc3545;
+        font-weight: bold;
+        background-color: #fdeaea;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    /* =========================
+    MENSAJES
+    ========================= */
+
+    .mensaje-success {
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #e8f7ee;
+        color: #18794e;
+        border: 1px solid #b7e4c7;
+        padding: 12px 15px;
+        border-radius: 7px;
+        margin-bottom: 20px;
+        font-size: 14px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .mensaje-success button {
+        border: none;
+        background: transparent;
+        color: #18794e;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 4px;
+    }
+
+    .mensaje-success button:hover {
+        opacity: 0.6;
+    }
+
+    /* =========================
+    ACCIONES
+    ========================= */
+
+    .btn-editar,
+    .btn-password,
+    .btn-eliminar {
+        border: none;
+        padding: 7px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-right: 5px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-editar {
+        background-color: #e8f1fb;
+        color: #0d3b66;
+    }
+
+    .btn-password {
+        background-color: #e8f1fb;
+        color: #0d3b66;
+    }
+
+    .btn-eliminar {
+        background-color: #fdeaea;
+        color: #dc3545;
+    }
+
+    .btn-editar:hover,
+    .btn-password:hover,
+    .btn-eliminar:hover {
+        opacity: 0.8;
+    }
+
+    /* =========================
+       VOLVER
+    ========================= */
+
+    .volver {
+        display: inline-block;
+        margin-top: 25px;
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        text-decoration: none;
+        border-radius: 7px;
+        transition: 0.2s;
+    }
+
+    .volver:hover {
+        background-color: #092c4c;
+    }
+
+
+    /* =========================
+       PIE
+    ========================= */
+
+    .pie {
+        text-align: center;
+        color: #888;
+        font-size: 12px;
+        margin-top: 25px;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .cabecera-tabla {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .tarjeta-usuarios {
+            padding: 20px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO DEL MÓDULO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        👤 Gestión de Usuarios
+    </h1>
+
+    <p>
+        Administración de usuarios y roles del sistema DICyT
+    </p>
+
+</div>
+
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+
+    {% if mensajes %}
+
+        {% for categoria, mensaje in mensajes %}
+
+            <div class="mensaje-{{ categoria }}" id="mensaje-sistema">
+
+                <span>
+                    ✅ {{ mensaje }}
+                </span>
+
+                <button
+                    type="button"
+                    onclick="cerrarMensaje()"
+                    title="Cerrar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+{% endwith %}
+
+<!-- =========================
+     TARJETA
+========================= -->
+
+<div class="tarjeta-usuarios">
+
+
+    <!-- CABECERA -->
+
+    <div class="cabecera-tabla">
+
+        <div>
+
+            <h2 class="titulo-usuarios">
+                Usuarios registrados
+            </h2>
+
+            <p class="descripcion-usuarios">
+                Administración de usuarios y roles del sistema.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('nuevo_usuario') }}"
+            class="btn-nuevo"
+        >
+            ➕ Nuevo usuario
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         TABLA
+    ========================= -->
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for usuario in usuarios %}
+
+                <tr>
+
+                    <td>
+                        {{ usuario["id"] }}
+                    </td>
+
+                    <td>
+                        {{ usuario["nombre"] }}
+                    </td>
+
+                    <td>
+                        {{ usuario["usuario"] }}
+                    </td>
+
+                    <td>
+                        {{ usuario["rol"] }}
+                    </td>
+
+                    <td>
+
+                        {% if usuario["estado"] == 1 %}
+
+                            <span class="activo">
+                                Activo
+                            </span>
+
+                        {% else %}
+
+                            <span class="inactivo">
+                                Inactivo
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{{ url_for('editar_usuario', id=usuario['id']) }}"
+                            class="btn-editar"
+                        >
+                            ✏️ Editar
+                        </a>
+
+                        <a
+                            href="{{ url_for('restablecer_password', id=usuario['id']) }}"
+                            class="btn-password"
+                        >
+                            🔑 Restablecer
+                        </a>
+
+                        <form
+                            action="{{ url_for('eliminar_usuario', id=usuario['id']) }}"
+                            method="POST"
+                            style="display:inline;"
+                            onsubmit="return confirmarEliminacion();"
+                        >
+
+                            <button
+                                type="submit"
+                                class="btn-eliminar"
+                            >
+                                🗑️ Eliminar
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    
+
+
+</div>
+
+
+<div class="pie">
+
+    DICyT — Sistema Integral de Documentación e Investigación Científica
+
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+function confirmarEliminacion() {
+
+    return confirm(
+        "⚠️ ¿Está seguro de eliminar este usuario?\n\n" +
+        "Esta acción no se puede deshacer."
+    );
+
+}
+
+</script>
+
+<script>
+
+    function cerrarMensaje() {
+
+        const mensaje = document.getElementById("mensaje-sistema");
+
+        if (mensaje) {
+            mensaje.remove();
+        }
+
+    }
+
+
+    setTimeout(function() {
+
+        cerrarMensaje();
+
+    }, 5000);
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,1008 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver Investigador - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       PANEL PRINCIPAL
+    ========================= */
+
+    .investigador-panel {
+
+        background: white;
+
+        max-width: 1000px;
+
+        margin: 0 auto;
+
+        padding: 30px;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.08);
+    }
+
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .investigador-encabezado {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 20px;
+
+        padding-bottom: 25px;
+
+        margin-bottom: 25px;
+
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+
+    .investigador-foto {
+
+        width: 90px;
+
+        height: 90px;
+
+        border-radius: 50%;
+
+        background: #f1f5f9;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-size: 40px;
+
+        color: #0d3b66;
+
+        flex-shrink: 0;
+    }
+
+
+    .investigador-nombre h1 {
+
+        margin: 0 0 7px 0;
+
+        color: #0d3b66;
+
+        font-size: 25px;
+    }
+
+
+    .investigador-nombre p {
+
+        margin: 3px 0;
+
+        color: #6b7280;
+
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BADGES
+    ========================= */
+
+    .etiquetas {
+
+        display: flex;
+
+        gap: 8px;
+
+        margin-top: 10px;
+
+        flex-wrap: wrap;
+    }
+
+
+    .etiqueta {
+
+        display: inline-block;
+
+        padding: 5px 10px;
+
+        border-radius: 15px;
+
+        font-size: 12px;
+
+        font-weight: 600;
+    }
+
+
+    .etiqueta-tipo {
+
+        background: #e8f1f8;
+
+        color: #0d3b66;
+    }
+
+
+    .etiqueta-activo {
+
+        background: #dcfce7;
+
+        color: #166534;
+    }
+
+
+    .etiqueta-inactivo {
+
+        background: #fee2e2;
+
+        color: #991b1b;
+    }
+
+
+    /* =========================
+       SECCIONES
+    ========================= */
+
+    .seccion {
+
+        margin-bottom: 30px;
+    }
+
+
+    .seccion-titulo {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        color: #0d3b66;
+
+        font-size: 17px;
+
+        font-weight: 700;
+
+        padding-bottom: 10px;
+
+        margin-bottom: 18px;
+
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+
+    .seccion-titulo i {
+
+        font-size: 17px;
+    }
+
+
+    /* =========================
+       INFORMACIÓN
+    ========================= */
+
+    .informacion-grid {
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 18px 25px;
+    }
+
+
+    .dato {
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 5px;
+    }
+
+
+    .dato-completo {
+
+        grid-column: 1 / -1;
+    }
+
+
+    .dato-label {
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        color: #6b7280;
+
+        text-transform: uppercase;
+    }
+
+
+    .dato-valor {
+
+        font-size: 14px;
+
+        color: #374151;
+
+        min-height: 18px;
+    }
+
+
+    .dato-vacio {
+
+        color: #9ca3af;
+
+        font-style: italic;
+    }
+
+
+    /* =========================
+       IDENTIFICADORES
+    ========================= */
+
+    .identificador {
+
+        background: #f8fafc;
+
+        border: 1px solid #e5e7eb;
+
+        padding: 12px;
+
+        border-radius: 7px;
+    }
+
+
+    .identificador .dato-label {
+
+        margin-bottom: 4px;
+    }
+
+
+    /* =========================
+       OBSERVACIONES
+    ========================= */
+
+    .observaciones {
+
+        background: #f8fafc;
+
+        border-left: 4px solid #0d3b66;
+
+        padding: 15px;
+
+        border-radius: 5px;
+
+        color: #4b5563;
+
+        line-height: 1.6;
+
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .acciones-investigador {
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+
+        padding-top: 20px;
+
+        border-top: 1px solid #e5e7eb;
+    }
+
+
+    .btn-volver {
+
+        background: #6b7280;
+
+        color: white;
+
+        padding: 11px 20px;
+
+        border-radius: 6px;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        font-weight: 600;
+    }
+
+
+    .btn-volver:hover {
+
+        background: #4b5563;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .informacion-grid {
+
+            grid-template-columns: 1fr;
+        }
+
+        .dato-completo {
+
+            grid-column: auto;
+        }
+
+        .investigador-encabezado {
+
+            align-items: flex-start;
+        }
+
+    }
+
+    .btn-editar {
+
+        background: #0d3b66;
+
+        color: white;
+
+        padding: 11px 20px;
+
+        border-radius: 6px;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        font-weight: 600;
+
+        transition: all 0.2s ease;
+    }
+
+    .btn-editar:hover {
+
+            background: #155d98;
+
+            transform: translateY(-1px);
+        }
+
+        .btn-eliminar-definitivo {
+
+        background: #c62828;
+
+        color: white;
+
+        padding: 11px 20px;
+
+        border: none;
+
+        border-radius: 6px;
+
+        font-size: 14px;
+
+        font-weight: 600;
+
+        cursor: pointer;
+
+        transition: all 0.2s ease;
+    }
+
+    .btn-eliminar-definitivo:hover {
+
+        background: #a91f1f;
+
+        transform: translateY(-1px);
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="investigador-panel">
+
+
+    <!-- =================================================
+         ENCABEZADO
+    ================================================== -->
+
+    <div class="investigador-encabezado">
+
+
+        <div class="investigador-foto">
+
+            {% if investigador["fotografia"] %}
+
+                <img
+                    src="{{ url_for('static', filename=investigador['fotografia']) }}"
+                    alt="Fotografía"
+                    style="
+                        width: 90px;
+                        height: 90px;
+                        object-fit: cover;
+                        border-radius: 50%;
+                    "
+                >
+
+            {% else %}
+
+                <i class="fa-solid fa-user"></i>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="investigador-nombre">
+
+            <h1>
+                {{ investigador["nombre"] }}
+                {{ investigador["apellido"] }}
+            </h1>
+
+
+            <p>
+                Código:
+                <strong>
+                    {{ investigador["codigo"] }}
+                </strong>
+            </p>
+
+
+            <div class="etiquetas">
+
+                <span class="etiqueta etiqueta-tipo">
+                    {{ investigador["tipo"] }}
+                </span>
+
+                {% if investigador["estado"]|int == 1 %}
+
+                    <span class="etiqueta etiqueta-activo">
+                        Activo
+                    </span>
+
+                {% else %}
+
+                    <span class="etiqueta etiqueta-inactivo">
+                        Inactivo
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         INFORMACIÓN PERSONAL
+    ================================================== -->
+
+    <div class="seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-user"></i>
+
+            Información personal
+
+        </div>
+
+
+        <div class="informacion-grid">
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Nombre
+                </span>
+
+                <span class="dato-valor">
+                    {{ investigador["nombre"] or "No registrado" }}
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Apellido
+                </span>
+
+                <span class="dato-valor">
+                    {{ investigador["apellido"] or "No registrado" }}
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    C.I.
+                </span>
+
+                <span class="dato-valor">
+
+                    {% if investigador["ci"] %}
+
+                        {{ investigador["ci"] }}
+
+                    {% else %}
+
+                        <span class="dato-vacio">
+                            No registrado
+                        </span>
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Correo electrónico
+                </span>
+
+                <span class="dato-valor">
+
+                    {% if investigador["correo"] %}
+
+                        {{ investigador["correo"] }}
+
+                    {% else %}
+
+                        <span class="dato-vacio">
+                            No registrado
+                        </span>
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Teléfono
+                </span>
+
+                <span class="dato-valor">
+
+                    {% if investigador["telefono"] %}
+
+                        {{ investigador["telefono"] }}
+
+                    {% else %}
+
+                        <span class="dato-vacio">
+                            No registrado
+                        </span>
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Tipo de investigador
+                </span>
+
+                <span class="dato-valor">
+                    {{ investigador["tipo"] }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         INFORMACIÓN INSTITUCIONAL
+    ================================================== -->
+
+    <div class="seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-building-columns"></i>
+
+            Información institucional
+
+        </div>
+
+
+        <div class="informacion-grid">
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Facultad
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["facultad"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Carrera / Área
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["carrera_area"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Cargo
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["cargo"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Institución
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["institucion"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Grado académico
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["grado_academico"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Especialidad
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["especialidad"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato dato-completo">
+
+                <span class="dato-label">
+                    Perfil
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["perfil"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         INFORMACIÓN DEL ESTUDIANTE
+    ================================================== -->
+
+    {% if investigador["tipo"] == "Estudiante Investigador" %}
+
+    <div class="seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-graduation-cap"></i>
+
+            Información académica del estudiante
+
+        </div>
+
+
+        <div class="informacion-grid">
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Semestre
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["semestre"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Matrícula / Código universitario
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["matricula"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Tutor / Docente responsable
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["tutor"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <span class="dato-label">
+                    Línea de investigación
+                </span>
+
+                <span class="dato-valor">
+
+                    {{ investigador["linea_investigacion"] or "No registrado" }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- =================================================
+         IDENTIFICADORES CIENTÍFICOS
+    ================================================== -->
+
+    <div class="seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-flask"></i>
+
+            Identificadores científicos
+
+        </div>
+
+
+        <div class="informacion-grid">
+
+
+            <div class="identificador">
+
+                <span class="dato-label">
+                    ORCID
+                </span>
+
+                <div class="dato-valor">
+
+                    {{ investigador["orcid"] or "No registrado" }}
+
+                </div>
+
+            </div>
+
+
+            <div class="identificador">
+
+                <span class="dato-label">
+                    Google Scholar
+                </span>
+
+                <div class="dato-valor">
+
+                    {{ investigador["google_scholar"] or "No registrado" }}
+
+                </div>
+
+            </div>
+
+
+            <div class="identificador">
+
+                <span class="dato-label">
+                    Scopus ID
+                </span>
+
+                <div class="dato-valor">
+
+                    {{ investigador["scopus"] or "No registrado" }}
+
+                </div>
+
+            </div>
+
+
+            <div class="identificador">
+
+                <span class="dato-label">
+                    Researcher ID
+                </span>
+
+                <div class="dato-valor">
+
+                    {{ investigador["researcher_id"] or "No registrado" }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         OBSERVACIONES
+    ================================================== -->
+
+    {% if investigador["observaciones"] %}
+
+    <div class="seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-note-sticky"></i>
+
+            Observaciones
+
+        </div>
+
+
+        <div class="observaciones">
+
+            {{ investigador["observaciones"] }}
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- =================================================
+         BOTÓN VOLVER
+    ================================================== -->
+
+    <div class="acciones-investigador">
+
+        <a
+            href="{{ url_for('investigadores') }}"
+            class="btn-volver"
+        >
+            ← Volver a investigadores
+        </a>
+
+
+        <a
+            href="{{ url_for('editar_investigador', id=investigador['id']) }}"
+            class="btn-editar"
+        >
+            <i class="fa-solid fa-pen"></i>
+            Editar investigador
+        </a>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('eliminar_definitivo_investigador', id=investigador['id']) }}"
+            style="display: inline;"
+            onsubmit="return confirm(
+                '¿Está seguro de eliminar definitivamente este investigador?\n\nEsta acción no se puede deshacer.'
+            );"
+        >
+
+            <button
+                type="submit"
+                class="btn-eliminar-definitivo"
+            >
+                <i class="fa-solid fa-trash"></i>
+                Eliminar definitivamente
+            </button>
+
+        </form>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

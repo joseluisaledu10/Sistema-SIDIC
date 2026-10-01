@@ -1,0 +1,756 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuevo Investigador - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       PANEL PRINCIPAL
+    ========================= */
+
+    .formulario-panel {
+
+        background: white;
+
+        max-width: 1000px;
+
+        margin: 0 auto;
+
+        padding: 30px;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.08);
+    }
+
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .formulario-panel h1 {
+
+        margin-top: 0;
+
+        color: #0d3b66;
+
+        text-align: center;
+
+        margin-bottom: 8px;
+    }
+
+
+    .formulario-panel > p {
+
+        text-align: center;
+
+        color: #6b7280;
+
+        margin-bottom: 30px;
+    }
+
+
+    /* =========================
+       SECCIONES
+    ========================= */
+
+    .seccion-formulario {
+
+        margin-bottom: 28px;
+    }
+
+
+    .seccion-titulo {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        color: #0d3b66;
+
+        font-size: 17px;
+
+        font-weight: 700;
+
+        padding-bottom: 10px;
+
+        margin-bottom: 18px;
+
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+
+    .seccion-titulo i {
+
+        font-size: 18px;
+    }
+
+
+    /* =========================
+       GRID
+    ========================= */
+
+    .formulario-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 20px;
+    }
+
+
+    .campo {
+
+        display: flex;
+
+        flex-direction: column;
+    }
+
+
+    .campo-completo {
+
+        grid-column: 1 / -1;
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .campo label {
+
+        margin-bottom: 7px;
+
+        font-weight: 600;
+
+        color: #374151;
+
+        font-size: 14px;
+    }
+
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+
+        padding: 11px 12px;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 6px;
+
+        font-size: 14px;
+
+        outline: none;
+
+        box-sizing: border-box;
+
+        width: 100%;
+    }
+
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+
+        border-color: #0d3b66;
+
+        box-shadow:
+            0 0 0 2px rgba(13,59,102,0.10);
+    }
+
+
+    .campo textarea {
+
+        min-height: 110px;
+
+        resize: vertical;
+    }
+
+
+    .campo small {
+
+        margin-top: 5px;
+
+        color: #777;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .botones-formulario {
+
+        margin-top: 30px;
+
+        padding-top: 20px;
+
+        border-top: 1px solid #e5e7eb;
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+    }
+
+
+    .btn-guardar {
+
+        background: #0d3b66;
+
+        color: white;
+
+        border: none;
+
+        padding: 11px 20px;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        font-weight: 600;
+    }
+
+
+    .btn-guardar:hover {
+
+        background: #155d98;
+    }
+
+
+    .btn-cancelar {
+
+        background: #6b7280;
+
+        color: white;
+
+        border: none;
+
+        padding: 11px 20px;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        text-decoration: none;
+    }
+
+
+    .btn-cancelar:hover {
+
+        background: #4b5563;
+    }
+
+
+    /* =========================
+       INFORMACIÓN
+    ========================= */
+
+    .info-opcional {
+
+        background: #f4f7fa;
+
+        border-left: 4px solid #0d3b66;
+
+        padding: 12px 15px;
+
+        margin-bottom: 25px;
+
+        border-radius: 5px;
+
+        color: #555;
+
+        font-size: 13px;
+
+        line-height: 1.5;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+
+        .formulario-grid {
+
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo {
+
+            grid-column: auto;
+        }
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="formulario-panel">
+
+    <h1>
+        👤 Nuevo investigador
+    </h1>
+
+    <p>
+        Registra la información del docente o estudiante investigador.
+    </p>
+
+
+    <div class="info-opcional">
+
+        <strong>Importante:</strong>
+        Los identificadores científicos como ORCID, Google Scholar,
+        Scopus y Researcher ID son opcionales. Solo se deben registrar
+        cuando el investigador los tenga.
+
+    </div>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('nuevo_investigador') }}"
+    >
+
+
+        <!-- =================================================
+             INFORMACIÓN PERSONAL
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-user"></i>
+
+                Información personal
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="nombre">
+                        Nombre *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="apellido">
+                        Apellido *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="apellido"
+                        name="apellido"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="tipo">
+                        Tipo de investigador *
+                    </label>
+
+                    <select
+                        id="tipo"
+                        name="tipo"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccionar tipo
+                        </option>
+
+                        <option value="Docente Investigador">
+                            Docente Investigador
+                        </option>
+
+                        <option value="Estudiante Investigador">
+                            Estudiante Investigador
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="ci">
+                        C.I.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ci"
+                        name="ci"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="correo">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="telefono">
+                        Teléfono
+                    </label>
+
+                    <input
+                        type="text"
+                        id="telefono"
+                        name="telefono"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             INFORMACIÓN INSTITUCIONAL
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-building-columns"></i>
+
+                Información institucional
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="carrera_area">
+                        Carrera / Área
+                    </label>
+
+                    <input
+                        type="text"
+                        id="carrera_area"
+                        name="carrera_area"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="cargo">
+                        Cargo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cargo"
+                        name="cargo"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="facultad">
+                        Facultad
+                    </label>
+
+                    <input
+                        type="text"
+                        id="facultad"
+                        name="facultad"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="institucion">
+                        Institución
+                    </label>
+
+                    <input
+                        type="text"
+                        id="institucion"
+                        name="institucion"
+                        value="Universidad Amazónica de Pando"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="grado_academico">
+                        Grado académico
+                    </label>
+
+                    <input
+                        type="text"
+                        id="grado_academico"
+                        name="grado_academico"
+                        placeholder="Ej.: Licenciatura, Maestría, Doctorado"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="especialidad">
+                        Especialidad / Área de investigación
+                    </label>
+
+                    <input
+                        type="text"
+                        id="especialidad"
+                        name="especialidad"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             IDENTIFICADORES CIENTÍFICOS
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-flask"></i>
+
+                Identificadores científicos
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="orcid">
+                        ORCID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="orcid"
+                        name="orcid"
+                        placeholder="Ej.: 0000-0000-0000-0000"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="google_scholar">
+                        Google Scholar
+                    </label>
+
+                    <input
+                        type="text"
+                        id="google_scholar"
+                        name="google_scholar"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="scopus">
+                        Scopus ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="scopus"
+                        name="scopus"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="researcher_id">
+                        Researcher ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="researcher_id"
+                        name="researcher_id"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ESTADO Y OBSERVACIONES
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                Estado y observaciones
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="estado">
+                        Estado
+                    </label>
+
+                    <select
+                        id="estado"
+                        name="estado"
+                    >
+
+                        <option value="Activo">
+                            Activo
+                        </option>
+
+                        <option value="Inactivo">
+                            Inactivo
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo campo-completo">
+
+                    <label for="observaciones">
+                        Observaciones
+                    </label>
+
+                    <textarea
+                        id="observaciones"
+                        name="observaciones"
+                        placeholder="Información adicional..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             BOTONES
+        ================================================== -->
+
+        <div class="botones-formulario">
+
+            <a
+                href="{{ url_for('investigadores') }}"
+                class="btn-cancelar"
+            >
+                Cancelar
+            </a>
+
+
+            <button
+                type="submit"
+                class="btn-guardar"
+            >
+                💾 Guardar investigador
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+{% endblock %}

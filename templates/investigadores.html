@@ -1,0 +1,958 @@
+{% extends "base.html" %}
+
+{% block title %}
+Investigadores - Sistema DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO DE PÁGINA
+    ========================= */
+
+    .pagina-encabezado {
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        margin-bottom: 25px;
+    }
+
+    .pagina-titulo h2 {
+
+        margin: 0;
+
+        color: #0d3b66;
+
+        font-size: 24px;
+    }
+
+    .pagina-titulo p {
+
+        margin-top: 6px;
+
+        color: #6b7280;
+
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BOTÓN NUEVO
+    ========================= */
+
+    .btn-nuevo {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 8px;
+
+        background-color: #0d3b66;
+
+        color: white;
+
+        padding: 11px 18px;
+
+        border-radius: 7px;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        font-weight: 600;
+
+        transition: all 0.2s ease;
+    }
+
+    .btn-nuevo:hover {
+
+        background-color: #155d98;
+
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================
+       PANEL DE BÚSQUEDA
+    ========================= */
+
+    .panel-filtros {
+
+        background-color: white;
+
+        padding: 20px;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.08);
+
+        margin-bottom: 20px;
+    }
+
+    .filtros-grid {
+        display: grid;
+        grid-template-columns:
+            1fr 220px 180px auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+
+    .campo-filtro {
+
+        display: flex;
+
+        flex-direction: column;
+    }
+
+
+    .campo-filtro label {
+
+        margin-bottom: 7px;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        color: #374151;
+    }
+
+
+    .campo-filtro input,
+    .campo-filtro select {
+
+        padding: 10px 12px;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 6px;
+
+        font-size: 14px;
+
+        outline: none;
+
+        box-sizing: border-box;
+
+        width: 100%;
+    }
+
+
+    .campo-filtro input:focus,
+    .campo-filtro select:focus {
+
+        border-color: #1e3a8a;
+
+        box-shadow:
+            0 0 0 2px rgba(30,58,138,0.10);
+    }
+
+
+    /* =========================
+       BOTÓN BUSCAR
+    ========================= */
+
+    .btn-buscar {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 7px;
+
+        padding: 10px 18px;
+
+        background-color: #0d3b66;
+
+        color: white;
+
+        border: none;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        height: 39px;
+    }
+
+
+    .btn-buscar:hover {
+
+        background-color: #155d98;
+    }
+
+
+    /* =========================
+       TABLA
+    ========================= */
+
+    .tabla-panel {
+
+        background-color: white;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.08);
+
+        overflow: hidden;
+    }
+
+
+    .tabla-contenedor {
+
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+
+    table {
+
+        width: 100%;
+
+        border-collapse: collapse;
+
+        min-width: 900px;
+    }
+
+
+    thead {
+
+        background-color: #0d3b66;
+
+        color: white;
+    }
+
+
+    th {
+
+        padding: 13px 12px;
+
+        text-align: left;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+    }
+
+
+    td {
+
+        padding: 12px;
+
+        border-bottom: 1px solid #e5e7eb;
+
+        color: #374151;
+
+        font-size: 13px;
+
+        vertical-align: middle;
+    }
+
+
+    tbody tr:hover {
+
+        background-color: #f8fafc;
+    }
+
+
+    tbody tr:last-child td {
+
+        border-bottom: none;
+    }
+
+
+    /* =========================
+       TIPO DE INVESTIGADOR
+    ========================= */
+
+    .tipo-badge {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 5px 9px;
+
+        border-radius: 20px;
+
+        font-size: 11px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+    }
+
+
+    .tipo-docente {
+
+        background-color: #e0ecf7;
+
+        color: #0d3b66;
+    }
+
+
+    .tipo-estudiante {
+
+        background-color: #e8f5e9;
+
+        color: #2e7d32;
+    }
+
+
+    /* =========================
+       ESTADO
+    ========================= */
+
+    .estado-badge {
+
+        display: inline-block;
+
+        padding: 5px 9px;
+
+        border-radius: 20px;
+
+        font-size: 11px;
+
+        font-weight: 600;
+    }
+
+
+    .estado-activo {
+
+        background-color: #e8f5e9;
+
+        color: #2e7d32;
+    }
+
+
+    .estado-inactivo {
+
+        background-color: #ffebee;
+
+        color: #c62828;
+    }
+
+
+    /* =========================
+       ACCIONES
+    ========================= */
+
+    .acciones button {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .acciones {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        white-space: nowrap;
+    }
+
+
+    .acciones a {
+
+        width: 32px;
+
+        height: 32px;
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 6px;
+
+        text-decoration: none;
+
+        transition: all 0.2s ease;
+    }
+
+
+    .accion-ver {
+
+        background-color: #e3f2fd;
+
+        color: #1565c0;
+    }
+
+
+    .accion-ver:hover {
+
+        background-color: #bbdefb;
+
+        transform: scale(1.05);
+    }
+
+
+    .accion-editar {
+
+        background-color: #fff3e0;
+
+        color: #ef6c00;
+    }
+
+
+    .accion-editar:hover {
+
+        background-color: #ffe0b2;
+
+        transform: scale(1.05);
+    }
+
+
+    .accion-eliminar {
+
+        background-color: #ffebee;
+
+        color: #c62828;
+    }
+
+
+    .accion-eliminar:hover {
+
+        background-color: #ffcdd2;
+
+        transform: scale(1.05);
+    }
+
+    .accion-eliminar-definitivo {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    .accion-eliminar-definitivo:hover {
+        background-color: #ffcdd2;
+        transform: scale(1.05);
+    }
+
+    
+
+    /* =========================
+       SIN REGISTROS
+    ========================= */
+
+    .sin-registros {
+
+        text-align: center;
+
+        padding: 45px 20px;
+
+        color: #6b7280;
+    }
+
+
+    .sin-registros i {
+
+        font-size: 38px;
+
+        margin-bottom: 12px;
+
+        color: #9ca3af;
+    }
+
+
+    .sin-registros p {
+
+        margin: 5px 0;
+    }
+
+
+    .sin-registros .texto-secundario {
+
+        font-size: 13px;
+
+        color: #9ca3af;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+        .filtros-grid {
+
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .btn-buscar {
+
+            width: 100%;
+        }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+        .pagina-encabezado {
+
+            flex-direction: column;
+
+            align-items: flex-start;
+
+            gap: 15px;
+        }
+
+        .filtros-grid {
+
+            grid-template-columns: 1fr;
+        }
+
+        .btn-nuevo {
+
+            width: 100%;
+
+            justify-content: center;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fa-solid fa-users"></i>
+            Investigadores
+        </h2>
+
+        <p>
+            Registro y gestión de docentes y estudiantes investigadores.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('nuevo_investigador') }}"
+        class="btn-nuevo"
+    >
+
+        <i class="fa-solid fa-plus"></i>
+
+        Nuevo investigador
+
+    </a>
+
+</div>
+
+
+<!-- =========================
+     FILTROS
+========================= -->
+
+<div class="panel-filtros">
+
+    <form
+        method="GET"
+        action="{{ url_for('investigadores') }}"
+    >
+
+        <div class="filtros-grid">
+
+            <!-- BUSCAR -->
+
+            <div class="campo-filtro">
+
+                <label for="buscar">
+                    Buscar investigador
+                </label>
+
+                <input
+                    type="text"
+                    id="buscar"
+                    name="buscar"
+                    placeholder="Nombre, apellido, CI..."
+                    value="{{ request.args.get('buscar', '') }}"
+                >
+
+            </div>
+
+
+            <!-- TIPO -->
+
+            <div class="campo-filtro">
+
+                <label for="tipo">
+                    Tipo de investigador
+                </label>
+
+                <select
+                    id="tipo"
+                    name="tipo"
+                >
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option
+                        value="Docente Investigador"
+                        {% if request.args.get('tipo') == 'Docente Investigador' %}
+                            selected
+                        {% endif %}
+                    >
+                        Docente Investigador
+                    </option>
+
+                    <option
+                        value="Estudiante Investigador"
+                        {% if request.args.get('tipo') == 'Estudiante Investigador' %}
+                            selected
+                        {% endif %}
+                    >
+                        Estudiante Investigador
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="campo-filtro">
+
+                <label for="estado">
+                    Estado
+                </label>
+
+                <select
+                    id="estado"
+                    name="estado"
+                >
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option
+                        value="1"
+                        {% if request.args.get('estado') == '1' %}
+                            selected
+                        {% endif %}
+                    >
+                        Activos
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if request.args.get('estado') == '0' %}
+                            selected
+                        {% endif %}
+                    >
+                        Inactivos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- BOTÓN BUSCAR -->
+
+            <div>
+
+                <button
+                    type="submit"
+                    class="btn-buscar"
+                >
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================
+     TABLA
+========================= -->
+
+<div class="tabla-panel">
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        N.º
+                    </th>
+
+                    <th>
+                        Nombre completo
+                    </th>
+
+                    <th>
+                        Tipo
+                    </th>
+
+                    <th>
+                        CI
+                    </th>
+
+                    <th>
+                        Carrera / Área
+                    </th>
+
+                    <th>
+                        Correo
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% if investigadores %}
+
+                    {% for investigador in investigadores %}
+
+                    <tr>
+
+                        <td>
+                            {{ loop.index }}
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                {{ investigador['nombre'] }}
+                                {{ investigador['apellido'] }}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            {% if investigador['tipo'] == 'Docente Investigador' %}
+
+                                <span class="tipo-badge tipo-docente">
+
+                                    <i class="fa-solid fa-chalkboard-user"></i>
+
+                                    Docente
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="tipo-badge tipo-estudiante">
+
+                                    <i class="fa-solid fa-user-graduate"></i>
+
+                                    Estudiante
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+                            {{ investigador['ci'] or '-' }}
+                        </td>
+
+
+                        <td>
+                            {{ investigador['carrera_area'] or '-' }}
+                        </td>
+
+
+                        <td>
+                            {{ investigador['correo'] or '-' }}
+                        </td>
+
+
+                        <td>
+
+                            {% if investigador['estado'] == 1 %}
+
+                                <span class="estado-badge estado-activo">
+                                    Activo
+                                </span>
+
+                            {% else %}
+
+                                <span class="estado-badge estado-inactivo">
+                                    Inactivo
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="acciones">
+
+                                <a
+                                    href="{{ url_for('ver_investigador', id=investigador['id']) }}"
+                                    class="accion-ver"
+                                    title="Ver investigador"
+                                >
+
+                                    <i class="fa-solid fa-eye"></i>
+
+                                </a>
+
+
+                                <a
+                                    href="{{ url_for('editar_investigador', id=investigador['id']) }}"
+                                    class="accion-editar"
+                                    title="Editar investigador"
+                                >
+
+                                    <i class="fa-solid fa-pen"></i>
+
+                                </a>
+
+
+                                <a
+                                    href="{{ url_for('eliminar_investigador', id=investigador['id']) }}"
+                                    class="accion-eliminar"
+                                    title="{% if investigador['estado'] == 1 %}Desactivar investigador{% else %}Activar investigador{% endif %}"
+                                    onclick="return confirm('{% if investigador['estado'] == 1 %}¿Está seguro de desactivar este investigador?{% else %}¿Desea activar nuevamente este investigador?{% endif %}');"
+                                >
+                                    {% if investigador['estado'] == 1 %}
+                                        <i class="fa-solid fa-user-slash"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-user-check"></i>
+                                    {% endif %}
+                                </a>
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('eliminar_definitivo_investigador', id=investigador['id']) }}"
+                                    style="display: inline;"
+                                    onsubmit="return confirm(
+                                        '¿Está seguro de eliminar definitivamente este investigador?\n\nEsta acción no se puede deshacer.'
+                                    );"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="accion-eliminar-definitivo"
+                                        title="Eliminar definitivamente"
+                                    >
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            <div class="sin-registros">
+
+                                <i class="fa-solid fa-users"></i>
+
+                                <p>
+                                    No existen investigadores registrados.
+                                </p>
+
+                                <p class="texto-secundario">
+                                    Cuando agregues un investigador,
+                                    aparecerá aquí.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

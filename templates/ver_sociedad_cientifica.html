@@ -1,0 +1,1077 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver Sociedad Científica - Sistema DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 24px;
+}
+
+.pagina-titulo p {
+
+    margin: 6px 0 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   PANEL PRINCIPAL
+========================================================= */
+
+.detalle-panel {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 25px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.seccion-detalle {
+
+    margin-bottom: 28px;
+
+    padding-bottom: 22px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.seccion-detalle:last-child {
+
+    border-bottom: none;
+
+    margin-bottom: 0;
+
+    padding-bottom: 0;
+}
+
+.seccion-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 18px;
+
+    color: #0d3b66;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+.seccion-titulo i {
+
+    color: #155d98;
+}
+
+
+/* =========================================================
+   DATOS
+========================================================= */
+
+.detalle-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 18px 30px;
+}
+
+.detalle-campo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.detalle-campo.completo {
+
+    grid-column: 1 / -1;
+}
+
+.detalle-label {
+
+    font-size: 12px;
+
+    color: #6b7280;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+.detalle-valor {
+
+    color: #1f2937;
+
+    font-size: 14px;
+
+    min-height: 20px;
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.estado {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    width: fit-content;
+
+    padding: 5px 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.estado-activo {
+
+    background: #d1fae5;
+
+    color: #065f46;
+}
+
+.estado-inactivo {
+
+    background: #fee2e2;
+
+    color: #991b1b;
+}
+
+
+/* =========================================================
+   ESTUDIANTES
+========================================================= */
+
+.lista-estudiantes {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.estudiante-item {
+
+    display: grid;
+
+    grid-template-columns: 35px minmax(0, 1fr) auto;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 14px;
+
+    background: #f5f8fb;
+
+    border-radius: 7px;
+
+    border: 1px solid #e1e8ef;
+}
+
+.estudiante-numero {
+
+    width: 27px;
+
+    height: 27px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #0d3b66;
+
+    color: white;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.estudiante-info {
+
+    min-width: 0;
+}
+
+.estudiante-nombre {
+
+    color: #155d98;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    margin-bottom: 3px;
+}
+
+.estudiante-datos {
+
+    color: #6b7280;
+
+    font-size: 12px;
+}
+
+.estudiante-cargo {
+
+    text-align: right;
+
+    color: #1f2937;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.sin-registros {
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+    font-style: italic;
+
+    padding: 10px 0;
+}
+
+
+/* =========================================================
+   ARCHIVO
+========================================================= */
+
+.archivo-documento {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 15px 18px;
+
+    background: #f5f8fb;
+
+    border: 1px solid #dce5ee;
+
+    border-radius: 8px;
+}
+
+.archivo-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+.archivo-icono {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #0d3b66;
+
+    color: white;
+
+    font-size: 19px;
+
+    flex-shrink: 0;
+}
+
+.archivo-nombre {
+
+    color: #1f2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+.btn-abrir-archivo {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 15px;
+
+    background: #0d3b66;
+
+    color: white;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    transition: 0.2s;
+}
+
+.btn-abrir-archivo:hover {
+
+    background: #155d98;
+
+    color: white;
+}
+
+
+/* =========================================================
+   BOTONES FINALES
+========================================================= */
+
+.botones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    text-decoration: none;
+
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.btn-cancelar {
+
+    background: #6b7280;
+
+    color: white;
+}
+
+.btn-cancelar:hover {
+
+    background: #4b5563;
+
+    color: white;
+}
+
+.btn-guardar {
+
+    background: #0d3b66;
+
+    color: white;
+}
+
+.btn-guardar:hover {
+
+    background: #155d98;
+
+    color: white;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .pagina-encabezado {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .detalle-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .detalle-campo.completo {
+
+        grid-column: auto;
+    }
+
+    .estudiante-item {
+
+        grid-template-columns: 35px minmax(0, 1fr);
+    }
+
+    .estudiante-cargo {
+
+        grid-column: 2;
+
+        text-align: left;
+    }
+
+    .archivo-documento {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .btn-abrir-archivo {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+
+    .botones {
+
+        flex-direction: column;
+    }
+
+    .botones .btn {
+
+        width: 100%;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+
+            <i class="fa-solid fa-users-rectangle"></i>
+
+            Sociedad Científica
+
+        </h2>
+
+        <p>
+            Información completa de la sociedad científica registrada.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PANEL
+========================================================= -->
+
+<div class="detalle-panel">
+
+
+    <!-- =====================================================
+         INFORMACIÓN PRINCIPAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            Información principal
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Código
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['codigo'] }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Gestión
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['gestion'] }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo completo">
+
+                <span class="detalle-label">
+                    Nombre
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['nombre'] }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Sigla
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['sigla'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Fecha de constitución
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['fecha_constitucion'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Carrera
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['carrera'] or '—' }}
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Facultad
+                </span>
+
+                <span class="detalle-valor">
+                    {{ sociedad['facultad'] or '—' }}
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ESTUDIANTES INVESTIGADORES
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-user-graduate"></i>
+
+            Estudiantes Investigadores
+
+        </div>
+
+
+        {% if estudiantes %}
+
+        <div class="lista-estudiantes">
+
+            {% for estudiante in estudiantes %}
+
+            <div class="estudiante-item">
+
+
+                <span class="estudiante-numero">
+
+                    {{ loop.index }}
+
+                </span>
+
+
+                <div class="estudiante-info">
+
+                    <div class="estudiante-nombre">
+
+                        {{ estudiante['apellido'] }},
+                        {{ estudiante['nombre'] }}
+
+                    </div>
+
+
+                    <div class="estudiante-datos">
+
+                        {% if estudiante['matricula'] %}
+
+                            Matrícula: {{ estudiante['matricula'] }}
+
+                        {% endif %}
+
+
+                        {% if estudiante['carrera'] %}
+
+                            {% if estudiante['matricula'] %}
+                                ·
+                            {% endif %}
+
+                            {{ estudiante['carrera'] }}
+
+                        {% endif %}
+
+
+                        {% if estudiante['semestre'] %}
+
+                            {% if estudiante['matricula'] or estudiante['carrera'] %}
+                                ·
+                            {% endif %}
+
+                            Semestre: {{ estudiante['semestre'] }}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="estudiante-cargo">
+
+                    {{ estudiante['cargo'] or 'Miembro' }}
+
+                </div>
+
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="sin-registros">
+
+            No se registraron estudiantes investigadores en esta sociedad científica.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN DE CONTACTO
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-address-card"></i>
+
+            Información de contacto
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Correo
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ sociedad['correo'] or '—' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Teléfono
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ sociedad['telefono'] or '—' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo completo">
+
+                <span class="detalle-label">
+                    Sitio web / URL
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if sociedad['url'] %}
+
+                    <a
+                        href="{{ sociedad['url'] }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ sociedad['url'] }}
+                    </a>
+
+                    {% else %}
+
+                    —
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DESCRIPCIÓN
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-align-left"></i>
+
+            Descripción
+
+        </div>
+
+
+        <div class="detalle-campo">
+
+            <span class="detalle-valor">
+
+                {{ sociedad['descripcion'] or '—' }}
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ARCHIVO DIGITAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+            Archivo digital
+
+        </div>
+
+
+        {% if sociedad['archivo'] %}
+
+        <div class="archivo-documento">
+
+            <div class="archivo-info">
+
+                <div class="archivo-icono">
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                </div>
+
+                <div class="archivo-nombre">
+
+                    Archivo de la sociedad científica
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{{ url_for(
+                    'abrir_archivo_sociedad_cientifica',
+                    id=sociedad['id']
+                ) }}"
+                target="_blank"
+                class="btn-abrir-archivo"
+            >
+
+                <i class="fa-solid fa-eye"></i>
+
+                Ver documento
+
+            </a>
+
+        </div>
+
+        {% else %}
+
+        <div class="sin-registros">
+
+            No se adjuntó un archivo digital.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN ADICIONAL
+    ===================================================== -->
+
+    <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-note-sticky"></i>
+
+            Información adicional
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Estado
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if sociedad['estado'] == 1 %}
+
+                        <span class="estado estado-activo">
+                            Activo
+                        </span>
+
+                    {% else %}
+
+                        <span class="estado estado-inactivo">
+                            Inactivo
+                        </span>
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+                    Registrado por
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ sociedad['usuario'] }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo completo">
+
+                <span class="detalle-label">
+                    Observaciones
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ sociedad['observaciones'] or '—' }}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     BOTONES FINALES
+========================================================= -->
+
+<div class="botones">
+
+
+    <a
+        href="{{ url_for('sociedades_cientificas') }}"
+        class="btn btn-cancelar"
+    >
+
+        <i class="fa-solid fa-arrow-left"></i>
+
+        Volver
+
+    </a>
+
+
+    <a
+        href="{{ url_for(
+            'editar_sociedad_cientifica',
+            id=sociedad['id']
+        ) }}"
+        class="btn btn-guardar"
+    >
+
+        <i class="fa-solid fa-pen"></i>
+
+        Editar sociedad
+
+    </a>
+
+
+</div>
+
+
+{% endblock %}

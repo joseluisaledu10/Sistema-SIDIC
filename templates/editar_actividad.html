@@ -1,0 +1,908 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar actividad - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       TARJETA
+    ========================= */
+
+    .tarjeta-actividad {
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+
+        background-color: white;
+
+        padding: 30px;
+
+        border-radius: 12px;
+
+        box-shadow:
+            0 3px 12px rgba(0,0,0,0.08);
+
+        box-sizing: border-box;
+    }
+
+
+    /* =========================
+       TITULO
+    ========================= */
+
+    .titulo-formulario {
+        color: #0d3b66;
+        font-size: 22px;
+        margin: 0 0 25px 0;
+        text-align: center;
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .fila {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+
+    .campo {
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .campo-completo {
+        grid-column: 1 / -1;
+    }
+
+
+    .campo label {
+        margin-bottom: 7px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #374151;
+    }
+
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+
+        width: 100%;
+
+        padding: 11px;
+
+        box-sizing: border-box;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 7px;
+
+        font-size: 14px;
+
+        font-family: inherit;
+
+        background-color: white;
+
+        transition: 0.2s;
+    }
+
+
+    .campo textarea {
+
+        min-height: 100px;
+
+        resize: vertical;
+    }
+
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+
+        outline: none;
+
+        border-color: #1e3a8a;
+
+        box-shadow:
+            0 0 0 2px rgba(30,58,138,0.10);
+    }
+
+
+    /* =========================
+       INDICADORES
+    ========================= */
+
+    .indicador {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        margin-top: 7px;
+
+        font-size: 12px;
+
+        font-weight: bold;
+
+        width: fit-content;
+
+        padding: 4px 9px;
+
+        border-radius: 12px;
+
+        transition: 0.2s;
+    }
+
+
+    .indicador-punto {
+
+        width: 8px;
+
+        height: 8px;
+
+        border-radius: 50%;
+
+        display: inline-block;
+    }
+
+
+    /* =========================
+       ESTADOS
+    ========================= */
+
+    .estado-pendiente {
+
+        background-color: #fff3cd;
+
+        color: #856404;
+    }
+
+
+    .estado-pendiente .indicador-punto {
+
+        background-color: #ffc107;
+    }
+
+
+    .estado-proceso {
+
+        background-color: #cfe2ff;
+
+        color: #084298;
+    }
+
+
+    .estado-proceso .indicador-punto {
+
+        background-color: #0d6efd;
+    }
+
+
+    .estado-completada {
+
+        background-color: #d1e7dd;
+
+        color: #0f5132;
+    }
+
+
+    .estado-completada .indicador-punto {
+
+        background-color: #198754;
+    }
+
+
+    .estado-cancelada {
+
+        background-color: #f8d7da;
+
+        color: #842029;
+    }
+
+
+    .estado-cancelada .indicador-punto {
+
+        background-color: #dc3545;
+    }
+
+
+    /* =========================
+       PRIORIDADES
+    ========================= */
+
+    .prioridad-baja {
+
+        background-color: #d1e7dd;
+
+        color: #0f5132;
+    }
+
+
+    .prioridad-baja .indicador-punto {
+
+        background-color: #198754;
+    }
+
+
+    .prioridad-media {
+
+        background-color: #fff3cd;
+
+        color: #856404;
+    }
+
+
+    .prioridad-media .indicador-punto {
+
+        background-color: #ffc107;
+    }
+
+
+    .prioridad-alta {
+
+        background-color: #f8d7da;
+
+        color: #842029;
+    }
+
+
+    .prioridad-alta .indicador-punto {
+
+        background-color: #dc3545;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .acciones {
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+
+        margin-top: 25px;
+    }
+
+
+    .btn {
+
+        padding: 11px 20px;
+
+        border: none;
+
+        border-radius: 7px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        text-decoration: none;
+    }
+
+
+    .btn-guardar {
+
+        background-color: #0d3b66;
+
+        color: white;
+    }
+
+
+    .btn-cancelar {
+
+        background-color: #e5e7eb;
+
+        color: #374151;
+    }
+
+
+    .btn:hover {
+
+        opacity: 0.9;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .fila {
+
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo {
+
+            grid-column: auto;
+        }
+
+        .tarjeta-actividad {
+
+            padding: 20px;
+        }
+
+        .acciones {
+
+            flex-direction: column;
+        }
+
+        .btn {
+
+            width: 100%;
+
+            text-align: center;
+
+            box-sizing: border-box;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        ✏️ Editar actividad
+    </h1>
+
+    <p>
+        Modifica la información de la actividad seleccionada
+    </p>
+
+</div>
+
+
+<!-- =========================
+     TARJETA
+========================= -->
+
+<div class="tarjeta-actividad">
+
+
+    <h2 class="titulo-formulario">
+
+        Información de la actividad
+
+    </h2>
+
+
+    <form method="POST">
+
+
+        <!-- =========================
+             FILA 1
+        ========================= -->
+
+        <div class="fila">
+
+
+            <!-- CÓDIGO -->
+
+            <div class="campo">
+
+                <label for="codigo">
+                    Código
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    name="codigo"
+                    value="{{ gestion['codigo'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- TIPO -->
+
+            <div class="campo">
+
+                <label for="tipo">
+                    Tipo de actividad
+                </label>
+
+                <select
+                    name="tipo"
+                    id="tipo"
+                    required
+                >
+
+                    {% for tipo in tipos_actividad %}
+
+                        <option
+                            value="{{ tipo }}"
+                            {% if gestion['tipo'] == tipo %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ tipo }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             NOMBRE DE LA ACTIVIDAD
+        ========================= -->
+
+        <div class="fila">
+
+            <div class="campo campo-completo">
+
+                <label for="asunto">
+                    Nombre de la actividad
+                </label>
+
+                <input
+                    type="text"
+                    id="asunto"
+                    name="asunto"
+                    value="{{ gestion['asunto'] }}"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             RESPONSABLE Y ESTADO
+        ========================= -->
+
+        <div class="fila">
+
+
+            <!-- RESPONSABLE -->
+
+            <div class="campo">
+
+                <label for="responsable">
+                    Responsable
+                </label>
+
+                <input
+                    type="text"
+                    id="responsable"
+                    name="responsable"
+                    value="{{ gestion['responsable'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="campo">
+
+                <label for="estado">
+                    Estado
+                </label>
+
+                <select
+                    id="estado"
+                    name="estado"
+                    required
+                    onchange="actualizarEstado()"
+                >
+
+                    <option value="Pendiente"
+                        {% if gestion['estado'] == 'Pendiente' %}
+                            selected
+                        {% endif %}
+                    >
+                        Pendiente
+                    </option>
+
+                    <option value="En proceso"
+                        {% if gestion['estado'] == 'En proceso' %}
+                            selected
+                        {% endif %}
+                    >
+                        En proceso
+                    </option>
+
+                    <option value="Completada"
+                        {% if gestion['estado'] == 'Completada' %}
+                            selected
+                        {% endif %}
+                    >
+                        Completada
+                    </option>
+
+                    <option value="Cancelada"
+                        {% if gestion['estado'] == 'Cancelada' %}
+                            selected
+                        {% endif %}
+                    >
+                        Cancelada
+                    </option>
+
+                </select>
+
+
+                <!-- INDICADOR DE ESTADO -->
+
+                <div
+                    id="indicador-estado"
+                    class="indicador"
+                >
+
+                    <span class="indicador-punto"></span>
+
+                    <span id="texto-estado"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             FECHAS
+        ========================= -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="fecha_inicio">
+                    Fecha de inicio
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha_inicio"
+                    name="fecha_inicio"
+                    value="{{ gestion['fecha_inicio'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="fecha_limite">
+                    Fecha límite
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha_limite"
+                    name="fecha_limite"
+                    value="{{ gestion['fecha_limite'] or '' }}"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             PRIORIDAD
+        ========================= -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="prioridad">
+                    Prioridad
+                </label>
+
+                <select
+                    id="prioridad"
+                    name="prioridad"
+                    required
+                    onchange="actualizarPrioridad()"
+                >
+
+                    <option value="Baja"
+                        {% if gestion['prioridad'] == 'Baja' %}
+                            selected
+                        {% endif %}
+                    >
+                        Baja
+                    </option>
+
+                    <option value="Media"
+                        {% if gestion['prioridad'] == 'Media' %}
+                            selected
+                        {% endif %}
+                    >
+                        Media
+                    </option>
+
+                    <option value="Alta"
+                        {% if gestion['prioridad'] == 'Alta' %}
+                            selected
+                        {% endif %}
+                    >
+                        Alta
+                    </option>
+
+                </select>
+
+
+                <!-- INDICADOR DE PRIORIDAD -->
+
+                <div
+                    id="indicador-prioridad"
+                    class="indicador"
+                >
+
+                    <span class="indicador-punto"></span>
+
+                    <span id="texto-prioridad"></span>
+
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             DESCRIPCIÓN
+        ========================= -->
+
+        <div class="fila">
+
+            <div class="campo campo-completo">
+
+                <label for="descripcion">
+                    Descripción
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                >{{ gestion['descripcion'] or '' }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             OBSERVACIONES
+        ========================= -->
+
+        <div class="fila">
+
+            <div class="campo campo-completo">
+
+                <label for="observaciones">
+                    Observaciones
+                </label>
+
+                <textarea
+                    id="observaciones"
+                    name="observaciones"
+                >{{ gestion['observaciones'] or '' }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             BOTONES
+        ========================= -->
+
+        <div class="acciones">
+
+            <a
+                href="{{ url_for('gestiones') }}"
+                class="btn btn-cancelar"
+            >
+                ← Cancelar
+            </a>
+
+
+            <button
+                type="submit"
+                class="btn btn-guardar"
+            >
+                💾 Guardar cambios
+            </button>
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+
+<!-- =========================
+     JAVASCRIPT
+========================= -->
+
+<script>
+
+    /* =========================
+       ACTUALIZAR ESTADO
+    ========================= */
+
+    function actualizarEstado() {
+
+        const select = document.getElementById("estado");
+
+        const indicador = document.getElementById("indicador-estado");
+
+        const texto = document.getElementById("texto-estado");
+
+        const estado = select.value;
+
+
+        indicador.className = "indicador";
+
+
+        if (estado === "Pendiente") {
+
+            indicador.classList.add("estado-pendiente");
+
+            texto.textContent = "Pendiente";
+
+        }
+
+        else if (estado === "En proceso") {
+
+            indicador.classList.add("estado-proceso");
+
+            texto.textContent = "En proceso";
+
+        }
+
+        else if (estado === "Completada") {
+
+            indicador.classList.add("estado-completada");
+
+            texto.textContent = "Completada";
+
+        }
+
+        else if (estado === "Cancelada") {
+
+            indicador.classList.add("estado-cancelada");
+
+            texto.textContent = "Cancelada";
+
+        }
+
+    }
+
+
+    /* =========================
+       ACTUALIZAR PRIORIDAD
+    ========================= */
+
+    function actualizarPrioridad() {
+
+        const select = document.getElementById("prioridad");
+
+        const indicador = document.getElementById("indicador-prioridad");
+
+        const texto = document.getElementById("texto-prioridad");
+
+        const prioridad = select.value;
+
+
+        indicador.className = "indicador";
+
+
+        if (prioridad === "Baja") {
+
+            indicador.classList.add("prioridad-baja");
+
+            texto.textContent = "Baja";
+
+        }
+
+        else if (prioridad === "Media") {
+
+            indicador.classList.add("prioridad-media");
+
+            texto.textContent = "Media";
+
+        }
+
+        else if (prioridad === "Alta") {
+
+            indicador.classList.add("prioridad-alta");
+
+            texto.textContent = "Alta";
+
+        }
+
+    }
+
+
+    /* =========================
+       INICIALIZAR AL CARGAR
+    ========================= */
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        actualizarEstado();
+
+        actualizarPrioridad();
+
+    });
+
+</script>
+
+
+{% endblock %}

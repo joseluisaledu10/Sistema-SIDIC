@@ -1,0 +1,1297 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+Nuevo Texto en asignatura - Sistema DICyT
+
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 25px;
+
+    font-weight: 700;
+
+}
+
+.pagina-titulo p {
+
+    margin: 5px 0 0 0;
+
+    color: #777;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   BOTÓN VOLVER
+========================================================= */
+
+.btn-volver {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 16px;
+
+    background: #6c757d;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+
+}
+
+.btn-volver:hover {
+
+    background: #5a6268;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+.formulario-contenedor {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 28px;
+
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.seccion-formulario {
+
+    margin-bottom: 30px;
+
+}
+
+.seccion-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding-bottom: 10px;
+
+    margin-bottom: 20px;
+
+    border-bottom: 2px solid #e9ecef;
+
+    color: #0d3b66;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+}
+
+.seccion-titulo i {
+
+    color: #155d98;
+
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px 22px;
+
+}
+
+.form-grupo {
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+.form-grupo.completo {
+
+    grid-column: 1 / -1;
+
+}
+
+
+/* =========================================================
+   LABELS
+========================================================= */
+
+.form-grupo label {
+
+    margin-bottom: 7px;
+
+    color: #333;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+.form-grupo label .obligatorio {
+
+    color: #dc3545;
+
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-grupo input,
+.form-grupo textarea,
+.form-grupo select {
+
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid #ced4da;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    color: #333;
+
+    background: #fff;
+
+    box-sizing: border-box;
+
+    transition: 0.2s;
+
+}
+
+.form-grupo input:focus,
+.form-grupo textarea:focus,
+.form-grupo select:focus {
+
+    outline: none;
+
+    border-color: #155d98;
+
+    box-shadow: 0 0 0 2px rgba(21,93,152,0.12);
+
+}
+
+.form-grupo textarea {
+
+    min-height: 100px;
+
+    resize: vertical;
+
+}
+
+
+/* =========================================================
+   AYUDA
+========================================================= */
+
+.texto-ayuda {
+
+    margin-top: 5px;
+
+    color: #777;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================================
+   INVESTIGADORES
+========================================================= */
+
+.investigadores-contenedor {
+
+    border: 1px solid #dee2e6;
+
+    border-radius: 8px;
+
+    padding: 15px;
+
+    background: #f8f9fa;
+
+    max-height: 320px;
+
+    overflow-y: auto;
+
+}
+
+.investigadores-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 8px 15px;
+
+}
+
+.investigador-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 10px;
+
+    border-radius: 6px;
+
+    background: white;
+
+    border: 1px solid #e5e5e5;
+
+    transition: 0.2s;
+
+}
+
+.investigador-item:hover {
+
+    background: #f0f6fb;
+
+    border-color: #b8d1e6;
+
+}
+
+.investigador-item input[type="checkbox"] {
+
+    width: 17px;
+
+    height: 17px;
+
+    accent-color: #155d98;
+
+    cursor: pointer;
+
+}
+
+.investigador-nombre {
+
+    color: #0d3b66;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+.investigador-tipo {
+
+    display: block;
+
+    color: #777;
+
+    font-size: 11px;
+
+    margin-top: 2px;
+
+}
+
+
+/* =========================================================
+   ARCHIVO
+========================================================= */
+
+.archivo-contenedor {
+
+    border: 1px dashed #b8c6d1;
+
+    border-radius: 8px;
+
+    padding: 20px;
+
+    background: #f8fafc;
+
+}
+
+.archivo-contenedor input[type="file"] {
+
+    border: none;
+
+    padding: 5px 0;
+
+    background: transparent;
+
+}
+
+
+/* =========================================================
+   ALERTA
+========================================================= */
+
+.alerta-error {
+
+    margin-bottom: 20px;
+
+    padding: 12px 15px;
+
+    border-radius: 6px;
+
+    background: #f8d7da;
+
+    border: 1px solid #f5c2c7;
+
+    color: #842029;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.formulario-botones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e9ecef;
+
+}
+
+.btn-cancelar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    background: #6c757d;
+
+    color: white;
+
+    text-decoration: none;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+}
+
+.btn-cancelar:hover {
+
+    background: #5a6268;
+
+    color: white;
+
+}
+
+.btn-guardar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 20px;
+
+    border-radius: 6px;
+
+    background: #0d6efd;
+
+    color: white;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+.btn-guardar:hover {
+
+    background: #0b5ed7;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .form-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .investigadores-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     ENCABEZADO
+===================================================== -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+
+            <i class="fas fa-book-open"></i>
+
+            Nuevo Texto en asignatura
+
+        </h2>
+
+        <p>
+
+            Registro de textos utilizados como material académico
+
+        </p>
+
+    </div>
+
+    <a
+        href="{{ url_for('textos_asignatura') }}"
+        class="btn-volver"
+    >
+
+        <i class="fas fa-arrow-left"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     ERROR
+===================================================== -->
+
+{% if error %}
+
+<div class="alerta-error">
+
+    <i class="fas fa-exclamation-circle"></i>
+
+    {{ error }}
+
+</div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     FORMULARIO
+===================================================== -->
+
+<div class="formulario-contenedor">
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+
+<!-- =====================================================
+     INFORMACIÓN PRINCIPAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fas fa-info-circle"></i>
+
+        Información principal
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <!-- CÓDIGO -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Código
+
+                <span class="obligatorio">*</span>
+
+            </label>
+
+            <input
+                type="text"
+                name="codigo"
+                required
+                value="{{ request.form.get('codigo', '') }}"
+                placeholder="Ej. TA-001"
+            >
+
+        </div>
+
+
+        <!-- ASIGNATURA -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Asignatura
+
+                <span class="obligatorio">*</span>
+
+            </label>
+
+            <input
+                type="text"
+                name="asignatura"
+                required
+                value="{{ request.form.get('asignatura', '') }}"
+                placeholder="Nombre de la asignatura"
+            >
+
+            <span class="texto-ayuda">
+
+                La asignatura corresponde al nombre del texto.
+
+            </span>
+
+        </div>
+
+
+        <!-- CARRERA -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Carrera
+
+            </label>
+
+            <input
+                type="text"
+                name="carrera"
+                value="{{ request.form.get('carrera', '') }}"
+                placeholder="Ej. Ingeniería de Sistemas"
+            >
+
+        </div>
+
+
+        <!-- FACULTAD -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Facultad
+
+            </label>
+
+            <input
+                type="text"
+                name="facultad"
+                value="{{ request.form.get('facultad', '') }}"
+                placeholder="Nombre de la facultad"
+            >
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     INVESTIGADORES / AUTORES
+========================================================= -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+        <i class="fas fa-users"></i>
+        <span>Investigadores / Autores</span>
+    </div>
+
+    <div class="campo-busqueda-investigadores">
+
+        <div class="input-busqueda">
+            <i class="fas fa-search"></i>
+
+            <input
+                type="text"
+                id="buscarInvestigador"
+                placeholder="Buscar investigador por nombre o apellido..."
+                autocomplete="off"
+            >
+        </div>
+
+    </div>
+
+    <div class="lista-investigadores" id="listaInvestigadores">
+
+        {% for investigador in investigadores %}
+
+        <label
+            class="investigador-item"
+            data-nombre="{{ investigador['nombre']|lower }}"
+            data-apellido="{{ investigador['apellido']|lower }}"
+        >
+
+            <input
+                type="checkbox"
+                name="investigadores"
+                value="{{ investigador['id'] }}"
+            >
+
+            <span class="investigador-nombre">
+                {{ investigador['apellido'] }}, {{ investigador['nombre'] }}
+            </span>
+
+            <span class="investigador-tipo">
+                {{ investigador['tipo'] }}
+            </span>
+
+        </label>
+
+        {% endfor %}
+
+        <div
+            id="sinResultadosInvestigador"
+            class="sin-resultados-investigador"
+            style="display: none;"
+        >
+            <i class="fas fa-search"></i>
+            No se encontraron investigadores.
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+/* =========================================================
+   BUSCADOR DE INVESTIGADORES
+========================================================= */
+
+.campo-busqueda-investigadores {
+    margin-bottom: 12px;
+}
+
+.input-busqueda {
+    position: relative;
+}
+
+.input-busqueda i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #155d98;
+    font-size: 14px;
+}
+
+.input-busqueda input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px 11px 40px;
+    border: 1px solid #d5dce5;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.input-busqueda input:focus {
+    border-color: #155d98;
+    box-shadow: 0 0 0 3px rgba(21, 93, 152, 0.10);
+}
+
+/* =========================================================
+   LISTA DE INVESTIGADORES
+========================================================= */
+
+.lista-investigadores {
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid #d5dce5;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+/* =========================================================
+   INVESTIGADOR
+========================================================= */
+
+.investigador-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #eef1f5;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.investigador-item:last-child {
+    border-bottom: none;
+}
+
+.investigador-item:hover {
+    background: #f4f8fc;
+}
+
+.investigador-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #155d98;
+}
+
+.investigador-nombre {
+    color: #155d98;
+    font-weight: 600;
+    flex: 1;
+}
+
+.investigador-tipo {
+    font-size: 12px;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   SIN RESULTADOS
+========================================================= */
+
+.sin-resultados-investigador {
+    padding: 25px 15px;
+    text-align: center;
+    color: #7a8490;
+    font-size: 14px;
+}
+
+.sin-resultados-investigador i {
+    margin-right: 6px;
+    color: #155d98;
+}
+
+</style>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const buscador = document.getElementById("buscarInvestigador");
+    const investigadores = document.querySelectorAll(".investigador-item");
+    const sinResultados = document.getElementById(
+        "sinResultadosInvestigador"
+    );
+
+    buscador.addEventListener("input", function () {
+
+        const texto = this.value
+            .toLowerCase()
+            .trim();
+
+        let encontrados = 0;
+
+        investigadores.forEach(function (investigador) {
+
+            const nombre = investigador.dataset.nombre;
+            const apellido = investigador.dataset.apellido;
+
+            const coincide =
+                nombre.includes(texto) ||
+                apellido.includes(texto);
+
+            if (coincide) {
+
+                investigador.style.display = "flex";
+                encontrados++;
+
+            } else {
+
+                investigador.style.display = "none";
+
+            }
+
+        });
+
+        if (encontrados === 0 && texto !== "") {
+
+            sinResultados.style.display = "block";
+
+        } else {
+
+            sinResultados.style.display = "none";
+
+        }
+
+    });
+
+});
+
+</script>
+
+
+<!-- =====================================================
+     INFORMACIÓN EDITORIAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fas fa-building"></i>
+
+        Información editorial
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <!-- EDITORIAL -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Editorial
+
+            </label>
+
+            <input
+                type="text"
+                name="editorial"
+                value="{{ request.form.get('editorial', '') }}"
+                placeholder="Editorial"
+            >
+
+        </div>
+
+
+        <!-- INSTITUCIÓN -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Institución
+
+            </label>
+
+            <input
+                type="text"
+                name="institucion"
+                value="{{ request.form.get('institucion', '') }}"
+                placeholder="Institución responsable"
+            >
+
+        </div>
+
+
+        <!-- EDICIÓN -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Edición
+
+            </label>
+
+            <input
+                type="text"
+                name="edicion"
+                value="{{ request.form.get('edicion', '') }}"
+                placeholder="Ej. Primera edición"
+            >
+
+        </div>
+
+
+        <!-- LUGAR -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Lugar de publicación
+
+            </label>
+
+            <input
+                type="text"
+                name="lugar_publicacion"
+                value="{{ request.form.get('lugar_publicacion', '') }}"
+                placeholder="Ej. Cobija, Pando"
+            >
+
+        </div>
+
+
+        <!-- FECHA -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Fecha de publicación
+
+            </label>
+
+            <input
+                type="date"
+                name="fecha_publicacion"
+                value="{{ request.form.get('fecha_publicacion', '') }}"
+            >
+
+        </div>
+
+
+        <!-- AÑO -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Año
+
+                <span class="obligatorio">*</span>
+
+            </label>
+
+            <input
+                type="number"
+                name="anio"
+                required
+                min="1900"
+                max="2100"
+                value="{{ request.form.get('anio', '') }}"
+                placeholder="Ej. 2026"
+            >
+
+        </div>
+
+
+        <!-- PÁGINAS -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Páginas
+
+            </label>
+
+            <input
+                type="number"
+                name="paginas"
+                min="1"
+                value="{{ request.form.get('paginas', '') }}"
+                placeholder="Número de páginas"
+            >
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     IDENTIFICACIÓN DIGITAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fas fa-fingerprint"></i>
+
+        Identificación digital
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <!-- ISBN -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                ISBN
+
+            </label>
+
+            <input
+                type="text"
+                name="isbn"
+                value="{{ request.form.get('isbn', '') }}"
+                placeholder="ISBN"
+            >
+
+        </div>
+
+
+        <!-- DOI -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                DOI
+
+            </label>
+
+            <input
+                type="text"
+                name="doi"
+                value="{{ request.form.get('doi', '') }}"
+                placeholder="DOI"
+            >
+
+        </div>
+
+
+        <!-- URL -->
+
+        <div class="form-grupo completo">
+
+            <label>
+
+                URL
+
+            </label>
+
+            <input
+                type="url"
+                name="url"
+                value="{{ request.form.get('url', '') }}"
+                placeholder="https://..."
+
+            >
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ARCHIVO
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fas fa-file-upload"></i>
+
+        Archivo digital
+
+    </div>
+
+
+    <div class="archivo-contenedor">
+
+        <div class="form-grupo">
+
+            <label>
+
+                Archivo del texto
+
+            </label>
+
+            <input
+                type="file"
+                name="archivo"
+            >
+
+            <span class="texto-ayuda">
+
+                El archivo será almacenado en Google Drive,
+                dentro de la carpeta TEXTOS_ASIGNATURA.
+
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACIÓN ADICIONAL
+===================================================== -->
+
+<div class="seccion-formulario">
+
+    <div class="seccion-titulo">
+
+        <i class="fas fa-align-left"></i>
+
+        Información adicional
+
+    </div>
+
+
+    <div class="form-grupo">
+
+        <label>
+
+            Observaciones
+
+        </label>
+
+        <textarea
+            name="observaciones"
+            placeholder="Observaciones o información adicional..."
+        >{{ request.form.get('observaciones', '') }}</textarea>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     BOTONES
+===================================================== -->
+
+<div class="formulario-botones">
+
+    <a
+        href="{{ url_for('textos_asignatura') }}"
+        class="btn-cancelar"
+    >
+
+        <i class="fas fa-times"></i>
+
+        Cancelar
+
+    </a>
+
+
+    <button
+        type="submit"
+        class="btn-guardar"
+    >
+
+        <i class="fas fa-save"></i>
+
+        Guardar texto
+
+    </button>
+
+</div>
+
+
+</form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Solicitud - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+.formulario-panel {
+    background: white;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.formulario-panel h1 {
+    margin-top: 0;
+    color: #1f2937;
+    text-align: center;
+}
+
+.formulario-panel > p {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.formulario-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo label {
+    margin-bottom: 7px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+    padding: 11px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.10);
+}
+
+.campo textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.campo-completo {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================
+   ARCHIVO
+========================= */
+
+.archivo-actual {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    color: #374151;
+    font-size: 14px;
+}
+
+.archivo-actual strong {
+    color: #1e3a8a;
+}
+
+.archivo-info {
+    color: #6b7280;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+
+/* =========================
+   BOTONES
+========================= */
+
+.botones-formulario {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-guardar {
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-guardar:hover {
+    background: #162d6b;
+}
+
+.btn-cancelar {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-cancelar:hover {
+    background: #4b5563;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 800px) {
+
+    .formulario-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-completo {
+        grid-column: auto;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="formulario-panel">
+
+    <h1>✏️ Editar solicitud</h1>
+
+    <p>
+        Modifica la información de la solicitud.
+    </p>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('editar_solicitud', id=solicitud['id']) }}"
+        enctype="multipart/form-data"
+    >
+
+        <div class="formulario-grid">
+
+
+            <!-- =========================
+                 CÓDIGO
+            ========================== -->
+
+            <div class="campo">
+
+                <label for="codigo">
+                    Código
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    name="codigo"
+                    value="{{ solicitud['codigo'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- =========================
+                 FECHA
+            ========================== -->
+
+            <div class="campo">
+
+                <label for="fecha">
+                    Fecha
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha"
+                    name="fecha"
+                    value="{{ solicitud['fecha'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- =========================
+                 SOLICITANTE
+            ========================== -->
+
+            <div class="campo">
+
+                <label for="solicitante">
+                    Solicitante
+                </label>
+
+                <input
+                    type="text"
+                    id="solicitante"
+                    name="solicitante"
+                    value="{{ solicitud['solicitante'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- =========================
+                 TIPO
+            ========================== -->
+
+            <div class="campo">
+
+                <label for="tipo">
+                    Tipo de solicitud
+                </label>
+
+                <select
+                    id="tipo"
+                    name="tipo"
+                    required
+                >
+
+                    <option value="">
+                        Seleccionar tipo
+                    </option>
+
+                    <option
+                        value="Apoyo"
+                        {% if solicitud['tipo'] == 'Apoyo' %}selected{% endif %}
+                    >
+                        Apoyo
+                    </option>
+
+                    <option
+                        value="Certificación"
+                        {% if solicitud['tipo'] == 'Certificación' %}selected{% endif %}
+                    >
+                        Certificación
+                    </option>
+
+                    <option
+                        value="Investigación"
+                        {% if solicitud['tipo'] == 'Investigación' %}selected{% endif %}
+                    >
+                        Investigación
+                    </option>
+
+                    <option
+                        value="Administrativa"
+                        {% if solicitud['tipo'] == 'Administrativa' %}selected{% endif %}
+                    >
+                        Administrativa
+                    </option>
+
+                    <option
+                        value="Otra"
+                        {% if solicitud['tipo'] == 'Otra' %}selected{% endif %}
+                    >
+                        Otra
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =========================
+                 ASUNTO
+            ========================== -->
+
+            <div class="campo campo-completo">
+
+                <label for="asunto">
+                    Asunto
+                </label>
+
+                <input
+                    type="text"
+                    id="asunto"
+                    name="asunto"
+                    value="{{ solicitud['asunto'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- =========================
+                 ESTADO
+            ========================== -->
+
+            <div class="campo">
+
+                <label for="estado">
+                    Estado
+                </label>
+
+                <select
+                    id="estado"
+                    name="estado"
+                    required
+                >
+
+                    <option
+                        value="Pendiente"
+                        {% if solicitud['estado'] == 'Pendiente' %}selected{% endif %}
+                    >
+                        Pendiente
+                    </option>
+
+                    <option
+                        value="En revisión"
+                        {% if solicitud['estado'] == 'En revisión' %}selected{% endif %}
+                    >
+                        En revisión
+                    </option>
+
+                    <option
+                        value="Atendida"
+                        {% if solicitud['estado'] == 'Atendida' %}selected{% endif %}
+                    >
+                        Atendida
+                    </option>
+
+                    <option
+                        value="Rechazada"
+                        {% if solicitud['estado'] == 'Rechazada' %}selected{% endif %}
+                    >
+                        Rechazada
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =========================
+                 DESCRIPCIÓN
+            ========================== -->
+
+            <div class="campo campo-completo">
+
+                <label for="descripcion">
+                    Descripción
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                >{{ solicitud['descripcion'] or '' }}</textarea>
+
+            </div>
+
+
+            <!-- =========================
+                 ARCHIVO ACTUAL
+            ========================== -->
+
+            <div class="campo campo-completo">
+
+                <label>
+                    Archivo adjunto
+                </label>
+
+
+                {% if solicitud['archivo'] %}
+
+                    <div class="archivo-actual">
+
+                        📎 Archivo actual:
+
+                        <strong>
+                            {{ solicitud['archivo'] }}
+                        </strong>
+
+                    </div>
+
+                    <div class="archivo-info">
+
+                        Si no seleccionas un archivo nuevo,
+                        se conservará el archivo actual.
+
+                    </div>
+
+                {% else %}
+
+                    <div class="archivo-actual">
+
+                        📎 Esta solicitud no tiene un archivo adjunto.
+
+                    </div>
+
+                    <div class="archivo-info">
+
+                        Puedes seleccionar un archivo si deseas
+                        agregar uno.
+
+                    </div>
+
+                {% endif %}
+
+
+                <input
+                    type="file"
+                    id="archivo"
+                    name="archivo"
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =========================
+             BOTONES
+        ========================== -->
+
+        <div class="botones-formulario">
+
+            <button
+                type="button"
+                class="btn-cancelar"
+                onclick="window.location.href='{{ url_for('solicitudes') }}'"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                type="submit"
+                class="btn-guardar"
+            >
+                💾 Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,1486 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuevo libro - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 24px;
+
+}
+
+.pagina-titulo p {
+
+    margin-top: 6px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.formulario-panel {
+
+    background-color: white;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    padding: 25px;
+
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.formulario-seccion {
+
+    margin-bottom: 28px;
+
+}
+
+.formulario-seccion:last-child {
+
+    margin-bottom: 0;
+
+}
+
+.seccion-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #0d3b66;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    padding-bottom: 10px;
+
+    margin-bottom: 18px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+}
+
+.seccion-titulo i {
+
+    font-size: 16px;
+
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.formulario-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px;
+
+}
+
+.campo-completo {
+
+    grid-column: 1 / -1;
+
+}
+
+
+/* =========================================================
+   CAMPOS
+========================================================= */
+
+.campo {
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+.campo label {
+
+    margin-bottom: 7px;
+
+    color: #374151;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+.campo label span {
+
+    color: #dc2626;
+
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    box-sizing: border-box;
+
+    font-family: inherit;
+
+}
+
+.campo textarea {
+
+    min-height: 100px;
+
+    resize: vertical;
+
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+
+    border-color: #1e3a8a;
+
+    box-shadow:
+        0 0 0 2px rgba(30,58,138,0.10);
+
+}
+
+.campo small {
+
+    margin-top: 5px;
+
+    color: #9ca3af;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================================
+   ARCHIVO
+========================================================= */
+
+.campo input[type="file"] {
+
+    padding: 8px 10px;
+
+    background-color: #f9fafb;
+
+    cursor: pointer;
+
+}
+
+.campo input[type="file"]:hover {
+
+    background-color: #f3f4f6;
+
+}
+
+
+/* =========================================================
+   ALERTA
+========================================================= */
+
+.alerta-error {
+
+    background-color: #ffebee;
+
+    color: #c62828;
+
+    border: 1px solid #ffcdd2;
+
+    border-radius: 7px;
+
+    padding: 12px 15px;
+
+    margin-bottom: 20px;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.formulario-acciones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 28px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+
+}
+
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+}
+
+.btn-cancelar {
+
+    background-color: #f3f4f6;
+
+    color: #374151;
+
+    border: 1px solid #d1d5db;
+
+}
+
+.btn-cancelar:hover {
+
+    background-color: #e5e7eb;
+
+}
+
+.btn-guardar {
+
+    background-color: #0d3b66;
+
+    color: white;
+
+    border: none;
+
+}
+
+.btn-guardar:hover {
+
+    background-color: #155d98;
+
+    transform: translateY(-1px);
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .formulario-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .campo-completo {
+
+        grid-column: auto;
+
+    }
+
+    .formulario-acciones {
+
+        flex-direction: column-reverse;
+
+    }
+
+    .formulario-acciones .btn {
+
+        width: 100%;
+
+    }
+
+}
+
+/* =========================================================
+   INVESTIGADORES
+========================================================= */
+
+.investigadores-contenedor {
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    background-color: #f9fafb;
+
+    padding: 15px;
+
+}
+
+.investigadores-lista {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 10px;
+
+    max-height: 260px;
+
+    overflow-y: auto;
+
+}
+
+.investigador-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    background-color: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 6px;
+
+    padding: 10px 12px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+}
+
+.investigador-item:hover {
+
+    border-color: #0d3b66;
+
+    background-color: #f8fafc;
+
+}
+
+.investigador-item:hover .investigador-nombre {
+
+    color: #0d3b66 !important;
+
+}
+
+.investigador-item input[type="checkbox"] {
+
+    width: 17px;
+
+    height: 17px;
+
+    cursor: pointer;
+
+    accent-color: #0d3b66;
+
+}
+
+.investigador-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+.investigador-nombre {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #0d3b66 !important;
+
+}
+
+.investigador-tipo {
+
+    font-size: 11px;
+
+    color: #0d3b66 !important;
+
+    margin-top: 2px;
+
+}
+
+.sin-investigadores {
+
+    color: #6b7280;
+
+    font-size: 13px;
+
+    padding: 10px;
+
+}
+
+@media (max-width: 700px) {
+
+    .investigadores-lista {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+/* =========================================================
+BUSCADOR DE INVESTIGADORES
+========================================================= */
+
+.investigadores-buscador {
+position: relative;
+margin-bottom: 12px;
+}
+
+.investigadores-buscador i {
+position: absolute;
+left: 12px;
+top: 50%;
+transform: translateY(-50%);
+color: #9ca3af;
+font-size: 13px;
+}
+
+.investigadores-buscador input {
+width: 100%;
+box-sizing: border-box;
+padding: 10px 12px 10px 36px;
+border: 1px solid #d1d5db;
+border-radius: 6px;
+background-color: white;
+font-size: 13px;
+outline: none;
+font-family: inherit;
+}
+
+.investigadores-buscador input:focus {
+border-color: #0d3b66;
+box-shadow: 0 0 0 2px rgba(13, 59, 102, 0.10);
+}
+
+/* =========================================================
+CONTADOR
+========================================================= */
+
+.investigadores-contador {
+display: flex;
+align-items: center;
+gap: 5px;
+margin-bottom: 10px;
+padding: 7px 10px;
+background-color: #f1f5f9;
+border-radius: 5px;
+color: #64748b;
+font-size: 12px;
+}
+
+.investigadores-contador i {
+color: #0d3b66;
+}
+
+.investigadores-contador strong {
+color: #0d3b66;
+font-size: 13px;
+}
+
+/* =========================================================
+LISTA
+========================================================= */
+
+.investigadores-lista {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 10px;
+max-height: 280px;
+overflow-y: auto;
+padding-right: 5px;
+}
+
+/* =========================================================
+INVESTIGADOR
+========================================================= */
+
+.investigador-item {
+display: flex;
+align-items: center;
+gap: 10px;
+background-color: white;
+border: 1px solid #e5e7eb;
+border-radius: 6px;
+padding: 10px 12px;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.investigador-item:hover {
+border-color: #0d3b66;
+background-color: #f8fafc;
+}
+
+/* CHECKBOX */
+
+.investigador-item input[type="checkbox"] {
+width: 17px;
+height: 17px;
+cursor: pointer;
+accent-color: #0d3b66;
+flex-shrink: 0;
+}
+
+/* INVESTIGADOR SELECCIONADO */
+
+.investigador-item:has(input[type="checkbox"]:checked) {
+border-color: #0d3b66;
+background-color: #f1f5f9;
+}
+
+.investigador-item:has(input[type="checkbox"]:checked)
+.investigador-nombre {
+color: #0d3b66;
+}
+
+/* INFORMACIÓN */
+
+.investigador-info {
+display: flex;
+flex-direction: column;
+min-width: 0;
+}
+
+.investigador-nombre {
+font-size: 14px;
+font-weight: 600;
+color: #0d3b66 !important;
+}
+
+.investigador-tipo {
+font-size: 11px;
+color: #0d3b66 !important;
+margin-top: 2px;
+}
+
+/* =========================================================
+SIN RESULTADOS
+========================================================= */
+
+.sin-resultados-investigadores {
+text-align: center;
+padding: 20px;
+color: #9ca3af;
+font-size: 13px;
+}
+
+.sin-resultados-investigadores i {
+margin-right: 5px;
+}
+
+/* =========================================================
+BARRA DE DESPLAZAMIENTO
+========================================================= */
+
+.investigadores-lista::-webkit-scrollbar {
+width: 7px;
+}
+
+.investigadores-lista::-webkit-scrollbar-track {
+background: #f1f5f9;
+border-radius: 10px;
+}
+
+.investigadores-lista::-webkit-scrollbar-thumb {
+background: #cbd5e1;
+border-radius: 10px;
+}
+
+.investigadores-lista::-webkit-scrollbar-thumb:hover {
+background: #94a3b8;
+}
+
+/* =========================================================
+RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+
+.investigadores-lista {
+    grid-template-columns: 1fr;
+}
+
+
+}
+
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+
+<div class="pagina-titulo">
+
+    <h2>
+
+        <i class="fa-solid fa-book"></i>
+
+        Nuevo libro
+
+    </h2>
+
+    <p>
+
+        Registre un nuevo libro científico o académico.
+
+    </p>
+
+</div>
+
+</div>
+
+<!-- =========================================================
+     FORMULARIO
+========================================================= -->
+
+<div class="formulario-panel">
+
+{% if error %}
+
+    <div class="alerta-error">
+
+        <i class="fa-solid fa-circle-exclamation"></i>
+
+        {{ error }}
+
+    </div>
+
+{% endif %}
+
+
+<form
+    method="POST"
+    action="{{ url_for('nuevo_libro') }}"
+    enctype="multipart/form-data"
+>
+
+
+    <!-- =================================================
+         INFORMACIÓN PRINCIPAL
+    ================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-book"></i>
+
+            Información principal
+
+        </div>
+
+
+        <div class="formulario-grid">
+
+
+            <!-- CÓDIGO -->
+
+            <div class="campo">
+
+                <label for="codigo">
+
+                    Código <span>*</span>
+
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    name="codigo"
+                    required
+                    maxlength="50"
+                    placeholder="Ej. LIB-001"
+                    value="{{ request.form.get('codigo', '') }}"
+                >
+
+            </div>
+
+
+            <!-- TIPO -->
+
+            <div class="campo">
+
+                <label for="tipo_libro">
+
+                    Tipo de libro
+
+                </label>
+
+                <select
+                    id="tipo_libro"
+                    name="tipo_libro"
+                >
+
+                    <option value="">
+
+                        Seleccione...
+
+                    </option>
+
+                    <option
+                        value="Libro científico"
+                        {% if request.form.get('tipo_libro') == 'Libro científico' %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Libro científico
+
+                    </option>
+
+                    <option
+                        value="Libro académico"
+                        {% if request.form.get('tipo_libro') == 'Libro académico' %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Libro académico
+
+                    </option>
+
+                    <option
+                        value="Libro institucional"
+                        {% if request.form.get('tipo_libro') == 'Libro institucional' %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Libro institucional
+
+                    </option>
+
+                    <option
+                        value="Otro"
+                        {% if request.form.get('tipo_libro') == 'Otro' %}
+                            selected
+                        {% endif %}
+                    >
+
+                        Otro
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TÍTULO -->
+
+            <div class="campo campo-completo">
+
+                <label for="titulo">
+
+                    Título <span>*</span>
+
+                </label>
+
+                <input
+                    type="text"
+                    id="titulo"
+                    name="titulo"
+                    required
+                    placeholder="Título completo del libro"
+                    value="{{ request.form.get('titulo', '') }}"
+                >
+
+            </div>
+
+
+            <!-- SUBTÍTULO -->
+
+            <div class="campo campo-completo">
+
+                <label for="subtitulo">
+
+                    Subtítulo
+
+                </label>
+
+                <input
+                    type="text"
+                    id="subtitulo"
+                    name="subtitulo"
+                    placeholder="Subtítulo del libro, si corresponde"
+                    value="{{ request.form.get('subtitulo', '') }}"
+                >
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    
+
+    <!-- =================================================
+         INFORMACIÓN EDITORIAL
+    ================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-building"></i>
+
+            Información editorial
+
+        </div>
+
+
+        <div class="formulario-grid">
+
+
+            <!-- ISBN -->
+
+            <div class="campo">
+
+                <label for="isbn">
+
+                    ISBN
+
+                </label>
+
+                <input
+                    type="text"
+                    id="isbn"
+                    name="isbn"
+                    placeholder="Ej. 978-99999-00-00-0"
+                    value="{{ request.form.get('isbn', '') }}"
+                >
+
+            </div>
+
+
+            <!-- EDITORIAL -->
+
+            <div class="campo">
+
+                <label for="editorial">
+
+                    Editorial
+
+                </label>
+
+                <input
+                    type="text"
+                    id="editorial"
+                    name="editorial"
+                    placeholder="Nombre de la editorial"
+                    value="{{ request.form.get('editorial', '') }}"
+                >
+
+            </div>
+
+
+            <!-- EDICIÓN -->
+
+            <div class="campo">
+
+                <label for="edicion">
+
+                    Edición
+
+                </label>
+
+                <input
+                    type="text"
+                    id="edicion"
+                    name="edicion"
+                    placeholder="Ej. Primera edición"
+                    value="{{ request.form.get('edicion', '') }}"
+                >
+
+            </div>
+
+
+            <!-- LUGAR -->
+
+            <div class="campo">
+
+                <label for="lugar_publicacion">
+
+                    Lugar de publicación
+
+                </label>
+
+                <input
+                    type="text"
+                    id="lugar_publicacion"
+                    name="lugar_publicacion"
+                    placeholder="Ej. Cobija, Bolivia"
+                    value="{{ request.form.get('lugar_publicacion', '') }}"
+                >
+
+            </div>
+
+
+            <!-- FECHA -->
+
+            <div class="campo">
+
+                <label for="fecha_publicacion">
+
+                    Fecha de publicación
+
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha_publicacion"
+                    name="fecha_publicacion"
+                    value="{{ request.form.get('fecha_publicacion', '') }}"
+                >
+
+            </div>
+
+
+            <!-- AÑO -->
+
+            <div class="campo">
+
+                <label for="anio">
+
+                    Año <span>*</span>
+
+                </label>
+
+                <input
+                    type="number"
+                    id="anio"
+                    name="anio"
+                    required
+                    min="1900"
+                    max="2100"
+                    placeholder="Ej. 2026"
+                    value="{{ request.form.get('anio', '') }}"
+                >
+
+            </div>
+
+
+            <!-- PÁGINAS -->
+
+            <div class="campo">
+
+                <label for="paginas">
+
+                    Número de páginas
+
+                </label>
+
+                <input
+                    type="number"
+                    id="paginas"
+                    name="paginas"
+                    min="1"
+                    placeholder="Ej. 250"
+                    value="{{ request.form.get('paginas', '') }}"
+                >
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         IDENTIFICACIÓN DIGITAL
+    ================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-link"></i>
+
+            Identificación digital
+
+        </div>
+
+
+        <div class="formulario-grid">
+
+
+            <!-- DOI -->
+
+            <div class="campo">
+
+                <label for="doi">
+
+                    DOI
+
+                </label>
+
+                <input
+                    type="text"
+                    id="doi"
+                    name="doi"
+                    placeholder="Ej. 10.1234/ejemplo"
+                    value="{{ request.form.get('doi', '') }}"
+                >
+
+            </div>
+
+
+            <!-- URL -->
+
+            <div class="campo">
+
+                <label for="url">
+
+                    URL
+
+                </label>
+
+                <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    placeholder="https://..."
+                    value="{{ request.form.get('url', '') }}"
+                >
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <!-- =================================================
+        INVESTIGADORES / AUTORES
+    ================================================== -->
+
+    <div class="formulario-seccion">
+
+    
+    <div class="seccion-titulo">
+        <i class="fa-solid fa-users"></i>
+        Investigadores / Autores
+    </div>
+
+    <div class="campo campo-completo">
+
+        <label>
+            Seleccione los investigadores que participaron
+            en el libro
+        </label>
+
+        <div class="investigadores-contenedor">
+
+            {% if investigadores %}
+
+                <!-- BUSCADOR -->
+                <div class="investigadores-buscador">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        id="buscarInvestigador"
+                        placeholder="Buscar investigador..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+                <!-- CONTADOR -->
+                <div class="investigadores-contador">
+                    <span>
+                        <i class="fa-solid fa-user-check"></i>
+                        Seleccionados:
+                    </span>
+
+                    <strong id="contadorInvestigadores">0</strong>
+
+                    <span id="textoInvestigadores">
+                        investigadores
+                    </span>
+                </div>
+
+                <!-- LISTA -->
+                <div
+                    class="investigadores-lista"
+                    id="listaInvestigadores"
+                >
+
+                    {% for investigador in investigadores %}
+
+                        <label
+                            class="investigador-item"
+                            data-nombre="{{ investigador.apellido }} {{ investigador.nombre }}"
+                            data-tipo="{{ investigador.tipo }}"
+                        >
+
+                            <input
+                                type="checkbox"
+                                name="investigadores"
+                                value="{{ investigador.id }}"
+                                class="checkbox-investigador"
+
+                                {% if investigador.id|string in request.form.getlist('investigadores') %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <div class="investigador-info">
+
+                                <span class="investigador-nombre">
+                                    {{ investigador.apellido }},
+                                    {{ investigador.nombre }}
+                                </span>
+
+                                <span class="investigador-tipo">
+                                    {{ investigador.tipo }}
+                                </span>
+
+                            </div>
+
+                        </label>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- SIN RESULTADOS -->
+                <div
+                    id="sinResultadosInvestigadores"
+                    class="sin-resultados-investigadores"
+                    style="display: none;"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    No se encontraron investigadores.
+                </div>
+
+            {% else %}
+
+                <div class="sin-investigadores">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    No existen investigadores activos registrados.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        <small>
+            Puede seleccionar uno o varios investigadores que participaron
+            como autores del libro.
+        </small>
+
+    </div>
+    
+
+    </div>
+
+
+    <!-- =================================================
+         INFORMACIÓN ADICIONAL
+    ================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            Información adicional
+
+        </div>
+
+
+        <div class="formulario-grid">
+
+
+            <!-- ARCHIVO -->
+
+            <div class="campo campo-completo">
+
+                <label for="archivo">
+
+                    Archivo del libro
+
+                </label>
+
+                <input
+                    type="file"
+                    id="archivo"
+                    name="archivo"
+                    accept=".pdf,.doc,.docx"
+                >
+
+                <small>
+
+                    Puede adjuntar el archivo digital del libro.
+                    Formatos permitidos: PDF, DOC y DOCX.
+
+                </small>
+
+            </div>
+
+
+            <!-- OBSERVACIONES -->
+
+            <div class="campo campo-completo">
+
+                <label for="observaciones">
+
+                    Observaciones
+
+                </label>
+
+                <textarea
+                    id="observaciones"
+                    name="observaciones"
+                    placeholder="Ingrese observaciones adicionales..."
+                >{{ request.form.get('observaciones', '') }}</textarea>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         BOTONES
+    ================================================== -->
+
+    <div class="formulario-acciones">
+
+        <a
+            href="{{ url_for('libros') }}"
+            class="btn btn-cancelar"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Cancelar
+
+        </a>
+
+
+        <button
+            type="submit"
+            class="btn btn-guardar"
+        >
+
+            <i class="fa-solid fa-floppy-disk"></i>
+
+            Guardar libro
+
+        </button>
+
+    </div>
+
+
+</form>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const buscador = document.getElementById("buscarInvestigador");
+    const lista = document.getElementById("listaInvestigadores");
+    const contador = document.getElementById("contadorInvestigadores");
+    const textoContador = document.getElementById("textoInvestigadores");
+    const sinResultados = document.getElementById("sinResultadosInvestigadores");
+
+    if (!buscador || !lista) {
+        return;
+    }
+
+    const investigadores = lista.querySelectorAll(".investigador-item");
+    const checkboxes = lista.querySelectorAll(".checkbox-investigador");
+
+
+    /* =====================================================
+       CONTADOR
+    ===================================================== */
+
+    function actualizarContador() {
+
+        const seleccionados = lista.querySelectorAll(
+            ".checkbox-investigador:checked"
+        ).length;
+
+        contador.textContent = seleccionados;
+
+        if (seleccionados === 1) {
+            textoContador.textContent = "investigador";
+        } else {
+            textoContador.textContent = "investigadores";
+        }
+    }
+
+
+    /* =====================================================
+       BUSCADOR
+    ===================================================== */
+
+    buscador.addEventListener("input", function () {
+
+        const texto = buscador.value
+            .toLowerCase()
+            .trim();
+
+        let encontrados = 0;
+
+        investigadores.forEach(function (item) {
+
+            const nombre = item.dataset.nombre.toLowerCase();
+            const tipo = item.dataset.tipo.toLowerCase();
+
+            if (
+                nombre.includes(texto) ||
+                tipo.includes(texto)
+            ) {
+
+                item.style.display = "flex";
+                encontrados++;
+
+            } else {
+
+                item.style.display = "none";
+
+            }
+
+        });
+
+
+        if (encontrados === 0) {
+
+            sinResultados.style.display = "block";
+
+        } else {
+
+            sinResultados.style.display = "none";
+
+        }
+
+    });
+
+
+    /* =====================================================
+       CAMBIO DE SELECCIÓN
+    ===================================================== */
+
+    checkboxes.forEach(function (checkbox) {
+
+        checkbox.addEventListener("change", function () {
+
+            actualizarContador();
+
+        });
+
+    });
+
+
+    /* =====================================================
+       INICIALIZAR
+    ===================================================== */
+
+    actualizarContador();
+
+});
+
+</script>
+
+
+{% endblock %}

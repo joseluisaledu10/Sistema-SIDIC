@@ -1,0 +1,873 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Texto en asignatura - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+    margin: 0;
+    color: #0d3b66;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.pagina-titulo p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.formulario-contenedor {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.formulario-seccion {
+    margin-bottom: 28px;
+}
+
+.formulario-seccion:last-child {
+    margin-bottom: 0;
+}
+
+.seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0d3b66;
+    font-size: 17px;
+    font-weight: 700;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+}
+
+.seccion-titulo i {
+    color: #155d98;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 22px;
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-grupo.completo {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   LABELS
+========================================================= */
+
+.form-grupo label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 7px;
+}
+
+.form-grupo label .obligatorio {
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1f2937;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+    border-color: #155d98;
+    box-shadow: 0 0 0 3px rgba(21,93,152,0.10);
+}
+
+.form-grupo textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+
+/* =========================================================
+   INVESTIGADORES
+========================================================= */
+
+.investigadores-buscador {
+    margin-bottom: 12px;
+}
+
+.investigadores-buscador input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.investigadores-lista {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 6px;
+}
+
+.investigador-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.investigador-item:hover {
+    background: #f3f6fa;
+}
+
+.investigador-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.investigador-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.investigador-nombre {
+    color: #0d3b66;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.investigador-tipo {
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.sin-resultados {
+    display: none;
+    text-align: center;
+    padding: 15px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ARCHIVO ACTUAL
+========================================================= */
+
+.archivo-actual {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.archivo-actual-titulo {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.archivo-actual-nombre {
+    color: #0d3b66;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   INFORMACIÓN
+========================================================= */
+
+.form-ayuda {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.formulario-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 20px;
+    margin-top: 25px;
+}
+
+.btn-cancelar,
+.btn-guardar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-cancelar {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-cancelar:hover {
+    background: #4b5563;
+    color: white;
+}
+
+.btn-guardar {
+    background: #0d3b66;
+    color: white;
+}
+
+.btn-guardar:hover {
+    background: #155d98;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grupo.completo {
+        grid-column: auto;
+    }
+
+    .pagina-encabezado {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+        <h2>Editar Texto en asignatura</h2>
+        <p>Modifique la información del texto registrado</p>
+    </div>
+
+</div>
+
+
+<div class="formulario-contenedor">
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <!-- =====================================================
+             INFORMACIÓN PRINCIPAL
+        ====================================================== -->
+
+        <div class="formulario-seccion">
+
+            <div class="seccion-titulo">
+                <i class="fa-solid fa-book"></i>
+                Información principal
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-grupo">
+
+                    <label>
+                        Código
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="codigo"
+                        value="{{ texto['codigo'] }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>
+                        Asignatura
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="asignatura"
+                        value="{{ texto['asignatura'] }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>
+                        Carrera
+                    </label>
+
+                    <input
+                        type="text"
+                        name="carrera"
+                        value="{{ texto['carrera'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>
+                        Facultad
+                    </label>
+
+                    <input
+                        type="text"
+                        name="facultad"
+                        value="{{ texto['facultad'] or '' }}"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             INVESTIGADORES
+        ====================================================== -->
+
+        <div class="formulario-seccion">
+
+            <div class="seccion-titulo">
+                <i class="fa-solid fa-users"></i>
+                Investigadores / Autores
+            </div>
+
+            <div class="investigadores-buscador">
+
+                <input
+                    type="text"
+                    id="buscarInvestigador"
+                    placeholder="Buscar investigador por nombre o apellido..."
+                >
+
+            </div>
+
+
+            <div
+                class="investigadores-lista"
+                id="listaInvestigadores"
+            >
+
+                {% for investigador in investigadores %}
+
+                    <label
+                        class="investigador-item"
+                        data-nombre="{{ investigador['nombre']|lower }}"
+                        data-apellido="{{ investigador['apellido']|lower }}"
+                    >
+
+                        <input
+                            type="checkbox"
+                            name="investigadores"
+                            value="{{ investigador['id'] }}"
+                            {% if investigador['id'] in seleccionados %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <span class="investigador-info">
+
+                            <span class="investigador-nombre">
+                                {{ investigador['apellido'] }}, {{ investigador['nombre'] }}
+                            </span>
+
+                            <span class="investigador-tipo">
+                                {{ investigador['tipo'] }}
+                            </span>
+
+                        </span>
+
+                    </label>
+
+                {% endfor %}
+
+
+                <div
+                    class="sin-resultados"
+                    id="sinResultados"
+                >
+                    No se encontraron investigadores.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             INFORMACIÓN EDITORIAL
+        ====================================================== -->
+
+        <div class="formulario-seccion">
+
+            <div class="seccion-titulo">
+                <i class="fa-solid fa-building"></i>
+                Información editorial
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-grupo">
+
+                    <label>Editorial</label>
+
+                    <input
+                        type="text"
+                        name="editorial"
+                        value="{{ texto['editorial'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>Institución</label>
+
+                    <input
+                        type="text"
+                        name="institucion"
+                        value="{{ texto['institucion'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>Edición</label>
+
+                    <input
+                        type="text"
+                        name="edicion"
+                        value="{{ texto['edicion'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>Lugar de publicación</label>
+
+                    <input
+                        type="text"
+                        name="lugar_publicacion"
+                        value="{{ texto['lugar_publicacion'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>Fecha de publicación</label>
+
+                    <input
+                        type="date"
+                        name="fecha_publicacion"
+                        value="{{ texto['fecha_publicacion'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>
+                        Año
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        name="anio"
+                        value="{{ texto['anio'] }}"
+                        min="1900"
+                        max="2100"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>Páginas</label>
+
+                    <input
+                        type="number"
+                        name="paginas"
+                        value="{{ texto['paginas'] or '' }}"
+                        min="1"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             IDENTIFICACIÓN DIGITAL
+        ====================================================== -->
+
+        <div class="formulario-seccion">
+
+            <div class="seccion-titulo">
+                <i class="fa-solid fa-link"></i>
+                Identificación digital
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-grupo">
+
+                    <label>ISBN</label>
+
+                    <input
+                        type="text"
+                        name="isbn"
+                        value="{{ texto['isbn'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo">
+
+                    <label>DOI</label>
+
+                    <input
+                        type="text"
+                        name="doi"
+                        value="{{ texto['doi'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="form-grupo completo">
+
+                    <label>URL</label>
+
+                    <input
+                        type="url"
+                        name="url"
+                        value="{{ texto['url'] or '' }}"
+                        placeholder="https://..."
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ARCHIVO DIGITAL
+        ====================================================== -->
+
+        <div class="formulario-seccion">
+
+            <div class="seccion-titulo">
+                <i class="fa-solid fa-file-arrow-up"></i>
+                Archivo digital
+            </div>
+
+
+            {% if texto['archivo'] %}
+
+                <div class="archivo-actual">
+
+                    <div class="archivo-actual-titulo">
+                        Archivo actual
+                    </div>
+
+                    <div class="archivo-actual-nombre">
+                        {{ nombre_archivo or 'Archivo digital' }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Reemplazar archivo
+                </label>
+
+                <input
+                    type="file"
+                    name="archivo"
+                >
+
+                <div class="form-ayuda">
+                    Si selecciona un nuevo archivo, reemplazará al archivo actual.
+                    Si no selecciona ninguno, se conservará el archivo existente.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+            INFORMACIÓN ADICIONAL
+        ====================================================== -->
+
+        <div class="formulario-seccion">
+
+            <div class="seccion-titulo">
+                <i class="fa-solid fa-note-sticky"></i>
+                Información adicional
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="form-grupo">
+
+                <label>Estado</label>
+
+                <select name="estado">
+
+                    <option
+                        value="1"
+                        {% if texto['estado'] == 1 %}selected{% endif %}
+                    >
+                        Activo
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if texto['estado'] == 0 %}selected{% endif %}
+                    >
+                        Inactivo
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- OBSERVACIONES -->
+
+            <div class="form-grupo">
+
+                <label>Observaciones</label>
+
+                <textarea
+                    name="observaciones"
+                >{{ texto['observaciones'] or '' }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             BOTONES
+        ====================================================== -->
+
+        <div class="formulario-acciones">
+
+            <a
+                href="{{ url_for('textos_asignatura') }}"
+                class="btn-cancelar"
+            >
+                <i class="fa-solid fa-xmark"></i>
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn-guardar"
+            >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+{% if error %}
+
+<div style="
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    {{ error }}
+</div>
+
+{% endif %}
+
+<script>
+
+/* =========================================================
+   BUSCADOR DE INVESTIGADORES
+========================================================= */
+
+const buscador = document.getElementById("buscarInvestigador");
+const investigadores = document.querySelectorAll(".investigador-item");
+const sinResultados = document.getElementById("sinResultados");
+
+buscador.addEventListener("input", function () {
+
+    const texto = this.value
+        .toLowerCase()
+        .trim();
+
+    let encontrados = 0;
+
+    investigadores.forEach(function (item) {
+
+        const nombre = item.dataset.nombre || "";
+        const apellido = item.dataset.apellido || "";
+
+        const coincide =
+            nombre.includes(texto) ||
+            apellido.includes(texto);
+
+        if (coincide) {
+
+            item.style.display = "flex";
+            encontrados++;
+
+        } else {
+
+            item.style.display = "none";
+
+        }
+
+    });
+
+
+    if (encontrados === 0) {
+
+        sinResultados.style.display = "block";
+
+    } else {
+
+        sinResultados.style.display = "none";
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

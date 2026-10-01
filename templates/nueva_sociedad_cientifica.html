@@ -1,0 +1,1283 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nueva Sociedad Científica - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+    margin: 0;
+    color: #0d3b66;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.pagina-titulo p {
+    margin: 6px 0 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   BOTÓN VOLVER
+========================================================= */
+
+.btn-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 15px;
+    background: #f1f5f9;
+    color: #0d3b66;
+    border: 1px solid #d7e0ea;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-volver:hover {
+    background: #e5ebf1;
+    color: #0d3b66;
+}
+
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
+.formulario-card {
+    background: white;
+    border: 1px solid #e0e6ed;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 7px rgba(0,0,0,0.04);
+}
+
+.formulario-titulo {
+    color: #0d3b66;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #edf2f7;
+}
+
+.formulario-titulo i {
+    margin-right: 8px;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 22px;
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-grupo.completo {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   LABELS
+========================================================= */
+
+.form-grupo label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 6px;
+}
+
+.obligatorio {
+    color: #dc3545;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-control {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #ced7e0;
+    border-radius: 7px;
+    font-size: 14px;
+    color: #34495e;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    border-color: #155d98;
+    box-shadow: 0 0 0 3px rgba(21, 93, 152, 0.10);
+}
+
+textarea.form-control {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.form-ayuda {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #7b8794;
+}
+
+
+/* =========================================================
+   MENSAJE DE ERROR
+========================================================= */
+
+.alerta-error {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #b42318;
+    padding: 12px 15px;
+    border-radius: 7px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alerta-error i {
+    margin-right: 7px;
+}
+
+
+/* =========================================================
+   ESTUDIANTES
+========================================================= */
+
+.estudiantes-info {
+    background: #f4f8fc;
+    border: 1px solid #dce8f3;
+    padding: 13px 15px;
+    border-radius: 7px;
+    margin-bottom: 18px;
+    color: #496176;
+    font-size: 13px;
+}
+
+.estudiantes-info i {
+    color: #155d98;
+    margin-right: 7px;
+}
+
+
+/* =========================================================
+   BUSCADOR DE ESTUDIANTES
+========================================================= */
+
+.buscador-estudiantes {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border: 1px solid #ced7e0;
+    border-radius: 7px;
+    background: white;
+    overflow: hidden;
+}
+
+.buscador-icono {
+    width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #155d98;
+}
+
+.buscador-estudiantes input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px 12px 10px 0;
+    font-size: 13px;
+    color: #34495e;
+    background: transparent;
+}
+
+.buscador-estudiantes:focus-within {
+    border-color: #155d98;
+    box-shadow: 0 0 0 3px rgba(21, 93, 152, 0.10);
+}
+
+
+/* =========================================================
+   TABLA DE ESTUDIANTES
+========================================================= */
+
+.estudiantes-tabla-contenedor {
+    border: 1px solid #dfe6ed;
+    border-radius: 8px;
+
+    /* Desplazamiento horizontal */
+    overflow-x: auto;
+
+    /* Desplazamiento vertical */
+    overflow-y: auto;
+
+    /* Altura máxima para muchos estudiantes */
+    max-height: 500px;
+}
+
+.estudiantes-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+.estudiantes-tabla th {
+    background: #f4f7fa;
+    color: #34495e;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 11px 10px;
+    text-align: left;
+    border-bottom: 1px solid #dfe6ed;
+
+    /* Mantener encabezado visible al desplazarse */
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.estudiantes-tabla td {
+    padding: 10px;
+    border-bottom: 1px solid #edf1f4;
+    font-size: 13px;
+    color: #495057;
+    vertical-align: middle;
+}
+
+.estudiantes-tabla tr:last-child td {
+    border-bottom: none;
+}
+
+.estudiantes-tabla tr:hover {
+    background: #f9fbfd;
+}
+
+.checkbox-estudiante {
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+}
+
+.nombre-estudiante {
+    font-weight: 600;
+    color: #0d3b66;
+}
+
+.dato-secundario {
+    font-size: 11px;
+    color: #7b8794;
+    margin-top: 2px;
+}
+
+.input-tabla {
+    width: 100%;
+    min-width: 120px;
+    box-sizing: border-box;
+    padding: 7px 8px;
+    border: 1px solid #ced7e0;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.input-tabla:focus {
+    outline: none;
+    border-color: #155d98;
+}
+
+.select-tabla {
+    width: 100%;
+    min-width: 120px;
+    padding: 7px 8px;
+    border: 1px solid #ced7e0;
+    border-radius: 5px;
+    font-size: 12px;
+    background: white;
+    color: #34495e;
+}
+
+.select-tabla:focus {
+    outline: none;
+    border-color: #155d98;
+}
+
+
+/* =========================================================
+   FILAS OCULTAS POR EL BUSCADOR
+========================================================= */
+
+.estudiante-oculto {
+    display: none;
+}
+
+
+/* =========================================================
+   SIN RESULTADOS
+========================================================= */
+
+.sin-resultados-estudiantes {
+    display: none;
+    text-align: center;
+    padding: 25px;
+    color: #7b8794;
+    font-size: 13px;
+}
+
+.sin-resultados-estudiantes i {
+    margin-right: 7px;
+    color: #adb5bd;
+}
+
+
+/* =========================================================
+   SIN ESTUDIANTES REGISTRADOS
+========================================================= */
+
+.sin-estudiantes {
+    text-align: center;
+    padding: 30px 20px;
+    color: #7b8794;
+    font-size: 14px;
+}
+
+.sin-estudiantes i {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 10px;
+    color: #adb5bd;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.formulario-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-cancelar {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: #f1f3f5;
+    color: #495057;
+    border: 1px solid #d6dbe0;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-cancelar:hover {
+    background: #e9ecef;
+    color: #343a40;
+}
+
+.btn-guardar {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    background: #155d98;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-guardar:hover {
+    background: #0d3b66;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grupo.completo {
+        grid-column: auto;
+    }
+
+    .pagina-encabezado {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     ENCABEZADO
+===================================================== -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fa-solid fa-users-rectangle"></i>
+            Nueva Sociedad Científica
+        </h2>
+
+        <p>
+            Registro de una sociedad científica estudiantil
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('sociedades_cientificas') }}"
+        class="btn-volver"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Volver
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     ERROR
+===================================================== -->
+
+{% if error %}
+
+<div class="alerta-error">
+
+    <i class="fa-solid fa-circle-exclamation"></i>
+
+    {{ error }}
+
+</div>
+
+{% endif %}
+
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+
+<!-- =====================================================
+     INFORMACIÓN GENERAL
+===================================================== -->
+
+<div class="formulario-card">
+
+    <div class="formulario-titulo">
+
+        <i class="fa-solid fa-building-columns"></i>
+
+        Información de la Sociedad Científica
+
+    </div>
+
+
+    <div class="form-grid">
+
+        <!-- CÓDIGO -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Código
+
+                <span class="obligatorio">*</span>
+
+            </label>
+
+            <input
+                type="text"
+                name="codigo"
+                class="form-control"
+                value="{{ sociedad.get('codigo', '') }}"
+                placeholder="Ej.: SC-001"
+                required
+            >
+
+        </div>
+
+
+        <!-- GESTIÓN -->
+
+        <div class="form-grupo">
+
+            <label>
+
+                Gestión
+
+                <span class="obligatorio">*</span>
+
+            </label>
+
+            <input
+                type="number"
+                name="gestion"
+                class="form-control"
+                value="{{ sociedad.get('gestion', '') }}"
+                min="2000"
+                max="2100"
+                placeholder="Ej.: 2026"
+                required
+            >
+
+        </div>
+
+
+        <!-- NOMBRE -->
+
+        <div class="form-grupo completo">
+
+            <label>
+
+                Nombre de la Sociedad Científica
+
+                <span class="obligatorio">*</span>
+
+            </label>
+
+            <input
+                type="text"
+                name="nombre"
+                class="form-control"
+                value="{{ sociedad.get('nombre', '') }}"
+                placeholder="Nombre completo de la sociedad científica"
+                required
+            >
+
+        </div>
+
+
+        <!-- SIGLA -->
+
+        <div class="form-grupo">
+
+            <label>
+                Sigla
+            </label>
+
+            <input
+                type="text"
+                name="sigla"
+                class="form-control"
+                value="{{ sociedad.get('sigla', '') }}"
+                placeholder="Ej.: SOCI-ING"
+            >
+
+        </div>
+
+
+        <!-- CARRERA -->
+
+        <div class="form-grupo">
+
+            <label>
+                Carrera
+            </label>
+
+            <input
+                type="text"
+                name="carrera"
+                class="form-control"
+                value="{{ sociedad.get('carrera', '') }}"
+                placeholder="Carrera a la que pertenece"
+            >
+
+        </div>
+
+
+        <!-- FACULTAD -->
+
+        <div class="form-grupo">
+
+            <label>
+                Facultad
+            </label>
+
+            <input
+                type="text"
+                name="facultad"
+                class="form-control"
+                value="{{ sociedad.get('facultad', '') }}"
+                placeholder="Facultad"
+            >
+
+        </div>
+
+
+        <!-- FECHA DE CONSTITUCIÓN -->
+
+        <div class="form-grupo">
+
+            <label>
+                Fecha de constitución
+            </label>
+
+            <input
+                type="date"
+                name="fecha_constitucion"
+                class="form-control"
+                value="{{ sociedad.get('fecha_constitucion', '') }}"
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CONTACTO
+===================================================== -->
+
+<div class="formulario-card">
+
+    <div class="formulario-titulo">
+
+        <i class="fa-solid fa-address-card"></i>
+
+        Información de Contacto
+
+    </div>
+
+
+    <div class="form-grid">
+
+        <!-- CORREO -->
+
+        <div class="form-grupo">
+
+            <label>
+                Correo electrónico
+            </label>
+
+            <input
+                type="email"
+                name="correo"
+                class="form-control"
+                value="{{ sociedad.get('correo', '') }}"
+                placeholder="correo@ejemplo.com"
+            >
+
+        </div>
+
+
+        <!-- TELÉFONO -->
+
+        <div class="form-grupo">
+
+            <label>
+                Teléfono
+            </label>
+
+            <input
+                type="text"
+                name="telefono"
+                class="form-control"
+                value="{{ sociedad.get('telefono', '') }}"
+                placeholder="Número de contacto"
+            >
+
+        </div>
+
+
+        <!-- URL -->
+
+        <div class="form-grupo completo">
+
+            <label>
+                Sitio web / URL
+            </label>
+
+            <input
+                type="url"
+                name="url"
+                class="form-control"
+                value="{{ sociedad.get('url', '') }}"
+                placeholder="https://..."
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ESTUDIANTES
+===================================================== -->
+
+<div class="formulario-card">
+
+    <div class="formulario-titulo">
+
+        <i class="fa-solid fa-user-graduate"></i>
+
+        Integrantes de la Sociedad Científica
+
+    </div>
+
+
+    <!-- INFORMACIÓN -->
+
+    <div class="estudiantes-info">
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        Seleccione los estudiantes investigadores que forman
+        parte de esta sociedad científica. Puede asignar a cada
+        integrante un cargo y registrar su periodo de participación.
+
+    </div>
+
+
+    {% if estudiantes %}
+
+
+    <!-- =================================================
+         BUSCADOR
+    ================================================= -->
+
+    <div class="buscador-estudiantes">
+
+        <div class="buscador-icono">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+        </div>
+
+
+        <input
+            type="text"
+            id="buscarEstudiante"
+            placeholder="Buscar por nombre, apellido, código, matrícula o carrera..."
+            autocomplete="off"
+        >
+
+    </div>
+
+
+    <!-- =================================================
+         TABLA
+    ================================================= -->
+
+    <div class="estudiantes-tabla-contenedor">
+
+        <table class="estudiantes-tabla">
+
+            <thead>
+
+                <tr>
+
+                    <th style="width: 45px;">
+                        Seleccionar
+                    </th>
+
+                    <th>
+                        Estudiante
+                    </th>
+
+                    <th>
+                        Carrera
+                    </th>
+
+                    <th>
+                        Semestre
+                    </th>
+
+                    <th>
+                        Cargo
+                    </th>
+
+                    <th>
+                        Inicio
+                    </th>
+
+                    <th>
+                        Fin
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for estudiante in estudiantes %}
+
+                <tr
+                    class="fila-estudiante"
+                    data-busqueda="
+                        {{ estudiante['nombre'] or '' }}
+                        {{ estudiante['apellido'] or '' }}
+                        {{ estudiante['codigo'] or '' }}
+                        {{ estudiante['matricula'] or '' }}
+                        {{ estudiante['carrera'] or '' }}
+                    "
+                >
+
+                    <!-- CHECKBOX -->
+
+                    <td style="text-align: center;">
+
+                        <input
+                            type="checkbox"
+                            name="estudiantes"
+                            value="{{ estudiante['id'] }}"
+                            class="checkbox-estudiante"
+                        >
+
+                    </td>
+
+
+                    <!-- ESTUDIANTE -->
+
+                    <td>
+
+                        <div class="nombre-estudiante">
+
+                            {{ estudiante['apellido'] }}
+                            {{ estudiante['nombre'] }}
+
+                        </div>
+
+
+                        {% if estudiante['codigo'] %}
+
+                        <div class="dato-secundario">
+
+                            Código:
+                            {{ estudiante['codigo'] }}
+
+                        </div>
+
+                        {% endif %}
+
+
+                        {% if estudiante['matricula'] %}
+
+                        <div class="dato-secundario">
+
+                            Matrícula:
+                            {{ estudiante['matricula'] }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- CARRERA -->
+
+                    <td>
+
+                        {{ estudiante['carrera'] or '-' }}
+
+                    </td>
+
+
+                    <!-- SEMESTRE -->
+
+                    <td>
+
+                        {{ estudiante['semestre'] or '-' }}
+
+                    </td>
+
+
+                    <!-- CARGO -->
+
+                    <td>
+
+                        <select
+                            name="cargo_{{ estudiante['id'] }}"
+                            class="select-tabla"
+                        >
+
+                            <option value="Miembro">
+                                Miembro
+                            </option>
+
+                            <option value="Presidente">
+                                Presidente
+                            </option>
+
+                            <option value="Vicepresidente">
+                                Vicepresidente
+                            </option>
+
+                            <option value="Secretario">
+                                Secretario
+                            </option>
+
+                            <option value="Tesorero">
+                                Tesorero
+                            </option>
+
+                            <option value="Vocal">
+                                Vocal
+                            </option>
+
+                        </select>
+
+                    </td>
+
+
+                    <!-- FECHA INICIO -->
+
+                    <td>
+
+                        <input
+                            type="date"
+                            name="fecha_inicio_{{ estudiante['id'] }}"
+                            class="input-tabla"
+                        >
+
+                    </td>
+
+
+                    <!-- FECHA FIN -->
+
+                    <td>
+
+                        <input
+                            type="date"
+                            name="fecha_fin_{{ estudiante['id'] }}"
+                            class="input-tabla"
+                        >
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+                <!-- =================================================
+                     SIN RESULTADOS DE BÚSQUEDA
+                ================================================= -->
+
+                <tr
+                    id="sinResultadosEstudiantes"
+                    class="sin-resultados-estudiantes"
+                >
+
+                    <td colspan="7">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        No se encontraron estudiantes con ese
+                        criterio de búsqueda.
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+
+    <!-- =================================================
+         SIN ESTUDIANTES
+    ================================================= -->
+
+    <div class="sin-estudiantes">
+
+        <i class="fa-solid fa-user-graduate"></i>
+
+        No existen estudiantes investigadores activos
+        registrados en el sistema.
+
+    </div>
+
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACIÓN COMPLEMENTARIA
+===================================================== -->
+
+<div class="formulario-card">
+
+    <div class="formulario-titulo">
+
+        <i class="fa-solid fa-file-lines"></i>
+
+        Información Complementaria
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <!-- DESCRIPCIÓN -->
+
+        <div class="form-grupo completo">
+
+            <label>
+                Descripción
+            </label>
+
+            <textarea
+                name="descripcion"
+                class="form-control"
+                placeholder="Descripción, objetivos o información general de la sociedad científica..."
+            >{{ sociedad.get('descripcion', '') }}</textarea>
+
+        </div>
+
+
+        <!-- DOCUMENTO -->
+
+        <div class="form-grupo completo">
+
+            <label>
+                Documento de respaldo
+            </label>
+
+            <input
+                type="file"
+                name="archivo"
+                class="form-control"
+            >
+
+            <div class="form-ayuda">
+
+                El documento será almacenado en Google Drive
+                dentro de la carpeta SOCIEDADES_CIENTIFICAS.
+
+            </div>
+
+        </div>
+
+
+        <!-- OBSERVACIONES -->
+
+        <div class="form-grupo completo">
+
+            <label>
+                Observaciones
+            </label>
+
+            <textarea
+                name="observaciones"
+                class="form-control"
+                placeholder="Observaciones adicionales..."
+            >{{ sociedad.get('observaciones', '') }}</textarea>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     BOTONES
+===================================================== -->
+
+<div class="formulario-acciones">
+
+    <a
+        href="{{ url_for('sociedades_cientificas') }}"
+        class="btn-cancelar"
+    >
+
+        <i class="fa-solid fa-xmark"></i>
+
+        Cancelar
+
+    </a>
+
+
+    <button
+        type="submit"
+        class="btn-guardar"
+    >
+
+        <i class="fa-solid fa-floppy-disk"></i>
+
+        Guardar Sociedad
+
+    </button>
+
+</div>
+
+
+</form>
+
+
+<!-- =====================================================
+     BUSCADOR EN TIEMPO REAL
+===================================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const buscador =
+            document.getElementById(
+                "buscarEstudiante"
+            );
+
+
+        const filas =
+            document.querySelectorAll(
+                ".fila-estudiante"
+            );
+
+
+        const sinResultados =
+            document.getElementById(
+                "sinResultadosEstudiantes"
+            );
+
+
+        if (!buscador) {
+            return;
+        }
+
+
+        buscador.addEventListener(
+            "input",
+            function () {
+
+                const texto =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+
+                let encontrados = 0;
+
+
+                filas.forEach(
+                    function (fila) {
+
+                        const contenido =
+                            fila
+                                .getAttribute(
+                                    "data-busqueda"
+                                )
+                                .toLowerCase();
+
+
+                        if (
+                            contenido.includes(
+                                texto
+                            )
+                        ) {
+
+                            fila.classList.remove(
+                                "estudiante-oculto"
+                            );
+
+                            encontrados++;
+
+                        } else {
+
+                            fila.classList.add(
+                                "estudiante-oculto"
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                if (
+                    encontrados === 0 &&
+                    texto !== ""
+                ) {
+
+                    sinResultados.style.display =
+                        "table-row";
+
+                } else {
+
+                    sinResultados.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+{% endblock %}

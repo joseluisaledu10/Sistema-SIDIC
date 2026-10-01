@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver documento - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    .encabezado {
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+    }
+
+    .encabezado p {
+        margin-top: 6px;
+        color: #666;
+    }
+    
+
+    .panel {
+        background: white;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .fila {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 22px;
+    }
+
+    .dato {
+        flex: 1;
+    }
+
+    .dato label,
+    .descripcion label {
+        display: block;
+        font-weight: bold;
+        color: #374151;
+        margin-bottom: 7px;
+    }
+
+    .valor {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 11px;
+        border-radius: 6px;
+        color: #4b5563;
+    }
+
+    .descripcion {
+        margin-bottom: 25px;
+    }
+
+    .descripcion-texto {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 15px;
+        border-radius: 6px;
+        min-height: 80px;
+        color: #4b5563;
+    }
+
+    .archivo {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f3f4f6;
+        border-radius: 6px;
+    }
+
+    .archivo a {
+        color: #1e3a8a;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .archivo a:hover {
+        text-decoration: underline;
+    }
+
+    .botones {
+        margin-top: 30px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .btn-volver {
+        background: #1e3a8a;
+        color: white;
+        padding: 11px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-volver:hover {
+        background: #162d6b;
+    }
+
+
+    @media (max-width: 700px) {
+
+        .fila {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="encabezado">
+
+    <h1>📄 Detalle del documento</h1>
+
+    <p>
+        Información registrada en el sistema DICyT
+    </p>
+
+</div>
+
+
+<div class="panel">
+
+
+    <!-- INFORMACIÓN PRINCIPAL -->
+
+    <div class="fila">
+
+        <div class="dato">
+
+            <label>Código</label>
+
+            <div class="valor">
+                {{ documento["codigo"] }}
+            </div>
+
+        </div>
+
+
+        <div class="dato">
+
+            <label>Fecha</label>
+
+            <div class="valor">
+                {{ documento["fecha"] }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- NOMBRE -->
+
+    <div class="dato" style="margin-bottom: 22px;">
+
+        <label>Nombre del documento</label>
+
+        <div class="valor">
+            {{ documento["nombre"] }}
+        </div>
+
+    </div>
+
+
+    <!-- CATEGORÍA Y USUARIO -->
+
+    <div class="fila">
+
+        <div class="dato">
+
+            <label>Categoría</label>
+
+            <div class="valor">
+                {{ documento["categoria"] }}
+            </div>
+
+        </div>
+
+
+        <div class="dato">
+
+            <label>Registrado por</label>
+
+            <div class="valor">
+                👤 {{ documento["usuario"] }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DESCRIPCIÓN -->
+
+    <div class="descripcion">
+
+        <label>Descripción</label>
+
+        <div class="descripcion-texto">
+
+            {% if documento["descripcion"] %}
+
+                {{ documento["descripcion"] }}
+
+            {% else %}
+
+                Sin descripción.
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ARCHIVO -->
+
+    <div class="archivo">
+
+        <strong>📎 Archivo:</strong>
+
+        {% if documento["archivo"] %}
+
+            <a
+                href="{{ url_for('abrir_archivo', archivo_id=documento['archivo']) }}"
+                target="_blank"
+            >
+
+                📄 {{ documento["nombre_archivo"] or "Abrir archivo" }}
+
+            </a>
+
+        {% else %}
+
+            Sin archivo adjunto.
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- BOTONES -->
+
+    <div class="botones">
+
+        <a
+            href="{{ url_for('documentos') }}"
+            class="btn-volver"
+        >
+
+            ← Volver a documentos
+
+        </a>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

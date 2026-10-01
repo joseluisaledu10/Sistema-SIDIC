@@ -1,0 +1,1153 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Sociedad Científica - Sistema DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 24px;
+}
+
+.pagina-titulo p {
+
+    margin: 6px 0 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+.formulario-panel {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 25px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.formulario-seccion {
+
+    margin-bottom: 30px;
+
+    padding-bottom: 25px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.formulario-seccion:last-child {
+
+    border-bottom: none;
+
+    margin-bottom: 0;
+
+    padding-bottom: 0;
+}
+
+.seccion-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 20px;
+
+    color: #0d3b66;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+.seccion-titulo i {
+
+    color: #155d98;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 18px 25px;
+}
+
+.form-grupo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.form-grupo.completo {
+
+    grid-column: 1 / -1;
+}
+
+.form-grupo label {
+
+    color: #374151;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    color: #1f2937;
+
+    background: white;
+
+    outline: none;
+
+    transition: 0.2s;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+
+    border-color: #155d98;
+
+    box-shadow: 0 0 0 2px rgba(21,93,152,0.08);
+}
+
+.form-grupo textarea {
+
+    min-height: 100px;
+
+    resize: vertical;
+}
+
+
+/* =========================================================
+   ESTUDIANTES
+========================================================= */
+
+.estudiantes-contenedor {
+
+    border: 1px solid #dce5ee;
+
+    border-radius: 9px;
+
+    overflow: hidden;
+
+    background: #f8fafc;
+}
+
+.estudiantes-cabecera {
+
+    padding: 13px 15px;
+
+    background: #eef4f9;
+
+    border-bottom: 1px solid #dce5ee;
+
+    color: #0d3b66;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+.estudiantes-lista {
+
+    max-height: 450px;
+
+    overflow-y: auto;
+
+    padding: 10px;
+}
+
+.estudiante-item {
+
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 8px;
+
+    padding: 13px;
+
+    margin-bottom: 8px;
+
+    transition: 0.2s;
+}
+
+.estudiante-item:last-child {
+
+    margin-bottom: 0;
+}
+
+.estudiante-item:hover {
+
+    border-color: #b9ccdd;
+}
+
+.estudiante-principal {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+.estudiante-principal input[type="checkbox"] {
+
+    width: 17px;
+
+    height: 17px;
+
+    accent-color: #0d3b66;
+
+    flex-shrink: 0;
+}
+
+.estudiante-nombre {
+
+    color: #155d98;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+.estudiante-datos {
+
+    margin: 5px 0 0 27px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+.estudiante-detalles {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+    margin-top: 12px;
+
+    margin-left: 27px;
+
+    padding-top: 12px;
+
+    border-top: 1px solid #edf0f3;
+}
+
+.estudiante-detalles label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+.estudiante-detalles input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 8px 9px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+
+    outline: none;
+}
+
+.estudiante-detalles input:focus {
+
+    border-color: #155d98;
+}
+
+.sin-estudiantes {
+
+    padding: 25px;
+
+    text-align: center;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+    font-style: italic;
+}
+
+
+/* =========================================================
+   ARCHIVO
+========================================================= */
+
+.archivo-actual {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 13px 15px;
+
+    margin-bottom: 12px;
+
+    background: #f5f8fb;
+
+    border: 1px solid #dce5ee;
+
+    border-radius: 8px;
+}
+
+.archivo-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.archivo-icono {
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #e8eef5;
+
+    color: #0d3b66;
+
+    flex-shrink: 0;
+}
+
+.archivo-nombre {
+
+    color: #374151;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+.archivo-ayuda {
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    margin-top: 5px;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.botones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.btn-cancelar {
+
+    background: #e8eef5;
+
+    color: #0d3b66;
+}
+
+.btn-cancelar:hover {
+
+    background: #dce7f1;
+
+    color: #0d3b66;
+}
+
+.btn-guardar {
+
+    background: #0d3b66;
+
+    color: white;
+}
+
+.btn-guardar:hover {
+
+    background: #155d98;
+
+    color: white;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .form-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .form-grupo.completo {
+
+        grid-column: auto;
+    }
+
+    .estudiante-detalles {
+
+        grid-template-columns: 1fr;
+
+        margin-left: 0;
+    }
+
+    .estudiante-datos {
+
+        margin-left: 0;
+    }
+
+    .archivo-actual {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .botones {
+
+        justify-content: stretch;
+
+        flex-direction: column;
+    }
+
+    .btn {
+
+        width: 100%;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fa-solid fa-pen-to-square"></i>
+            Editar Sociedad Científica
+        </h2>
+
+        <p>
+            Modifique la información de la sociedad científica.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     FORMULARIO
+========================================================= -->
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+
+<div class="formulario-panel">
+
+
+    <!-- =====================================================
+         INFORMACIÓN GENERAL
+    ====================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-building-columns"></i>
+
+            Información general
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Código *
+                </label>
+
+                <input
+                    type="text"
+                    name="codigo"
+                    value="{{ sociedad['codigo'] or '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Gestión *
+                </label>
+
+                <input
+                    type="number"
+                    name="gestion"
+                    value="{{ sociedad['gestion'] or '' }}"
+                    min="2000"
+                    max="2100"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-grupo completo">
+
+                <label>
+                    Nombre de la sociedad *
+                </label>
+
+                <input
+                    type="text"
+                    name="nombre"
+                    value="{{ sociedad['nombre'] or '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Sigla
+                </label>
+
+                <input
+                    type="text"
+                    name="sigla"
+                    value="{{ sociedad['sigla'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Estado
+                </label>
+
+                <select name="estado">
+
+                    <option
+                        value="1"
+                        {% if sociedad['estado'] == 1 %}
+                            selected
+                        {% endif %}
+                    >
+                        Activo
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if sociedad['estado'] == 0 %}
+                            selected
+                        {% endif %}
+                    >
+                        Inactivo
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Carrera
+                </label>
+
+                <input
+                    type="text"
+                    name="carrera"
+                    value="{{ sociedad['carrera'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Facultad
+                </label>
+
+                <input
+                    type="text"
+                    name="facultad"
+                    value="{{ sociedad['facultad'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Fecha de constitución
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha_constitucion"
+                    value="{{ sociedad['fecha_constitucion'] or '' }}"
+                >
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTACTO
+    ====================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-address-card"></i>
+
+            Información de contacto
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Correo electrónico
+                </label>
+
+                <input
+                    type="email"
+                    name="correo"
+                    value="{{ sociedad['correo'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Teléfono
+                </label>
+
+                <input
+                    type="text"
+                    name="telefono"
+                    value="{{ sociedad['telefono'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo completo">
+
+                <label>
+                    Sitio web / URL
+                </label>
+
+                <input
+                    type="url"
+                    name="url"
+                    value="{{ sociedad['url'] or '' }}"
+                    placeholder="https://..."
+                >
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ESTUDIANTES INVESTIGADORES
+    ====================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-users"></i>
+
+            Estudiantes Investigadores
+
+        </div>
+
+
+        <div class="estudiantes-contenedor">
+
+            <div class="estudiantes-cabecera">
+
+                Seleccione los estudiantes que forman parte
+                de la sociedad científica
+
+            </div>
+
+
+            {% if estudiantes %}
+
+            <div class="estudiantes-lista">
+
+                {% for estudiante in estudiantes %}
+
+                {% set datos = seleccionados.get(estudiante['id']) %}
+
+                <div class="estudiante-item">
+
+
+                    <div class="estudiante-principal">
+
+                        <input
+                            type="checkbox"
+                            name="estudiantes"
+                            value="{{ estudiante['id'] }}"
+                            id="estudiante_{{ estudiante['id'] }}"
+                            {% if datos %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <label
+                            for="estudiante_{{ estudiante['id'] }}"
+                            class="estudiante-nombre"
+                        >
+
+                            {{ estudiante['apellido'] }},
+                            {{ estudiante['nombre'] }}
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="estudiante-datos">
+
+                        Código:
+                        {{ estudiante['codigo'] or '—' }}
+
+                        &nbsp; | &nbsp;
+
+                        Matrícula:
+                        {{ estudiante['matricula'] or '—' }}
+
+                        &nbsp; | &nbsp;
+
+                        Carrera:
+                        {{ estudiante['carrera'] or '—' }}
+
+                        {% if estudiante['semestre'] %}
+
+                        &nbsp; | &nbsp;
+
+                        Semestre:
+                        {{ estudiante['semestre'] }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="estudiante-detalles">
+
+
+                        <div>
+
+                            <label>
+                                Cargo
+                            </label>
+
+                            <input
+                                type="text"
+                                name="cargo_{{ estudiante['id'] }}"
+                                value="{{ datos['cargo'] if datos else 'Miembro' }}"
+                                placeholder="Ej. Presidente"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label>
+                                Fecha de inicio
+                            </label>
+
+                            <input
+                                type="date"
+                                name="fecha_inicio_{{ estudiante['id'] }}"
+                                value="{{ datos['fecha_inicio'] if datos else '' }}"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label>
+                                Fecha de finalización
+                            </label>
+
+                            <input
+                                type="date"
+                                name="fecha_fin_{{ estudiante['id'] }}"
+                                value="{{ datos['fecha_fin'] if datos else '' }}"
+                            >
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="sin-estudiantes">
+
+                No existen estudiantes investigadores activos
+                registrados en el sistema.
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DESCRIPCIÓN
+    ====================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-align-left"></i>
+
+            Descripción
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Descripción de la sociedad científica
+            </label>
+
+            <textarea
+                name="descripcion"
+            >{{ sociedad['descripcion'] or '' }}</textarea>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ARCHIVO DIGITAL
+    ====================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+            Archivo digital
+
+        </div>
+
+
+        {% if sociedad['archivo'] %}
+
+        <div class="archivo-actual">
+
+            <div class="archivo-info">
+
+                <div class="archivo-icono">
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                </div>
+
+                <div>
+
+                    <div class="archivo-nombre">
+
+                        {{ nombre_archivo or 'Archivo digital registrado' }}
+
+                    </div>
+
+                    <div class="archivo-ayuda">
+
+                        Si selecciona un nuevo archivo,
+                        reemplazará al actual.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="form-grupo">
+
+            <label>
+                {% if sociedad['archivo'] %}
+                    Reemplazar archivo
+                {% else %}
+                    Adjuntar archivo
+                {% endif %}
+            </label>
+
+            <input
+                type="file"
+                name="archivo"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN ADICIONAL
+    ====================================================== -->
+
+    <div class="formulario-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-note-sticky"></i>
+
+            Información adicional
+
+        </div>
+
+
+        <div class="form-grupo">
+
+            <label>
+                Observaciones
+            </label>
+
+            <textarea
+                name="observaciones"
+            >{{ sociedad['observaciones'] or '' }}</textarea>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     BOTONES
+========================================================= -->
+
+<div class="botones">
+
+    <a
+        href="{{ url_for('sociedades_cientificas') }}"
+        class="btn btn-cancelar"
+    >
+
+        <i class="fa-solid fa-arrow-left"></i>
+
+        Cancelar
+
+    </a>
+
+
+    <button
+        type="submit"
+        class="btn btn-guardar"
+    >
+
+        <i class="fa-solid fa-floppy-disk"></i>
+
+        Guardar cambios
+
+    </button>
+
+</div>
+
+
+</form>
+
+{% endblock %}

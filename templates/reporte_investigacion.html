@@ -1,0 +1,1971 @@
+{% extends "base.html" %}
+
+{% block title %}
+Reporte de Investigación - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+.reporte-container {
+    padding: 10px 5px 30px;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.reporte-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.reporte-titulo h2 {
+    margin: 0;
+    color: #0d3b66;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.reporte-titulo p {
+    margin: 5px 0 0;
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.btn-imprimir {
+    border: none;
+    background: #0d3b66;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-imprimir:hover {
+    background: #155d98;
+}
+
+
+/* =========================================================
+   ENCABEZADO INSTITUCIONAL - SOLO IMPRESIÓN
+========================================================= */
+
+.reporte-encabezado-impresion {
+    display: none;
+}
+
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
+.tarjetas-reporte {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.tarjeta-reporte {
+    position: relative;
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    padding-right: 65px;
+    box-shadow: 0 2px 9px rgba(0,0,0,0.08);
+    border-left: 4px solid #0d3b66;
+    min-height: 88px;
+    overflow: hidden;
+}
+
+.tarjeta-icono {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.tarjeta-icono i {
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   COLORES DE TARJETAS
+========================================================= */
+
+.tarjeta-azul {
+    border-left-color: #0d3b66;
+}
+
+.tarjeta-azul .tarjeta-icono {
+    background: #e8f1f8;
+    color: #0d3b66;
+}
+
+.tarjeta-celeste {
+    border-left-color: #2684b8;
+}
+
+.tarjeta-celeste .tarjeta-icono {
+    background: #e8f5fb;
+    color: #2684b8;
+}
+
+.tarjeta-verde {
+    border-left-color: #2e7d32;
+}
+
+.tarjeta-verde .tarjeta-icono {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.tarjeta-morado {
+    border-left-color: #6a4c93;
+}
+
+.tarjeta-morado .tarjeta-icono {
+    background: #f1eafb;
+    color: #6a4c93;
+}
+
+.tarjeta-ambar {
+    border-left-color: #c27c0e;
+}
+
+.tarjeta-ambar .tarjeta-icono {
+    background: #fff5df;
+    color: #c27c0e;
+}
+
+.tarjeta-turquesa {
+    border-left-color: #168c8c;
+}
+
+.tarjeta-turquesa .tarjeta-icono {
+    background: #e5f7f7;
+    color: #168c8c;
+}
+
+.tarjeta-indigo {
+    border-left-color: #4056a1;
+}
+
+.tarjeta-indigo .tarjeta-icono {
+    background: #e9edff;
+    color: #4056a1;
+}
+
+.tarjeta-roja {
+    border-left-color: #b23a48;
+}
+
+.tarjeta-roja .tarjeta-icono {
+    background: #fdecef;
+    color: #b23a48;
+}
+
+.tarjeta-reporte .tarjeta-label {
+    font-size: 11px;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.tarjeta-reporte .tarjeta-valor {
+    font-size: 27px;
+    font-weight: 700;
+    color: #0d3b66;
+}
+
+.tarjeta-reporte .tarjeta-grupo {
+    font-size: 10px;
+    color: #888;
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   SEGUNDA FILA
+========================================================= */
+
+.tarjetas-produccion {
+    margin-top: -10px;
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.filtros-reporte {
+    background: white;
+    border-radius: 10px;
+    padding: 17px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 9px rgba(0,0,0,0.08);
+}
+
+.filtros-titulo {
+    color: #0d3b66;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 13px;
+}
+
+.filtros-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.filtro-grupo label {
+    display: block;
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.filtro-grupo input,
+.filtro-grupo select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #d5dbe0;
+    border-radius: 6px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.filtro-grupo input:focus,
+.filtro-grupo select:focus {
+    outline: none;
+    border-color: #0d3b66;
+}
+
+
+/* =========================================================
+   GRÁFICOS
+========================================================= */
+
+.graficos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+
+/* =========================================================
+   TARJETAS DE GRÁFICOS
+========================================================= */
+
+.grafico-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5eaf0;
+    overflow: hidden;
+}
+
+.grafico-card.ancho {
+    grid-column: span 2;
+}
+
+
+/* =========================================================
+   TÍTULO DEL GRÁFICO
+========================================================= */
+
+.grafico-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 15px;
+    font-weight: 700;
+    color: #0d3b66;
+
+    padding-bottom: 12px;
+    margin-bottom: 5px;
+
+    border-bottom: 1px solid #edf0f3;
+}
+
+.grafico-titulo i {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eaf2f8;
+    color: #0d3b66;
+
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   ÁREA DEL GRÁFICO
+========================================================= */
+
+.grafico {
+    width: 100%;
+    height: 300px;
+}
+
+.grafico-card.ancho .grafico {
+    height: 320px;
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.seccion-reporte {
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 9px rgba(0,0,0,0.08);
+}
+
+.seccion-titulo {
+    color: #0d3b66;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 9px;
+    border-bottom: 2px solid #e7edf3;
+}
+
+.seccion-titulo i {
+    margin-right: 7px;
+}
+
+
+/* =========================================================
+   TABLAS
+========================================================= */
+
+.tabla-contenedor {
+    overflow-x: auto;
+}
+
+.tabla-reporte {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.tabla-reporte thead th {
+    background: #0d3b66;
+    color: white;
+    padding: 10px 8px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabla-reporte tbody td {
+    padding: 9px 8px;
+    border-bottom: 1px solid #e8ecef;
+    vertical-align: middle;
+}
+
+.tabla-reporte tbody tr:hover {
+    background: #f7f9fb;
+}
+
+.codigo-badge {
+    display: inline-block;
+    background: #eef4f9;
+    color: #0d3b66;
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tipo-badge {
+    display: inline-block;
+    background: #edf3f8;
+    color: #155d98;
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.estado-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.estado-activo {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.estado-inactivo {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.estado-default {
+    background: #eeeeee;
+    color: #616161;
+}
+
+.sin-registros {
+    text-align: center;
+    padding: 30px !important;
+    color: #777;
+}
+
+.titulo-produccion {
+    font-weight: 600;
+    color: #333;
+}
+
+.autores-produccion {
+    color: #555;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .tarjetas-reporte {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 800px) {
+
+    .tarjetas-reporte {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .graficos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grafico-card.ancho {
+        grid-column: span 1;
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 550px) {
+
+    .tarjetas-reporte {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reporte-header {
+        align-items: flex-start;
+        gap: 10px;
+        flex-direction: column;
+    }
+}
+
+
+/* =========================================================
+   IMPRESIÓN
+========================================================= */
+
+@media print {
+
+    @page {
+        size: legal landscape;
+        margin: 10mm;
+    }
+
+
+    /* =====================================================
+       OCULTAR INTERFAZ DEL SISTEMA
+    ===================================================== */
+
+    .menu,
+    .topbar,
+    .encabezado,
+    .btn-imprimir,
+    .filtros-reporte {
+        display: none !important;
+    }
+
+
+    /* =====================================================
+       CUERPO
+    ===================================================== */
+
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        background: #ffffff !important;
+    }
+
+
+    /* =====================================================
+       CONTENIDO PRINCIPAL
+    ===================================================== */
+
+    .main-content,
+    .content,
+    .reporte-container {
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+
+        padding: 0 !important;
+
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+
+
+    /* =====================================================
+       ENCABEZADO INSTITUCIONAL
+    ===================================================== */
+
+    .reporte-encabezado-impresion {
+        display: flex !important;
+        position: relative;
+
+        width: 100% !important;
+
+        align-items: center;
+
+        margin: 0 0 18px 0 !important;
+        padding: 0 0 12px 0 !important;
+
+        border-bottom: 2px solid #0d3b66;
+
+        box-sizing: border-box;
+    }
+
+    .reporte-encabezado-impresion img {
+        width: 70px !important;
+        height: auto !important;
+
+        object-fit: contain;
+
+        margin-right: 18px;
+    }
+
+    .reporte-institucion {
+        flex: 1;
+        text-align: center;
+    }
+
+    .reporte-institucion h1 {
+        margin: 0 0 4px 0 !important;
+
+        color: #0d3b66 !important;
+
+        font-size: 18px !important;
+        font-weight: 700 !important;
+    }
+
+    .reporte-institucion h2 {
+        margin: 0 0 4px 0 !important;
+
+        color: #333 !important;
+
+        font-size: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    .reporte-institucion h3 {
+        margin: 0 !important;
+
+        color: #555 !important;
+
+        font-size: 10px !important;
+        font-weight: 600 !important;
+    }
+
+    .fecha-generacion {
+        width: 155px !important;
+
+        margin-left: 15px;
+
+        color: #555 !important;
+
+        font-size: 9px !important;
+        line-height: 1.5;
+
+        text-align: right;
+    }
+
+
+    /* =====================================================
+       OCULTAR ENCABEZADO NORMAL EN IMPRESIÓN
+    ===================================================== */
+
+    .reporte-header {
+        display: none !important;
+    }
+
+
+    /* =====================================================
+       TARJETAS
+    ===================================================== */
+
+    .tarjetas-reporte {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .tarjeta-reporte {
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+
+    /* =====================================================
+       GRÁFICOS
+    ===================================================== */
+
+    .graficos-grid {
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .grafico-card {
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+
+    /* =====================================================
+       SECCIONES
+    ===================================================== */
+
+    .seccion-reporte {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+
+    /* =====================================================
+       TABLAS
+    ===================================================== */
+
+    .tabla-reporte {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+
+    /* =====================================================
+       OCULTAR ELEMENTOS NO IMPRIMIBLES
+    ===================================================== */
+
+    button,
+    .no-print {
+        display: none !important;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="reporte-container">
+
+
+    <!-- =====================================================
+         ENCABEZADO INSTITUCIONAL - SOLO IMPRESIÓN
+    ===================================================== -->
+
+    <div class="reporte-encabezado-impresion">
+
+        <img
+            src="{{ url_for('static', filename='img/logo_uap.png') }}"
+            alt="Universidad Amazónica de Pando"
+        >
+
+        <div class="reporte-institucion">
+
+            <h1>
+                UNIVERSIDAD AMAZÓNICA DE PANDO
+            </h1>
+
+            <h2>
+                DIRECCIÓN DE INVESTIGACIÓN, CIENCIA Y TECNOLOGÍA – DICyT
+            </h2>
+
+            <h3>
+                SISTEMA INTEGRAL DE DOCUMENTACIÓN E INFORMACIÓN CIENTÍFICA
+            </h3>
+
+        </div>
+
+        <div class="fecha-generacion">
+            Fecha de generación: {{ fecha_generacion }} |
+            Hora: {{ hora_generacion }}
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="reporte-header">
+
+        <div class="reporte-titulo">
+
+            <h2>
+                <i class="fa-solid fa-microscope"></i>
+                Reporte de Investigación
+            </h2>
+
+            <p>
+                Investigadores y producción científica registrada en el sistema
+            </p>
+
+        </div>
+
+        <button
+            class="btn-imprimir"
+            onclick="window.print()"
+        >
+            <i class="fa-solid fa-print"></i>
+            Imprimir reporte
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+        TARJETAS — INVESTIGADORES
+    ====================================================== -->
+
+    <div class="tarjetas-reporte">
+
+        <div class="tarjeta-reporte tarjeta-azul">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Total investigadores
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_investigadores }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Investigadores registrados
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-azul">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Docentes investigadores
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ docentes }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Personal docente
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-celeste">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Estudiantes investigadores
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ estudiantes }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Estudiantes
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-verde">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Investigadores activos
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ investigadores_activos }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Estado activo
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-morado">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Total publicaciones
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_publicaciones }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Producción científica
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+        TARJETAS — PRODUCCIÓN
+    ====================================================== -->
+
+    <div class="tarjetas-reporte tarjetas-produccion">
+
+        <div class="tarjeta-reporte tarjeta-azul">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Artículos
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_articulos }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Artículos científicos
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-ambar">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-book"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Libros
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_libros }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Libros registrados
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-turquesa">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-newspaper"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Revistas
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_revistas }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Revistas registradas
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-indigo">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Textos en asignatura
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_textos }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Producción académica
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta-reporte tarjeta-roja">
+
+            <div class="tarjeta-icono">
+                <i class="fa-solid fa-people-group"></i>
+            </div>
+
+            <div class="tarjeta-label">
+                Sociedades científicas
+            </div>
+
+            <div class="tarjeta-valor">
+                {{ total_sociedades }}
+            </div>
+
+            <div class="tarjeta-grupo">
+                Sociedades registradas
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTROS
+    ====================================================== -->
+
+    <div class="filtros-reporte">
+
+        <div class="filtros-titulo">
+            <i class="fa-solid fa-filter"></i>
+            Filtros del reporte
+        </div>
+
+        <div class="filtros-grid">
+
+            <div class="filtro-grupo">
+
+                <label>Buscar</label>
+
+                <input
+                    type="text"
+                    id="filtroBuscar"
+                    placeholder="Investigador, código o título..."
+                >
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>Tipo investigador</label>
+
+                <select id="filtroInvestigador">
+
+                    <option value="">Todos</option>
+
+                    <option value="Docente Investigador">
+                        Docente Investigador
+                    </option>
+
+                    <option value="Estudiante Investigador">
+                        Estudiante Investigador
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>Estado</label>
+
+                <select id="filtroEstado">
+
+                    <option value="">Todos</option>
+
+                    <option value="1">Activo</option>
+
+                    <option value="0">Inactivo</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>Año</label>
+
+                <select id="filtroAnio">
+
+                    <option value="">Todos</option>
+
+                    {% set anios = [] %}
+
+                    {% for p in produccion %}
+
+                        {% if p.anio and p.anio|string not in anios %}
+
+                            {% set _ = anios.append(p.anio|string) %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {% for anio in anios|sort(reverse=true) %}
+
+                        <option value="{{ anio }}">
+                            {{ anio }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filtro-grupo">
+
+                <label>Tipo de publicación</label>
+
+                <select id="filtroPublicacion">
+
+                    <option value="">Todos</option>
+
+                    <option value="Artículo">Artículos</option>
+
+                    <option value="Libro">Libros</option>
+
+                    <option value="Revista">Revistas</option>
+
+                    <option value="Texto en Asignatura">
+                        Textos en Asignatura
+                    </option>
+
+                    <option value="Sociedad Científica">
+                        Sociedades Científicas
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         GRÁFICOS
+    ====================================================== -->
+
+    <div class="graficos-grid">
+
+        <div class="grafico-card">
+
+            <div class="grafico-titulo">
+                <i class="fa-solid fa-users"></i>
+                Investigadores por tipo
+            </div>
+
+            <div
+                id="graficoInvestigadores"
+                class="grafico">
+            </div>
+
+        </div>
+
+
+        <div class="grafico-card">
+
+            <div class="grafico-titulo">
+                <i class="fa-solid fa-chart-pie"></i>
+                Producción científica por tipo
+            </div>
+
+            <div
+                id="graficoProduccion"
+                class="grafico">
+            </div>
+
+        </div>
+
+
+        <div class="grafico-card ancho">
+
+            <div class="grafico-titulo">
+                <i class="fa-solid fa-chart-column"></i>
+                Producción científica por año
+            </div>
+
+            <div
+                id="graficoAnio"
+                class="grafico">
+            </div>
+
+        </div>
+
+
+        <div class="grafico-card ancho">
+
+            <div class="grafico-titulo">
+                <i class="fa-solid fa-user-check"></i>
+                Estado de investigadores
+            </div>
+
+            <div
+                id="graficoEstado"
+                class="grafico">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLA DE INVESTIGADORES
+    ====================================================== -->
+
+    <div class="seccion-reporte">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-users"></i>
+
+            Investigadores registrados
+
+        </div>
+
+        <div class="tabla-contenedor">
+
+            <table
+                class="tabla-reporte"
+                id="tablaInvestigadores">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Código</th>
+                        <th>Investigador</th>
+                        <th>Tipo</th>
+                        <th>Grado académico</th>
+                        <th>ORCID</th>
+                        <th>Estado</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% if investigadores %}
+
+                        {% for investigador in investigadores %}
+
+                            <tr
+                                data-busqueda="{{ investigador['codigo'] }} {{ investigador['nombre'] }} {{ investigador['apellido'] }} {{ investigador['tipo'] }}"
+                                data-tipo="{{ investigador['tipo'] }}"
+                                data-estado="{{ investigador['estado'] }}">
+
+                                <td>
+
+                                    <span class="codigo-badge">
+                                        {{ investigador['codigo'] }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ investigador['nombre'] }}
+                                        {{ investigador['apellido'] }}
+                                    </strong>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="tipo-badge">
+                                        {{ investigador['tipo'] }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    {{ investigador['grado_academico'] or '—' }}
+                                </td>
+
+                                <td>
+                                    {{ investigador['orcid'] or '—' }}
+                                </td>
+
+                                <td>
+
+                                    {% if investigador['estado'] == 1 %}
+
+                                        <span class="estado-badge estado-activo">
+                                            Activo
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="estado-badge estado-inactivo">
+                                            Inactivo
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="sin-registros">
+
+                                <i class="fa-regular fa-folder-open"></i>
+
+                                No hay investigadores registrados.
+
+                            </td>
+
+                        </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLA DE PRODUCCIÓN
+    ====================================================== -->
+
+    <div class="seccion-reporte">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-book-open"></i>
+
+            Producción científica
+
+        </div>
+
+        <div class="tabla-contenedor">
+
+            <table
+                class="tabla-reporte"
+                id="tablaProduccion">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Código</th>
+                        <th>Tipo</th>
+                        <th>Título / Nombre</th>
+                        <th>Autor(es)</th>
+                        <th>Año</th>
+                        <th>Estado</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% if produccion %}
+
+                        {% for p in produccion %}
+
+                            <tr
+                                data-busqueda="{{ p.codigo }} {{ p.titulo }} {{ p.autores }}"
+                                data-tipo="{{ p.tipo }}"
+                                data-anio="{{ p.anio }}"
+                                data-estado="{{ p.estado }}">
+
+                                <td>
+
+                                    <span class="codigo-badge">
+                                        {{ p.codigo }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="tipo-badge">
+                                        {{ p.tipo }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="titulo-produccion">
+                                        {{ p.titulo }}
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="autores-produccion">
+                                        {{ p.autores }}
+                                    </div>
+
+                                </td>
+
+                                <td>
+                                    {{ p.anio or '—' }}
+                                </td>
+
+                                <td>
+
+                                    {% if p.estado == 1 %}
+
+                                        <span class="estado-badge estado-activo">
+                                            Activo
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="estado-badge estado-inactivo">
+                                            Inactivo
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="sin-registros">
+
+                                <i class="fa-regular fa-folder-open"></i>
+
+                                No hay producción científica registrada.
+
+                            </td>
+
+                        </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ECHARTS
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+<script>
+
+/* =========================================================
+   DATOS
+========================================================= */
+
+const totalDocentes = {{ docentes }};
+const totalEstudiantes = {{ estudiantes }};
+
+const totalArticulos = {{ total_articulos }};
+const totalLibros = {{ total_libros }};
+const totalRevistas = {{ total_revistas }};
+const totalTextos = {{ total_textos }};
+const totalSociedades = {{ total_sociedades }};
+
+const totalActivos = {{ investigadores_activos }};
+const totalInvestigadores = {{ total_investigadores }};
+
+const investigadoresInactivos =
+    totalInvestigadores - totalActivos;
+
+
+/* =========================================================
+   GRÁFICO — INVESTIGADORES
+========================================================= */
+
+const graficoInvestigadores =
+    echarts.init(
+        document.getElementById(
+            'graficoInvestigadores'
+        )
+    );
+
+graficoInvestigadores.setOption({
+
+    tooltip: {
+        trigger: 'item'
+    },
+
+    legend: {
+        bottom: 0
+    },
+
+    series: [
+
+        {
+
+            type: 'pie',
+
+            radius: ['38%', '60%'],
+
+            center: ['50%', '45%'],
+
+            data: [
+
+                {
+                    value: totalDocentes,
+                    name: 'Docentes'
+                },
+
+                {
+                    value: totalEstudiantes,
+                    name: 'Estudiantes'
+                }
+
+            ],
+
+            label: {
+                formatter: '{b}: {c}'
+            }
+
+        }
+
+    ]
+
+});
+
+
+/* =========================================================
+   GRÁFICO — PRODUCCIÓN
+========================================================= */
+
+const graficoProduccion =
+    echarts.init(
+        document.getElementById(
+            'graficoProduccion'
+        )
+    );
+
+graficoProduccion.setOption({
+
+    tooltip: {
+        trigger: 'item'
+    },
+
+    legend: {
+        bottom: 0
+    },
+
+    series: [
+
+        {
+
+            type: 'pie',
+
+            radius: ['38%', '60%'],
+
+            center: ['50%', '42%'],
+
+            data: [
+
+                {
+                    value: totalArticulos,
+                    name: 'Artículos'
+                },
+
+                {
+                    value: totalLibros,
+                    name: 'Libros'
+                },
+
+                {
+                    value: totalRevistas,
+                    name: 'Revistas'
+                },
+
+                {
+                    value: totalTextos,
+                    name: 'Textos en Asignatura'
+                },
+
+                {
+                    value: totalSociedades,
+                    name: 'Sociedades Científicas'
+                }
+
+            ],
+
+            label: {
+                formatter: '{b}: {c}'
+            }
+
+        }
+
+    ]
+
+});
+
+
+/* =========================================================
+   PRODUCCIÓN POR AÑO
+========================================================= */
+
+const datosProduccion =
+    {{ produccion | tojson }};
+
+const produccionPorAnio = {};
+
+datosProduccion.forEach(function(p) {
+
+    if (!p.anio) {
+        return;
+    }
+
+    const anio = String(p.anio);
+
+    if (!produccionPorAnio[anio]) {
+        produccionPorAnio[anio] = 0;
+    }
+
+    produccionPorAnio[anio]++;
+
+});
+
+const aniosProduccion =
+    Object.keys(produccionPorAnio).sort();
+
+const valoresProduccion =
+    aniosProduccion.map(function(anio) {
+
+        return produccionPorAnio[anio];
+
+    });
+
+
+const graficoAnio =
+    echarts.init(
+        document.getElementById(
+            'graficoAnio'
+        )
+    );
+
+graficoAnio.setOption({
+
+    tooltip: {
+        trigger: 'axis'
+    },
+
+    grid: {
+        left: 45,
+        right: 25,
+        bottom: 45,
+        top: 20
+    },
+
+    xAxis: {
+
+        type: 'category',
+
+        data: aniosProduccion
+
+    },
+
+    yAxis: {
+
+        type: 'value',
+
+        minInterval: 1
+
+    },
+
+    series: [
+
+        {
+
+            type: 'bar',
+
+            data: valoresProduccion,
+
+            label: {
+                show: true,
+                position: 'top'
+            }
+
+        }
+
+    ]
+
+});
+
+
+/* =========================================================
+   ESTADO DE INVESTIGADORES
+========================================================= */
+
+const graficoEstado =
+    echarts.init(
+        document.getElementById(
+            'graficoEstado'
+        )
+    );
+
+graficoEstado.setOption({
+
+    tooltip: {
+        trigger: 'item'
+    },
+
+    legend: {
+        bottom: 0
+    },
+
+    series: [
+
+        {
+
+            type: 'pie',
+
+            radius: ['38%', '60%'],
+
+            center: ['50%', '42%'],
+
+            data: [
+
+                {
+                    value: totalActivos,
+                    name: 'Activos'
+                },
+
+                {
+                    value: investigadoresInactivos,
+                    name: 'Inactivos'
+                }
+
+            ],
+
+            label: {
+                formatter: '{b}: {c}'
+            }
+
+        }
+
+    ]
+
+});
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+const filtroBuscar =
+    document.getElementById('filtroBuscar');
+
+const filtroInvestigador =
+    document.getElementById('filtroInvestigador');
+
+const filtroEstado =
+    document.getElementById('filtroEstado');
+
+const filtroAnio =
+    document.getElementById('filtroAnio');
+
+const filtroPublicacion =
+    document.getElementById('filtroPublicacion');
+
+
+function aplicarFiltros() {
+
+    const buscar =
+        filtroBuscar.value
+            .toLowerCase()
+            .trim();
+
+    const tipoInvestigador =
+        filtroInvestigador.value;
+
+    const estado =
+        filtroEstado.value;
+
+    const anio =
+        filtroAnio.value;
+
+    const tipoPublicacion =
+        filtroPublicacion.value;
+
+
+    /* -----------------------------------------------------
+       TABLA INVESTIGADORES
+    ----------------------------------------------------- */
+
+    document
+        .querySelectorAll(
+            '#tablaInvestigadores tbody tr'
+        )
+        .forEach(function(fila) {
+
+            const texto =
+                (fila.dataset.busqueda || '')
+                    .toLowerCase();
+
+            const tipo =
+                fila.dataset.tipo || '';
+
+            const estadoFila =
+                fila.dataset.estado || '';
+
+
+            const coincideBusqueda =
+                !buscar ||
+                texto.includes(buscar);
+
+            const coincideTipo =
+                !tipoInvestigador ||
+                tipo === tipoInvestigador;
+
+            const coincideEstado =
+                !estado ||
+                estadoFila === estado;
+
+
+            fila.style.display =
+                coincideBusqueda &&
+                coincideTipo &&
+                coincideEstado
+                    ? ''
+                    : 'none';
+
+        });
+
+
+    /* -----------------------------------------------------
+       TABLA PRODUCCIÓN
+    ----------------------------------------------------- */
+
+    document
+        .querySelectorAll(
+            '#tablaProduccion tbody tr'
+        )
+        .forEach(function(fila) {
+
+            const texto =
+                (fila.dataset.busqueda || '')
+                    .toLowerCase();
+
+            const tipo =
+                fila.dataset.tipo || '';
+
+            const anioFila =
+                fila.dataset.anio || '';
+
+            const estadoFila =
+                fila.dataset.estado || '';
+
+
+            const coincideBusqueda =
+                !buscar ||
+                texto.includes(buscar);
+
+            const coincideTipo =
+                !tipoPublicacion ||
+                tipo === tipoPublicacion;
+
+            const coincideAnio =
+                !anio ||
+                anioFila === anio;
+
+            const coincideEstado =
+                !estado ||
+                estadoFila === estado;
+
+
+            fila.style.display =
+                coincideBusqueda &&
+                coincideTipo &&
+                coincideAnio &&
+                coincideEstado
+                    ? ''
+                    : 'none';
+
+        });
+
+}
+
+
+/* =========================================================
+   EVENTOS DE FILTROS
+========================================================= */
+
+filtroBuscar.addEventListener(
+    'input',
+    aplicarFiltros
+);
+
+filtroInvestigador.addEventListener(
+    'change',
+    aplicarFiltros
+);
+
+filtroEstado.addEventListener(
+    'change',
+    aplicarFiltros
+);
+
+filtroAnio.addEventListener(
+    'change',
+    aplicarFiltros
+);
+
+filtroPublicacion.addEventListener(
+    'change',
+    aplicarFiltros
+);
+
+
+/* =========================================================
+   REDIMENSIONAR GRÁFICOS
+========================================================= */
+
+window.addEventListener(
+    'resize',
+    function() {
+
+        graficoInvestigadores.resize();
+        graficoProduccion.resize();
+        graficoAnio.resize();
+        graficoEstado.resize();
+
+    }
+);
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,654 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Revista - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+    .pagina-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .pagina-titulo h2 {
+        margin: 0;
+        color: #0d3b66;
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .pagina-titulo p {
+        margin: 6px 0 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .formulario-tarjeta {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 22px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+        border: 1px solid #e9ecef;
+    }
+
+    .seccion-titulo {
+        color: #0d3b66;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e8f1f8;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px 25px;
+    }
+
+    .form-grupo {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grupo.completo {
+        grid-column: 1 / -1;
+    }
+
+    .form-grupo label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #34495e;
+        margin-bottom: 7px;
+    }
+
+    .form-grupo input,
+    .form-grupo select,
+    .form-grupo textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 7px;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .form-grupo input:focus,
+    .form-grupo select:focus,
+    .form-grupo textarea:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13,110,253,0.10);
+    }
+
+    .form-grupo textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-ayuda {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+
+    .archivo-actual {
+        background: #f5f9fc;
+        border: 1px solid #dbe8f2;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #34495e;
+    }
+
+    .botones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 7px;
+        padding: 11px 18px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .btn-cancelar {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-guardar {
+        background: #0d3b66;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+    @media (max-width: 800px) {
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pagina-encabezado {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="pagina-encabezado">
+
+    <div class="pagina-titulo">
+
+        <h2>
+            <i class="fas fa-edit"></i>
+            Editar Revista
+        </h2>
+
+        <p>
+            Modificación de la información de la revista
+        </p>
+
+    </div>
+
+</div>
+
+
+<form
+    method="POST"
+    action="{{ url_for('editar_revista', id=revista['id']) }}"
+    enctype="multipart/form-data"
+>
+
+
+    <!-- =====================================================
+         INFORMACIÓN PRINCIPAL
+    ===================================================== -->
+
+    <div class="formulario-tarjeta">
+
+        <div class="seccion-titulo">
+            <i class="fas fa-info-circle"></i>
+            Información principal
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-grupo">
+
+                <label>
+                    Código *
+                </label>
+
+                <input
+                    type="text"
+                    name="codigo"
+                    value="{{ revista['codigo'] or '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Nombre de la revista *
+                </label>
+
+                <input
+                    type="text"
+                    name="nombre"
+                    value="{{ revista['nombre'] or '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    ISSN
+                </label>
+
+                <input
+                    type="text"
+                    name="issn"
+                    value="{{ revista['issn'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    ISSN Electrónico
+                </label>
+
+                <input
+                    type="text"
+                    name="issn_electronico"
+                    value="{{ revista['issn_electronico'] or '' }}"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN EDITORIAL
+    ===================================================== -->
+
+    <div class="formulario-tarjeta">
+
+        <div class="seccion-titulo">
+            <i class="fas fa-building"></i>
+            Información editorial
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-grupo">
+
+                <label>
+                    Editorial
+                </label>
+
+                <input
+                    type="text"
+                    name="editorial"
+                    value="{{ revista['editorial'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Institución
+                </label>
+
+                <input
+                    type="text"
+                    name="institucion"
+                    value="{{ revista['institucion'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    País
+                </label>
+
+                <input
+                    type="text"
+                    name="pais"
+                    value="{{ revista['pais'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Ciudad
+                </label>
+
+                <input
+                    type="text"
+                    name="ciudad"
+                    value="{{ revista['ciudad'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Periodicidad
+                </label>
+
+                <select name="periodicidad">
+
+                    <option value="">
+                        Seleccionar
+                    </option>
+
+                    <option value="Anual"
+                        {% if revista['periodicidad'] == 'Anual' %}selected{% endif %}>
+                        Anual
+                    </option>
+
+                    <option value="Semestral"
+                        {% if revista['periodicidad'] == 'Semestral' %}selected{% endif %}>
+                        Semestral
+                    </option>
+
+                    <option value="Trimestral"
+                        {% if revista['periodicidad'] == 'Trimestral' %}selected{% endif %}>
+                        Trimestral
+                    </option>
+
+                    <option value="Cuatrimestral"
+                        {% if revista['periodicidad'] == 'Cuatrimestral' %}selected{% endif %}>
+                        Cuatrimestral
+                    </option>
+
+                    <option value="Bimestral"
+                        {% if revista['periodicidad'] == 'Bimestral' %}selected{% endif %}>
+                        Bimestral
+                    </option>
+
+                    <option value="Mensual"
+                        {% if revista['periodicidad'] == 'Mensual' %}selected{% endif %}>
+                        Mensual
+                    </option>
+
+                    <option value="Otro"
+                        {% if revista['periodicidad'] == 'Otro' %}selected{% endif %}>
+                        Otro
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Área temática
+                </label>
+
+                <input
+                    type="text"
+                    name="area_tematica"
+                    value="{{ revista['area_tematica'] or '' }}"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         IDENTIFICACIÓN DIGITAL
+    ===================================================== -->
+
+    <div class="formulario-tarjeta">
+
+        <div class="seccion-titulo">
+            <i class="fas fa-globe"></i>
+            Identificación digital e indexación
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-grupo completo">
+
+                <label>
+                    URL
+                </label>
+
+                <input
+                    type="url"
+                    name="url"
+                    value="{{ revista['url'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    DOI
+                </label>
+
+                <input
+                    type="text"
+                    name="doi"
+                    value="{{ revista['doi'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Indexación
+                </label>
+
+                <input
+                    type="text"
+                    name="indexacion"
+                    value="{{ revista['indexacion'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Fecha de inicio
+                </label>
+
+                <input
+                    type="date"
+                    name="fecha_inicio"
+                    value="{{ revista['fecha_inicio'] or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-grupo">
+
+                <label>
+                    Estado
+                </label>
+
+                <select name="estado">
+
+                    <option
+                        value="1"
+                        {% if revista['estado'] == 1 %}selected{% endif %}
+                    >
+                        Activa
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if revista['estado'] == 0 %}selected{% endif %}
+                    >
+                        Inactiva
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN ADICIONAL
+    ===================================================== -->
+
+    <div class="formulario-tarjeta">
+
+        <div class="seccion-titulo">
+            <i class="fas fa-paperclip"></i>
+            Información adicional
+        </div>
+
+
+        <div class="form-grupo completo">
+
+            <label>
+                Archivo de la revista
+            </label>
+
+
+            {% if revista['archivo'] %}
+            <div style="
+                margin-top: 12px;
+                padding: 15px 18px;
+                background: #f4f8fc;
+                border: 1px solid #d9e5f0;
+                border-radius: 10px;
+            ">
+
+                <div style="
+                    font-size: 13px;
+                    color: #6c757d;
+                    margin-bottom: 8px;
+                    font-weight: 600;
+                ">
+                    <i class="fas fa-file-alt"></i>
+                    DOCUMENTO ACTUAL
+                </div>
+
+                <a
+                    href="{{ url_for('abrir_archivo_revista', id=revista['id']) }}"
+                    target="_blank"
+                    style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 9px;
+                        color: #0d6efd;
+                        text-decoration: none;
+                        font-weight: 600;
+                        font-size: 14px;
+                    "
+                    title="Abrir documento"
+                >
+                    <i class="fas fa-file-pdf" style="font-size: 22px;"></i>
+
+                    {{ revista['nombre_archivo'] or 'Abrir documento actual' }}
+
+                    <i class="fas fa-external-link-alt"
+                    style="font-size: 11px;">
+                    </i>
+                </a>
+
+                <div style="
+                    margin-top: 8px;
+                    font-size: 12px;
+                    color: #7a8793;
+                ">
+                    Si seleccionas un nuevo archivo, este reemplazará al documento actual.
+                </div>
+
+            </div>
+            {% endif %}
+
+
+            <input
+                type="file"
+                name="archivo"
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+            >
+
+            <span class="form-ayuda">
+
+                Opcional. Si no seleccionas un archivo,
+                se conservará el archivo actual.
+
+            </span>
+
+        </div>
+
+
+        <br>
+
+
+        <div class="form-grupo completo">
+
+            <label>
+                Observaciones
+            </label>
+
+            <textarea
+                name="observaciones"
+            >{{ revista['observaciones'] or '' }}</textarea>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BOTONES
+    ===================================================== -->
+
+    <div class="botones">
+
+        <a
+            href="{{ url_for('revistas') }}"
+            class="btn btn-cancelar"
+        >
+            <i class="fas fa-times"></i>
+            Cancelar
+        </a>
+
+
+        <button
+            type="submit"
+            class="btn btn-guardar"
+        >
+            <i class="fas fa-save"></i>
+            Guardar cambios
+        </button>
+
+    </div>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,931 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Investigador - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       PANEL PRINCIPAL
+    ========================= */
+
+    .formulario-panel {
+
+        background: white;
+
+        max-width: 1000px;
+
+        margin: 0 auto;
+
+        padding: 30px;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.08);
+    }
+
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .formulario-panel h1 {
+
+        margin-top: 0;
+
+        color: #0d3b66;
+
+        text-align: center;
+
+        margin-bottom: 8px;
+    }
+
+
+    .formulario-panel > p {
+
+        text-align: center;
+
+        color: #6b7280;
+
+        margin-bottom: 30px;
+    }
+
+
+    /* =========================
+       SECCIONES
+    ========================= */
+
+    .seccion-formulario {
+
+        margin-bottom: 28px;
+    }
+
+
+    .seccion-titulo {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        color: #0d3b66;
+
+        font-size: 17px;
+
+        font-weight: 700;
+
+        padding-bottom: 10px;
+
+        margin-bottom: 18px;
+
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+
+    .seccion-titulo i {
+
+        font-size: 18px;
+    }
+
+
+    /* =========================
+       GRID
+    ========================= */
+
+    .formulario-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 20px;
+    }
+
+
+    .campo {
+
+        display: flex;
+
+        flex-direction: column;
+    }
+
+
+    .campo-completo {
+
+        grid-column: 1 / -1;
+    }
+
+
+    /* =========================
+       CAMPOS
+    ========================= */
+
+    .campo label {
+
+        margin-bottom: 7px;
+
+        font-weight: 600;
+
+        color: #374151;
+
+        font-size: 14px;
+    }
+
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+
+        padding: 11px 12px;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 6px;
+
+        font-size: 14px;
+
+        outline: none;
+
+        box-sizing: border-box;
+
+        width: 100%;
+    }
+
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+
+        border-color: #0d3b66;
+
+        box-shadow:
+            0 0 0 2px rgba(13,59,102,0.10);
+    }
+
+
+    .campo textarea {
+
+        min-height: 110px;
+
+        resize: vertical;
+    }
+
+
+    /* =========================
+       INFORMACIÓN
+    ========================= */
+
+    .info-edicion {
+
+        background: #f4f7fa;
+
+        border-left: 4px solid #0d3b66;
+
+        padding: 12px 15px;
+
+        margin-bottom: 25px;
+
+        border-radius: 5px;
+
+        color: #555;
+
+        font-size: 13px;
+
+        line-height: 1.5;
+    }
+
+
+    /* =========================
+       BOTONES
+    ========================= */
+
+    .botones-formulario {
+
+        margin-top: 30px;
+
+        padding-top: 20px;
+
+        border-top: 1px solid #e5e7eb;
+
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+    }
+
+
+    .btn-guardar {
+
+        background: #0d3b66;
+
+        color: white;
+
+        border: none;
+
+        padding: 11px 20px;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        font-weight: 600;
+    }
+
+
+    .btn-guardar:hover {
+
+        background: #155d98;
+    }
+
+
+    .btn-cancelar {
+
+        background: #6b7280;
+
+        color: white;
+
+        border: none;
+
+        padding: 11px 20px;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+        text-decoration: none;
+    }
+
+
+    .btn-cancelar:hover {
+
+        background: #4b5563;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+
+        .formulario-grid {
+
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo {
+
+            grid-column: auto;
+        }
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="formulario-panel">
+
+    <h1>
+        ✏️ Editar investigador
+    </h1>
+
+    <p>
+        Actualiza la información del investigador.
+    </p>
+
+
+    <div class="info-edicion">
+
+        <strong>Código del investigador:</strong>
+
+        {{ investigador["codigo"] }}
+
+        <br>
+
+        Puedes modificar la información necesaria.
+        El código del investigador no se modifica.
+
+    </div>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('editar_investigador', id=investigador['id']) }}"
+    >
+
+
+        <!-- =================================================
+             INFORMACIÓN PERSONAL
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-user"></i>
+
+                Información personal
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="nombre">
+                        Nombre *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value="{{ investigador['nombre'] or '' }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="apellido">
+                        Apellido *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="apellido"
+                        name="apellido"
+                        value="{{ investigador['apellido'] or '' }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="tipo">
+                        Tipo de investigador *
+                    </label>
+
+                    <select
+                        id="tipo"
+                        name="tipo"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccionar tipo
+                        </option>
+
+                        <option
+                            value="Docente Investigador"
+                            {% if investigador["tipo"] == "Docente Investigador" %}
+                                selected
+                            {% endif %}
+                        >
+                            Docente Investigador
+                        </option>
+
+                        <option
+                            value="Estudiante Investigador"
+                            {% if investigador["tipo"] == "Estudiante Investigador" %}
+                                selected
+                            {% endif %}
+                        >
+                            Estudiante Investigador
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="ci">
+                        C.I.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ci"
+                        name="ci"
+                        value="{{ investigador['ci'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="correo">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                        value="{{ investigador['correo'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="telefono">
+                        Teléfono
+                    </label>
+
+                    <input
+                        type="text"
+                        id="telefono"
+                        name="telefono"
+                        value="{{ investigador['telefono'] or '' }}"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             INFORMACIÓN INSTITUCIONAL
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-building-columns"></i>
+
+                Información institucional
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="carrera_area">
+                        Carrera / Área
+                    </label>
+
+                    <input
+                        type="text"
+                        id="carrera_area"
+                        name="carrera_area"
+                        value="{{ investigador['carrera_area'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="cargo">
+                        Cargo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cargo"
+                        name="cargo"
+                        value="{{ investigador['cargo'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="facultad">
+                        Facultad
+                    </label>
+
+                    <input
+                        type="text"
+                        id="facultad"
+                        name="facultad"
+                        value="{{ investigador['facultad'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="institucion">
+                        Institución
+                    </label>
+
+                    <input
+                        type="text"
+                        id="institucion"
+                        name="institucion"
+                        value="{{ investigador['institucion'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="grado_academico">
+                        Grado académico
+                    </label>
+
+                    <input
+                        type="text"
+                        id="grado_academico"
+                        name="grado_academico"
+                        value="{{ investigador['grado_academico'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="especialidad">
+                        Especialidad / Área de investigación
+                    </label>
+
+                    <input
+                        type="text"
+                        id="especialidad"
+                        name="especialidad"
+                        value="{{ investigador['especialidad'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo campo-completo">
+
+                    <label for="perfil">
+                        Perfil
+                    </label>
+
+                    <textarea
+                        id="perfil"
+                        name="perfil"
+                        placeholder="Descripción del perfil del investigador..."
+                    >{{ investigador['perfil'] or '' }}</textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             INFORMACIÓN ACADÉMICA DEL ESTUDIANTE
+        ================================================== -->
+
+        <div
+            class="seccion-formulario"
+            id="seccion-estudiante"
+        >
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-graduation-cap"></i>
+
+                Información académica del estudiante
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="semestre">
+                        Semestre
+                    </label>
+
+                    <input
+                        type="text"
+                        id="semestre"
+                        name="semestre"
+                        value="{{ investigador['semestre'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="matricula">
+                        Matrícula / Código universitario
+                    </label>
+
+                    <input
+                        type="text"
+                        id="matricula"
+                        name="matricula"
+                        value="{{ investigador['matricula'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="tutor">
+                        Tutor / Docente responsable
+                    </label>
+
+                    <input
+                        type="text"
+                        id="tutor"
+                        name="tutor"
+                        value="{{ investigador['tutor'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="linea_investigacion">
+                        Línea de investigación
+                    </label>
+
+                    <input
+                        type="text"
+                        id="linea_investigacion"
+                        name="linea_investigacion"
+                        value="{{ investigador['linea_investigacion'] or '' }}"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             IDENTIFICADORES CIENTÍFICOS
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-flask"></i>
+
+                Identificadores científicos
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="orcid">
+                        ORCID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="orcid"
+                        name="orcid"
+                        value="{{ investigador['orcid'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="google_scholar">
+                        Google Scholar
+                    </label>
+
+                    <input
+                        type="text"
+                        id="google_scholar"
+                        name="google_scholar"
+                        value="{{ investigador['google_scholar'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="scopus">
+                        Scopus ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="scopus"
+                        name="scopus"
+                        value="{{ investigador['scopus'] or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="researcher_id">
+                        Researcher ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="researcher_id"
+                        name="researcher_id"
+                        value="{{ investigador['researcher_id'] or '' }}"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ESTADO Y OBSERVACIONES
+        ================================================== -->
+
+        <div class="seccion-formulario">
+
+            <div class="seccion-titulo">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                Estado y observaciones
+
+            </div>
+
+
+            <div class="formulario-grid">
+
+
+                <div class="campo">
+
+                    <label for="estado">
+                        Estado
+                    </label>
+
+                    <select
+                        id="estado"
+                        name="estado"
+                    >
+
+                        <option
+                            value="1"
+                            {% if investigador["estado"] == 1 %}
+                                selected
+                            {% endif %}
+                        >
+                            Activo
+                        </option>
+
+                        <option
+                            value="0"
+                            {% if investigador["estado"] == 0 %}
+                                selected
+                            {% endif %}
+                        >
+                            Inactivo
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo campo-completo">
+
+                    <label for="observaciones">
+                        Observaciones
+                    </label>
+
+                    <textarea
+                        id="observaciones"
+                        name="observaciones"
+                        placeholder="Información adicional..."
+                    >{{ investigador['observaciones'] or '' }}</textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             BOTONES
+        ================================================== -->
+
+        <div class="botones-formulario">
+
+
+            <a
+                href="{{ url_for('investigadores') }}"
+                class="btn-cancelar"
+            >
+                Cancelar
+            </a>
+
+
+            <button
+                type="submit"
+                class="btn-guardar"
+            >
+                💾 Guardar cambios
+            </button>
+
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     MOSTRAR/OCULTAR DATOS DE ESTUDIANTE
+====================================================== -->
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const tipo = document.getElementById("tipo");
+
+        const seccionEstudiante =
+            document.getElementById("seccion-estudiante");
+
+
+        function actualizarSeccion() {
+
+            if (tipo.value === "Estudiante Investigador") {
+
+                seccionEstudiante.style.display = "block";
+
+            } else {
+
+                seccionEstudiante.style.display = "none";
+
+            }
+
+        }
+
+
+        tipo.addEventListener(
+            "change",
+            actualizarSeccion
+        );
+
+
+        actualizarSeccion();
+
+    });
+
+</script>
+
+{% endblock %}

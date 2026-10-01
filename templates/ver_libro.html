@@ -1,0 +1,1251 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ver libro - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.pagina-encabezado {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.pagina-titulo h2 {
+
+    margin: 0;
+
+    color: #0d3b66;
+
+    font-size: 24px;
+
+}
+
+.pagina-titulo p {
+
+    margin-top: 6px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   PANEL PRINCIPAL
+========================================================= */
+
+.detalle-panel {
+
+    background-color: white;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+
+    overflow: hidden;
+
+}
+
+
+/* =========================================================
+   CABECERA DEL LIBRO
+========================================================= */
+
+.detalle-cabecera {
+
+    background: linear-gradient(
+        135deg,
+        #0d3b66,
+        #155d98
+    );
+
+    color: white;
+
+    padding: 25px 30px;
+
+}
+
+.detalle-codigo {
+
+    font-size: 12px;
+
+    opacity: 0.85;
+
+    margin-bottom: 8px;
+
+    font-weight: 600;
+
+}
+
+.detalle-titulo {
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+    margin: 0;
+
+    line-height: 1.35;
+
+}
+
+.detalle-subtitulo {
+
+    margin-top: 7px;
+
+    font-size: 14px;
+
+    opacity: 0.9;
+
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.detalle-estado {
+
+    margin-top: 15px;
+
+}
+
+.estado-badge {
+
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+.estado-activo {
+
+    background-color: #e8f5e9;
+
+    color: #2e7d32;
+
+}
+
+.estado-inactivo {
+
+    background-color: #ffebee;
+
+    color: #c62828;
+
+}
+
+
+/* =========================================================
+   CONTENIDO
+========================================================= */
+
+.detalle-contenido {
+
+    padding: 28px 30px;
+
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.detalle-seccion {
+
+    margin-bottom: 28px;
+
+}
+
+.detalle-seccion:last-child {
+
+    margin-bottom: 0;
+
+}
+
+.seccion-titulo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #0d3b66;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    padding-bottom: 10px;
+
+    margin-bottom: 18px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+}
+
+/* Espacio adicional antes del archivo adjunto */
+.detalle-seccion.archivo-seccion {
+    margin-top: 40px;
+}
+
+/* =========================================================
+   CAMPOS
+========================================================= */
+
+.detalle-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px 25px;
+
+}
+
+.detalle-campo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+}
+
+.detalle-campo.completo {
+
+    grid-column: 1 / -1;
+
+}
+
+.detalle-label {
+
+    font-size: 12px;
+
+    color: #6b7280;
+
+    font-weight: 600;
+
+}
+
+.detalle-valor {
+
+    font-size: 14px;
+
+    color: #374151;
+
+    word-break: break-word;
+
+}
+
+
+/* =========================================================
+   ENLACES
+========================================================= */
+
+.detalle-valor a {
+
+    color: #1565c0;
+
+    text-decoration: none;
+
+}
+
+.detalle-valor a:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* =========================================================
+   OBSERVACIONES
+========================================================= */
+
+.observaciones {
+
+    background-color: #f8fafc;
+
+    border-radius: 7px;
+
+    padding: 14px;
+
+    color: #4b5563;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   BOTONES INFERIORES
+========================================================= */
+
+.botones-inferiores {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+
+}
+
+.btn-volver,
+.btn-editar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+
+}
+
+
+/* =========================================================
+   BOTÓN VOLVER
+========================================================= */
+
+.btn-volver {
+
+    background-color: #f3f4f6;
+
+    color: #374151;
+
+}
+
+.btn-volver:hover {
+
+    background-color: #e5e7eb;
+
+    transform: translateY(-1px);
+
+}
+
+
+/* =========================================================
+   BOTÓN EDITAR
+========================================================= */
+
+.btn-editar {
+
+    background-color: #fff3e0;
+
+    color: #ef6c00;
+
+}
+
+.btn-editar:hover {
+
+    background-color: #ffe0b2;
+
+    transform: translateY(-1px);
+
+}
+
+/* =========================================================
+   INVESTIGADORES / AUTORES
+========================================================= */
+
+.investigadores-ver {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.investigador-ver-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 14px;
+
+    background-color: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #0d3b66;
+
+    border-radius: 7px;
+}
+
+.numero-autor {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #0d3b66;
+    color: white;
+
+    border-radius: 50%;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    flex-shrink: 0;
+}
+
+.nombre-investigador {
+    color: #0d3b66;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tipo-investigador {
+    margin-left: auto;
+
+    color: #6b7280;
+    font-size: 12px;
+
+    background-color: #eef3f8;
+    padding: 4px 9px;
+    border-radius: 12px;
+}
+
+.sin-investigadores {
+    padding: 12px 14px;
+
+    background-color: #f8fafc;
+
+    border-radius: 7px;
+
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .pagina-encabezado {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+
+    }
+
+    .detalle-contenido {
+
+        padding: 20px;
+
+    }
+
+    .detalle-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .detalle-campo.completo {
+
+        grid-column: auto;
+
+    }
+
+    .botones-inferiores {
+
+        flex-direction: column;
+
+    }
+
+    .btn-volver,
+    .btn-editar {
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+    }
+
+}
+
+/* =========================================================
+   ARCHIVO ADJUNTO
+========================================================= */
+
+.archivo-adjunto {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    background-color: #f8fafc;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 15px;
+
+}
+
+
+.archivo-icono {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background-color: #fee2e2;
+
+    color: #dc2626;
+
+    border-radius: 7px;
+
+    font-size: 20px;
+
+}
+
+
+.archivo-informacion {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.archivo-nombre {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #374151;
+
+    word-break: break-word;
+
+}
+
+
+.archivo-descripcion {
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    color: #9ca3af;
+
+}
+
+
+.archivo-acciones {
+
+    flex-shrink: 0;
+
+}
+
+
+.btn-archivo {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px 13px;
+
+    background-color: #0d3b66;
+
+    color: white;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+
+}
+
+
+.btn-archivo:hover {
+
+    background-color: #155d98;
+
+    transform: translateY(-1px);
+
+}
+
+
+.archivo-vacio {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 14px;
+
+    background-color: #f8fafc;
+
+    border-radius: 7px;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+
+}
+
+
+.archivo-vacio i {
+
+    font-size: 16px;
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+========================================================= -->
+
+<div class="pagina-encabezado">
+
+
+<div class="pagina-titulo">
+
+    <h2>
+
+        <i class="fa-solid fa-book"></i>
+
+        Ver libro
+
+    </h2>
+
+    <p>
+
+        Información detallada del libro registrado.
+
+    </p>
+
+</div>
+
+</div>
+
+<!-- =========================================================
+     DETALLE
+========================================================= -->
+
+<div class="detalle-panel">
+
+<!-- =====================================================
+     CABECERA DEL LIBRO
+====================================================== -->
+
+<div class="detalle-cabecera">
+
+    <div class="detalle-codigo">
+
+        CÓDIGO: {{ libro['codigo'] }}
+
+    </div>
+
+
+    <h1 class="detalle-titulo">
+
+        {{ libro['titulo'] }}
+
+    </h1>
+
+
+    {% if libro['subtitulo'] %}
+
+        <div class="detalle-subtitulo">
+
+            {{ libro['subtitulo'] }}
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="detalle-estado">
+
+        {% if libro['estado'] == 1 %}
+
+            <span class="estado-badge estado-activo">
+
+                Activo
+
+            </span>
+
+        {% else %}
+
+            <span class="estado-badge estado-inactivo">
+
+                Inactivo
+
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CONTENIDO
+====================================================== -->
+
+<div class="detalle-contenido">
+
+
+    <!-- =================================================
+         INFORMACIÓN EDITORIAL
+    ================================================== -->
+
+    <div class="detalle-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-building"></i>
+
+            Información editorial
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    ISBN
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['isbn'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Editorial
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['editorial'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Edición
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['edicion'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Tipo de libro
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['tipo_libro'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Lugar de publicación
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['lugar_publicacion'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Fecha de publicación
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['fecha_publicacion'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Año
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['anio'] }}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Páginas
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['paginas'] or '-' }}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         IDENTIFICACIÓN DIGITAL
+    ================================================== -->
+
+    <div class="detalle-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-link"></i>
+
+            Identificación digital
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    DOI
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if libro['doi'] %}
+
+                        {{ libro['doi'] }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    URL
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {% if libro['url'] %}
+
+                        <a
+                            href="{{ libro['url'] }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+
+                            {{ libro['url'] }}
+
+                        </a>
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+        INVESTIGADORES / AUTORES
+    ===================================================== -->
+
+    <div class="detalle-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-users"></i>
+
+            Investigadores / Autores
+
+        </div>
+
+        {% if investigadores %}
+
+            <div class="investigadores-ver">
+
+                {% for investigador in investigadores %}
+
+                    <div class="investigador-ver-item">
+
+                        <span class="numero-autor">
+                            {{ loop.index }}
+                        </span>
+
+                        <span class="nombre-investigador">
+
+                            {{ investigador["apellido"] }},
+                            {{ investigador["nombre"] }}
+
+                        </span>
+
+                        {% if investigador["tipo"] %}
+
+                            <span class="tipo-investigador">
+
+                                {{ investigador["tipo"] }}
+
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="sin-investigadores">
+
+                No se registraron investigadores para este libro.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- =================================================
+         INFORMACIÓN ADICIONAL
+    ================================================== -->
+
+    <div class="detalle-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            Información adicional
+
+        </div>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="detalle-campo completo">
+
+                <span class="detalle-label">
+
+                    Observaciones
+
+                </span>
+
+
+                {% if libro['observaciones'] %}
+
+                    <div class="observaciones">
+
+                        {{ libro['observaciones'] }}
+
+                    </div>
+
+                {% else %}
+
+                    <span class="detalle-valor">
+
+                        -
+
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span class="detalle-label">
+
+                    Registrado por
+
+                </span>
+
+                <span class="detalle-valor">
+
+                    {{ libro['usuario'] }}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    <!-- =================================================
+        ARCHIVO ADJUNTO
+    ================================================= -->
+
+
+    <div class="detalle-seccion archivo-seccion">
+
+        <div class="seccion-titulo">
+
+            <i class="fa-solid fa-paperclip"></i>
+
+            Archivo adjunto
+
+        </div>
+
+
+        {% if archivo_drive %}
+
+            <div class="archivo-adjunto">
+
+                <div class="archivo-icono">
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                </div>
+
+
+                <div class="archivo-informacion">
+
+                    <div class="archivo-nombre">
+
+                        {{ archivo_drive['name'] }}
+
+                    </div>
+
+                    <div class="archivo-descripcion">
+
+                        Archivo almacenado en Google Drive
+
+                    </div>
+
+                </div>
+
+
+                <div class="archivo-acciones">
+
+                    <a
+                        href="{{ archivo_drive['webViewLink'] }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn-archivo"
+                    >
+
+                        <i class="fa-solid fa-eye"></i>
+
+                        Ver archivo
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="archivo-vacio">
+
+                <i class="fa-solid fa-paperclip"></i>
+
+                <span>
+                    No se ha adjuntado ningún archivo.
+                </span>
+
+            </div>
+
+        {% endif %}
+
+    </div>    
+
+        <!-- =================================================
+             BOTONES INFERIORES
+        ================================================== -->
+
+        <div class="botones-inferiores">
+
+            <a
+                href="{{ url_for('libros') }}"
+                class="btn-volver"
+            >
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Volver
+
+            </a>
+
+
+            <a
+                href="{{ url_for('editar_libro', id=libro['id']) }}"
+                class="btn-editar"
+            >
+
+                <i class="fa-solid fa-pen"></i>
+
+                Editar
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+    
+
+</div>
+
+</div>
+
+{% endblock %}

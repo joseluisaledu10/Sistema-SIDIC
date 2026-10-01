@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}
+Categorías - Sistema DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BARRA DE ACCIONES
+    ========================= */
+
+    .barra-acciones {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================
+       BOTÓN NUEVA CATEGORÍA
+    ========================= */
+
+    .btn-nueva {
+        display: inline-block;
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-nueva:hover {
+        background-color: #092c4c;
+    }
+
+
+    /* =========================
+       CONTENEDOR DE TABLA
+    ========================= */
+
+    .contenedor-tabla {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+
+    /* =========================
+       TABLA
+    ========================= */
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+    thead {
+        background-color: #0d3b66;
+        color: white;
+    }
+
+    th {
+        padding: 13px 12px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #edf0f2;
+        font-size: 13px;
+        color: #444;
+        vertical-align: middle;
+    }
+
+    tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+
+    /* =========================
+       CÓDIGO
+    ========================= */
+
+    .codigo-categoria {
+        font-weight: 600;
+        color: #1e3a8a;
+        white-space: nowrap;
+    }
+
+
+    /* =========================
+       NOMBRE DE CATEGORÍA
+    ========================= */
+
+    .nombre-categoria {
+        color: #333;
+        font-weight: 500;
+    }
+
+
+    /* =========================
+       DESCRIPCIÓN
+    ========================= */
+
+    .descripcion-categoria {
+        color: #555;
+    }
+
+
+    /* =========================
+       ACCIONES
+    ========================= */
+
+    th:last-child {
+        text-align: center;
+    }
+
+    td:last-child {
+        text-align: center;
+    }
+
+    .acciones {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .btn-accion {
+        border: none;
+        width: 32px;
+        height: 30px;
+        padding: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-editar {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .btn-eliminar {
+        background-color: #fde2e2;
+        color: #b91c1c;
+    }
+
+    .btn-accion:hover {
+        opacity: 0.8;
+    }
+
+    .acciones form {
+        margin: 0;
+        padding: 0;
+    }
+
+
+    /* =========================
+       SIN REGISTROS
+    ========================= */
+
+    .sin-registros {
+        text-align: center;
+        padding: 45px 20px;
+        color: #777;
+    }
+
+    .sin-registros .icono {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .sin-registros p {
+        margin: 5px 0;
+    }
+
+    .sin-registros small {
+        color: #999;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .barra-acciones {
+            justify-content: stretch;
+        }
+
+        .btn-nueva {
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        🗂️ Categorías
+    </h1>
+
+    <p>
+        Gestión de categorías de documentos del sistema DICyT
+    </p>
+
+</div>
+
+
+<!-- =========================
+     BARRA DE ACCIONES
+========================= -->
+
+<div class="barra-acciones">
+
+    <button
+        type="button"
+        class="btn-nueva"
+        onclick="window.location.href='{{ url_for('nueva_categoria') }}'"
+    >
+        ➕ Nueva categoría
+    </button>
+
+</div>
+
+
+<!-- =========================
+     TABLA DE CATEGORÍAS
+========================= -->
+
+<div class="contenedor-tabla">
+
+    {% if categorias %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Categoría
+                    </th>
+
+                    <th>
+                        Descripción
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for categoria in categorias %}
+
+                    <tr>
+
+                        <td>
+                            <span class="codigo-categoria">
+                                {{ categoria["codigo"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="nombre-categoria">
+                                {{ categoria["categoria"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="descripcion-categoria">
+                                {{ categoria["descripcion"] }}
+                            </span>
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td>
+
+                            <div class="acciones">
+
+                                <!-- EDITAR -->
+
+                                <button
+                                    type="button"
+                                    class="btn-accion btn-editar"
+                                    title="Editar categoría"
+                                    onclick="window.location.href='{{ url_for('editar_categoria', id=categoria['id']) }}'"
+                                >
+                                    ✏️
+                                </button>
+
+
+                                <!-- ELIMINAR -->
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('eliminar_categoria', id=categoria['id']) }}"
+                                    onsubmit="return confirmarEliminarCategoria();"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn-accion btn-eliminar"
+                                        title="Eliminar categoría"
+                                    >
+                                        🗑️
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="sin-registros">
+
+            <div class="icono">
+                🗂️
+            </div>
+
+            <p>
+                <strong>
+                    No hay categorías registradas
+                </strong>
+            </p>
+
+            <small>
+                Cuando registres una nueva categoría aparecerá aquí.
+            </small>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function confirmarEliminarCategoria() {
+
+    return confirm(
+        "¿Está seguro de que desea eliminar esta categoría?\n\n" +
+        "Esta acción no se puede deshacer."
+    );
+
+}
+
+</script>
+
+
+{% endblock %}

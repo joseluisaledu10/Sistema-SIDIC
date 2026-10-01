@@ -1,0 +1,629 @@
+{% extends "base.html" %}
+
+{% block title %}
+Actividades - DICyT
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .modulo-encabezado {
+        margin-bottom: 25px;
+    }
+
+    .modulo-encabezado h1 {
+        margin: 0;
+        color: #1e3a8a;
+        font-size: 28px;
+    }
+
+    .modulo-encabezado p {
+        margin-top: 7px;
+        color: #666;
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       BARRA DE ACCIONES
+    ========================= */
+
+    .barra-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+    }
+
+
+    /* =========================
+       BUSCADOR
+    ========================= */
+
+    .buscador {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .buscador input {
+        width: 100%;
+        padding: 11px 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .buscador input:focus {
+        border-color: #1e3a8a;
+        box-shadow: 0 0 0 2px rgba(30,58,138,0.10);
+    }
+
+    .btn-buscar {
+        border: none;
+        padding: 11px 18px;
+        background-color: #1e3a8a;
+        color: white;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-buscar:hover {
+        background-color: #163172;
+    }
+
+
+    /* =========================
+       BOTÓN NUEVA GESTIÓN
+    ========================= */
+
+    .btn-nueva {
+        display: inline-block;
+        padding: 11px 18px;
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .btn-nueva:hover {
+        background-color: #092c4c;
+    }
+
+
+    /* =========================
+       TABLA
+    ========================= */
+
+    .contenedor-tabla {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 950px;
+    }
+
+    thead {
+        background-color: #0d3b66;
+        color: white;
+    }
+
+    th {
+        padding: 13px 12px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #edf0f2;
+        font-size: 13px;
+        color: #444;
+        vertical-align: middle;
+    }
+
+    tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+
+    /* =========================
+       ESTADO
+    ========================= */
+
+    .estado {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .estado-pendiente {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .estado-proceso {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+
+    .estado-completada {
+        background-color: #d1e7dd;
+        color: #146c43;
+    }
+
+    .estado-cancelada {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+
+    /* =========================
+    PRIORIDAD
+    ========================= */
+
+    .prioridad {
+
+        display: inline-block;
+
+        padding: 5px 9px;
+
+        border-radius: 20px;
+
+        font-size: 12px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+    }
+
+
+    /* ALTA */
+
+    .prioridad-alta {
+
+        background-color: #f8d7da;
+
+        color: #842029;
+    }
+
+
+    /* MEDIA */
+
+    .prioridad-media {
+
+        background-color: #fff3cd;
+
+        color: #856404;
+    }
+
+
+    /* BAJA */
+
+    .prioridad-baja {
+
+        background-color: #d1e7dd;
+
+        color: #0f5132;
+    }
+
+
+    /* =========================
+       ACCIONES
+    ========================= */
+
+    .acciones {
+        display: flex;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .btn-accion {
+        border: none;
+        padding: 6px 9px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-ver {
+        background-color: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .btn-editar {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .btn-eliminar {
+        background-color: #fde2e2;
+        color: #b91c1c;
+    }
+
+    .btn-accion:hover {
+        opacity: 0.8;
+    }
+
+
+    /* =========================
+       SIN REGISTROS
+    ========================= */
+
+    .sin-registros {
+        text-align: center;
+        padding: 45px 20px;
+        color: #777;
+    }
+
+    .sin-registros .icono {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .sin-registros p {
+        margin: 5px 0;
+    }
+
+    .sin-registros small {
+        color: #999;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+
+        .barra-acciones {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .buscador {
+            max-width: none;
+        }
+
+        .btn-nueva {
+            text-align: center;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================
+     ENCABEZADO
+========================= -->
+
+<div class="modulo-encabezado">
+
+    <h1>
+        📋 Actividades
+    </h1>
+
+    <p>
+        Registro y seguimiento de actividades de DICyT
+    </p>
+
+</div>
+
+
+<!-- =========================
+     BARRA DE ACCIONES
+========================= -->
+
+<div class="barra-acciones">
+
+
+    <!-- BUSCADOR -->
+
+    <form
+        method="GET"
+        action="{{ url_for('gestiones') }}"
+        class="buscador"
+    >
+
+        <input
+            type="text"
+            name="buscar"
+            placeholder="Buscar por código, asunto, tipo o responsable..."
+            value="{{ request.args.get('buscar', '') }}"
+        >
+
+        <button
+            type="submit"
+            class="btn-buscar"
+        >
+            🔍 Buscar
+        </button>
+
+    </form>
+
+
+    <!-- NUEVA GESTIÓN -->
+
+    <a
+        href="{{ url_for('nueva_actividad') }}"
+        class="btn-nueva"
+    >
+        ➕ Nueva actividad
+    </a>
+
+</div>
+
+
+<!-- =========================
+     TABLA
+========================= -->
+
+<div class="contenedor-tabla">
+
+    {% if gestiones %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Código
+                    </th>
+
+                    <th>
+                        Tipo
+                    </th>
+
+                    <th>
+                        Asunto
+                    </th>
+
+                    <th>
+                        Responsable
+                    </th>
+
+                    <th>
+                        Fecha inicio
+                    </th>
+
+                    <th>
+                        Fecha límite
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Prioridad
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for gestion in gestiones %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ gestion['codigo'] }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ gestion['tipo'] }}
+                        </td>
+
+                        <td>
+                            {{ gestion['asunto'] }}
+                        </td>
+
+                        <td>
+                            {{ gestion['responsable'] }}
+                        </td>
+
+                        <td>
+                            {{ gestion['fecha_inicio'] }}
+                        </td>
+
+                        <td>
+                            {{ gestion['fecha_limite'] or '-' }}
+                        </td>
+
+
+                        <!-- ESTADO -->
+
+                        <td>
+
+                            {% if gestion['estado'] == 'Pendiente' %}
+
+                                <span class="estado estado-pendiente">
+                                    🟡 Pendiente
+                                </span>
+
+                            {% elif gestion['estado'] == 'En proceso' %}
+
+                                <span class="estado estado-proceso">
+                                    🔵 En proceso
+                                </span>
+
+                            {% elif gestion['estado'] == 'Completada' %}
+
+                                <span class="estado estado-completada">
+                                    🟢 Completada
+                                </span>
+
+                            {% elif gestion['estado'] == 'Cancelada' %}
+
+                                <span class="estado estado-cancelada">
+                                    🔴 Cancelada
+                                </span>
+
+                            {% else %}
+
+                                <span class="estado">
+                                    {{ gestion['estado'] }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- PRIORIDAD -->
+
+                        <td>
+
+                            {% if gestion['prioridad'] == 'Alta' %}
+
+                                <span class="prioridad prioridad-alta">
+                                    🔴 Alta
+                                </span>
+
+                            {% elif gestion['prioridad'] == 'Media' %}
+
+                                <span class="prioridad prioridad-media">
+                                    🟠 Media
+                                </span>
+
+                            {% else %}
+
+                                <span class="prioridad prioridad-baja">
+                                    🟢 Baja
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td>
+
+                            <div class="acciones">
+
+                                <a
+                                    href="{{ url_for('ver_gestion', id=gestion['id']) }}"
+                                    class="btn-accion btn-ver"
+                                    title="Ver actividad"
+                                >
+                                    👁️
+                                </a>
+
+                                <a
+                                    href="{{ url_for('editar_gestion', id=gestion['id']) }}"
+                                    class="btn-accion btn-editar"
+                                    title="Editar actividad"
+                                >
+                                    ✏️
+                                </a>
+
+                                <form
+                                    action="{{ url_for('eliminar_gestion', id=gestion['id']) }}"
+                                    method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirmarEliminarGestion();"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn-accion btn-eliminar"
+                                        title="Eliminar actividad"
+                                    >
+                                        🗑️
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="sin-registros">
+
+            <div class="icono">
+                📋
+            </div>
+
+            <p>
+                <strong>
+                    No hay actividades registradas
+                </strong>
+            </p>
+
+            <small>
+                Cuando registres una nueva actividad aparecerá aquí.
+            </small>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+
+function confirmarEliminarGestion() {
+
+    return confirm(
+        "¿Está seguro de que desea eliminar esta actividad?\n\n" +
+        "Esta acción no se puede deshacer."
+    );
+
+}
+
+</script>
+
+{% endblock %}
