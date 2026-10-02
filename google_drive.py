@@ -341,6 +341,25 @@ def obtener_carpeta_sociedades_cientificas(servicio):
     )
 
 # =========================================================
+# CARPETA INVESTIGADORES
+# =========================================================
+
+def obtener_carpeta_investigadores(servicio):
+
+    carpeta_investigacion = obtener_carpeta_investigacion(
+        servicio
+    )
+
+    return obtener_o_crear_carpeta(
+
+        servicio,
+
+        "INVESTIGADORES",
+
+        carpeta_investigacion
+    )
+
+# =========================================================
 # CARPETA POR CATEGORÍA
 # =========================================================
 

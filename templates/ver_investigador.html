@@ -560,6 +560,31 @@ Ver Investigador - DICyT
 
                 </span>
 
+                {% if investigador["ci_archivo"] %}
+
+                    <a
+                        href="{{ url_for(
+                            'ver_ci_investigador',
+                            id=investigador['id']
+                        ) }}"
+                        target="_blank"
+                        style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-top: 6px;
+                            color: #0d3b66;
+                            font-size: 13px;
+                            font-weight: 600;
+                            text-decoration: none;
+                        "
+                    >
+                        <i class="fa-solid fa-file-pdf"></i>
+                        Ver documento de C.I.
+                    </a>
+
+                {% endif %}
+
             </div>
 
 

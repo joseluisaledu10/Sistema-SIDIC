@@ -332,6 +332,7 @@ Nuevo Investigador - DICyT
     <form
         method="POST"
         action="{{ url_for('nuevo_investigador') }}"
+        enctype="multipart/form-data"
     >
 
 
@@ -425,6 +426,30 @@ Nuevo Investigador - DICyT
                         id="ci"
                         name="ci"
                     >
+
+                    <small>
+                        Número de Cédula de Identidad.
+                    </small>
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="ci_archivo">
+                        Documento de C.I.
+                    </label>
+
+                    <input
+                        type="file"
+                        id="ci_archivo"
+                        name="ci_archivo"
+                        accept=".pdf,application/pdf"
+                    >
+
+                    <small>
+                        Adjuntar copia del C.I. únicamente en formato PDF.
+                    </small>
 
                 </div>
 

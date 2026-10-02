@@ -326,6 +326,7 @@ Editar Investigador - DICyT
     <form
         method="POST"
         action="{{ url_for('editar_investigador', id=investigador['id']) }}"
+        enctype="multipart/form-data"
     >
 
 
@@ -432,6 +433,89 @@ Editar Investigador - DICyT
                         name="ci"
                         value="{{ investigador['ci'] or '' }}"
                     >
+
+                    {% if investigador["ci_archivo"] %}
+
+                        <div
+                            style="
+                                margin-top: 8px;
+                                padding: 10px 12px;
+                                background: #f4f7fa;
+                                border: 1px solid #e5e7eb;
+                                border-radius: 6px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    font-size: 12px;
+                                    color: #6b7280;
+                                    margin-bottom: 6px;
+                                "
+                            >
+                                <strong>
+                                    Documento actual
+                                </strong>
+                            </div>
+
+                            <a
+                                href="{{ url_for(
+                                    'ver_ci_investigador',
+                                    id=investigador['id']
+                                ) }}"
+                                target="_blank"
+                                style="
+                                    display: inline-flex;
+                                    align-items: center;
+                                    gap: 6px;
+                                    color: #0d3b66;
+                                    font-size: 13px;
+                                    font-weight: 600;
+                                    text-decoration: none;
+                                "
+                            >
+                                <i class="fa-solid fa-file-pdf"></i>
+                                Ver documento de C.I.
+                            </a>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="ci_archivo">
+                        {% if investigador["ci_archivo"] %}
+                            Reemplazar documento de C.I.
+                        {% else %}
+                            Documento de C.I.
+                        {% endif %}
+                    </label>
+
+                    <input
+                        type="file"
+                        id="ci_archivo"
+                        name="ci_archivo"
+                        accept=".pdf,application/pdf"
+                    >
+
+                    <small
+                        style="
+                            margin-top: 5px;
+                            color: #6b7280;
+                            font-size: 12px;
+                        "
+                    >
+                        {% if investigador["ci_archivo"] %}
+                            Selecciona un nuevo PDF solamente si deseas reemplazar
+                            el documento actual.
+                        {% else %}
+                            Adjuntar copia del C.I. únicamente en formato PDF.
+                        {% endif %}
+                    </small>
 
                 </div>
 

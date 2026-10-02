@@ -28,6 +28,8 @@ from google_drive import (
 
     obtener_carpeta_sociedades_cientificas,
 
+    obtener_carpeta_investigadores,
+
     subir_archivo,
 
     eliminar_archivo,
@@ -3818,6 +3820,72 @@ def ver_investigador(id):
     )
 
 # =========================================================
+# VER DOCUMENTO DE C.I. DEL INVESTIGADOR
+# =========================================================
+
+@app.route("/investigadores/ci/<int:id>")
+def ver_ci_investigador(id):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    investigador = conexion.execute("""
+        SELECT ci_archivo
+        FROM investigadores
+        WHERE id = ?
+    """, (id,)).fetchone()
+
+    conexion.close()
+
+    if investigador is None:
+        return redirect(url_for("investigadores"))
+
+    archivo_id = investigador["ci_archivo"]
+
+    if not archivo_id:
+        flash(
+            "Este investigador no tiene un documento de C.I. registrado.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "ver_investigador",
+                id=id
+            )
+        )
+
+    # =====================================================
+    # OBTENER ARCHIVO DESDE GOOGLE DRIVE
+    # =====================================================
+
+    servicio = conectar_google_drive()
+
+    archivo = servicio.files().get(
+        fileId=archivo_id,
+        fields="id,name,mimeType,webViewLink"
+    ).execute()
+
+    enlace = archivo.get("webViewLink")
+
+    if enlace:
+        return redirect(enlace)
+
+    flash(
+        "No se pudo obtener el documento de C.I.",
+        "danger"
+    )
+
+    return redirect(
+        url_for(
+            "ver_investigador",
+            id=id
+        )
+    )
+
+# =========================================================
 # NUEVO INVESTIGADOR
 # =========================================================
 
@@ -3840,6 +3908,7 @@ def nuevo_investigador():
         ci = request.form.get("ci", "").strip()
         correo = request.form.get("correo", "").strip()
         telefono = request.form.get("telefono", "").strip()
+        ci_archivo = request.files.get("ci_archivo")
 
 
         # =====================================================
@@ -3937,6 +4006,35 @@ def nuevo_investigador():
             ""
         ).strip()
 
+        # =====================================================
+        # DOCUMENTO DE C.I.
+        # =====================================================
+
+        archivo_ci_id = None
+
+        if ci_archivo and ci_archivo.filename:
+
+            nombre_original = secure_filename(
+                ci_archivo.filename
+            )
+
+            extension = ""
+
+            if "." in nombre_original:
+                extension = nombre_original.rsplit(
+                    ".", 1
+                )[1].lower()
+
+            if extension != "pdf":
+
+                flash(
+                    "El documento del C.I. debe estar en formato PDF.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("nuevo_investigador")
+                )
 
         # =====================================================
         # GENERAR CÓDIGO DEL INVESTIGADOR
@@ -3969,6 +4067,48 @@ def nuevo_investigador():
 
         codigo = f"INV-{numero:04d}"
 
+        # =====================================================
+        # SUBIR C.I. A GOOGLE DRIVE
+        # =====================================================
+
+        if ci_archivo and ci_archivo.filename:
+
+            nombre_drive = (
+                f"{codigo} - {nombre} {apellido} - CI.pdf"
+            )
+
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf"
+            ) as archivo_temporal:
+
+                ruta_temporal = archivo_temporal.name
+
+            ci_archivo.save(ruta_temporal)
+
+            try:
+
+                servicio = conectar_google_drive()
+
+                carpeta_investigadores = (
+                    obtener_carpeta_investigadores(
+                        servicio
+                    )
+                )
+
+                archivo_drive = subir_archivo(
+                    servicio,
+                    ruta_temporal,
+                    nombre_drive,
+                    carpeta_investigadores
+                )
+
+                archivo_ci_id = archivo_drive.get("id")
+
+            finally:
+
+                if os.path.exists(ruta_temporal):
+                    os.remove(ruta_temporal)
 
         # =====================================================
         # GUARDAR INVESTIGADOR
@@ -3982,6 +4122,7 @@ def nuevo_investigador():
                 apellido,
                 tipo,
                 ci,
+                ci_archivo,
                 correo,
                 telefono,
 
@@ -4015,14 +4156,13 @@ def nuevo_investigador():
 
             VALUES (
 
-                ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?,
                 ?, ?, ?,
                 ?, ?, ?, ?, ?,
                 ?, ?, ?, ?,
                 ?,
-                ?,
-                ?, ?
+                ?, ?, ?
             )
 
         """, (
@@ -4032,6 +4172,7 @@ def nuevo_investigador():
             apellido,
             tipo,
             ci,
+            archivo_ci_id,
             correo,
             telefono,
 
@@ -4113,6 +4254,7 @@ def editar_investigador(id):
         ci = request.form.get("ci", "").strip()
         correo = request.form.get("correo", "").strip()
         telefono = request.form.get("telefono", "").strip()
+        ci_archivo = request.files.get("ci_archivo")
 
         carrera_area = request.form.get(
             "carrera_area", ""
@@ -4182,6 +4324,96 @@ def editar_investigador(id):
         ).strip()
 
         # =================================================
+        # DOCUMENTO DE C.I.
+        # =================================================
+
+        archivo_ci_id = investigador["ci_archivo"]
+
+        if ci_archivo and ci_archivo.filename:
+
+            nombre_original = secure_filename(
+                ci_archivo.filename
+            )
+
+            extension = ""
+
+            if "." in nombre_original:
+                extension = nombre_original.rsplit(
+                    ".", 1
+                )[1].lower()
+
+            if extension != "pdf":
+
+                conexion.close()
+
+                flash(
+                    "El documento del C.I. debe estar en formato PDF.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for(
+                        "editar_investigador",
+                        id=id
+                    )
+                )
+
+            nombre_drive = secure_filename(
+                ci_archivo.filename
+            )
+
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf"
+            ) as archivo_temporal:
+
+                ruta_temporal = archivo_temporal.name
+
+            ci_archivo.save(ruta_temporal)
+
+            try:
+
+                servicio = conectar_google_drive()
+
+                carpeta_investigadores = (
+                    obtener_carpeta_investigadores(
+                        servicio
+                    )
+                )
+
+                # ELIMINAR DOCUMENTO ANTERIOR
+                if archivo_ci_id:
+
+                    try:
+
+                        eliminar_archivo(
+                            servicio,
+                            archivo_ci_id
+                        )
+
+                    except Exception as error:
+
+                        print(
+                            "No se pudo eliminar el documento anterior:",
+                            error
+                        )
+
+                # SUBIR NUEVO DOCUMENTO
+                archivo_drive = subir_archivo(
+                    servicio,
+                    ruta_temporal,
+                    nombre_drive,
+                    carpeta_investigadores
+                )
+
+                archivo_ci_id = archivo_drive.get("id")
+
+            finally:
+
+                if os.path.exists(ruta_temporal):
+                    os.remove(ruta_temporal)
+
+        # =================================================
         # ACTUALIZAR
         # =================================================
 
@@ -4192,6 +4424,7 @@ def editar_investigador(id):
                 apellido = ?,
                 tipo = ?,
                 ci = ?,
+                ci_archivo = ?,
                 correo = ?,
                 telefono = ?,
                 carrera_area = ?,
@@ -4216,6 +4449,7 @@ def editar_investigador(id):
             apellido,
             tipo,
             ci,
+            archivo_ci_id,
             correo,
             telefono,
             carrera_area,
