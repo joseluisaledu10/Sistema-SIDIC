@@ -635,6 +635,26 @@ Editar Texto en asignatura - Sistema DICyT
 
                 </div>
 
+                <div class="form-grupo">
+                    <label>CDD</label>
+                    <input
+                        type="text"
+                        name="cdd"
+                        value="{{ texto['cdd'] or '' }}"
+                        placeholder="Código Dewey"
+                    >
+                </div>
+
+                <div class="form-grupo">
+                    <label>Código UAP</label>
+                    <input
+                        type="text"
+                        name="codigo_uap"
+                        value="{{ texto['codigo_uap'] or '' }}"
+                        placeholder="Código UAP"
+                    >
+                </div>
+
 
                 <div class="form-grupo">
 
@@ -712,6 +732,46 @@ Editar Texto en asignatura - Sistema DICyT
                     Si no selecciona ninguno, se conservará el archivo existente.
                 </div>
 
+            </div>
+
+            {% if texto['archivo_isbn'] %}
+                <div class="archivo-actual">
+                    <div class="archivo-actual-titulo">Respaldo actual del ISBN</div>
+                    <div class="archivo-actual-nombre">
+                        {{ nombre_archivo_isbn or 'Respaldo del ISBN' }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-grupo">
+                <label>Reemplazar respaldo del ISBN</label>
+                <input
+                    type="file"
+                    name="archivo_isbn"
+                >
+                <div class="form-ayuda">
+                    Opcional. Puede adjuntar cualquier formato; si no selecciona uno nuevo, se conservará el actual.
+                </div>
+            </div>
+
+            {% if texto['archivo_codigo_barras'] %}
+                <div class="archivo-actual">
+                    <div class="archivo-actual-titulo">Código de barras actual</div>
+                    <div class="archivo-actual-nombre">
+                        {{ nombre_archivo_codigo_barras or 'Código de barras ISBN' }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-grupo">
+                <label>Reemplazar código de barras del ISBN</label>
+                <input
+                    type="file"
+                    name="archivo_codigo_barras"
+                >
+                <div class="form-ayuda">
+                    Opcional. Si no selecciona uno nuevo, se conservará el actual.
+                </div>
             </div>
 
         </div>

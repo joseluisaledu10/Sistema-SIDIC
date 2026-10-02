@@ -782,6 +782,16 @@ Ver Texto en asignatura - Sistema DICyT
 
             </div>
 
+            <div class="detalle-campo">
+                <span class="detalle-label">CDD</span>
+                <span class="detalle-valor">{{ texto['cdd'] or '—' }}</span>
+            </div>
+
+            <div class="detalle-campo">
+                <span class="detalle-label">Código UAP</span>
+                <span class="detalle-valor">{{ texto['codigo_uap'] or '—' }}</span>
+            </div>
+
 
             <div class="detalle-campo">
 
@@ -896,11 +906,69 @@ Ver Texto en asignatura - Sistema DICyT
 
         </div>
 
-        {% else %}
+        {% endif %}
+
+        {% if texto['archivo_isbn'] %}
+
+        <div class="archivo-documento">
+
+            <div class="archivo-info">
+
+                <div class="archivo-icono">
+
+                    <i class="fa-solid fa-file-lines"></i>
+
+                </div>
+
+                <div class="archivo-nombre">
+
+                    {{ nombre_archivo_isbn or 'Respaldo del ISBN' }}
+
+                </div>
+
+            </div>
+
+            <a
+                href="{{ url_for('abrir_archivo', archivo_id=texto['archivo_isbn']) }}"
+                target="_blank"
+                class="btn-abrir-archivo"
+            >
+                <i class="fa-solid fa-eye"></i>
+                Ver respaldo ISBN
+            </a>
+
+        </div>
+
+        {% endif %}
+
+        {% if texto['archivo_codigo_barras'] %}
+
+        <div class="archivo-documento">
+            <div class="archivo-info">
+                <div class="archivo-icono">
+                    <i class="fa-solid fa-barcode"></i>
+                </div>
+                <div class="archivo-nombre">
+                    {{ nombre_archivo_codigo_barras or 'Código de barras ISBN' }}
+                </div>
+            </div>
+            <a
+                href="{{ url_for('abrir_archivo', archivo_id=texto['archivo_codigo_barras']) }}"
+                target="_blank"
+                class="btn-abrir-archivo"
+            >
+                <i class="fa-solid fa-eye"></i>
+                Ver código de barras
+            </a>
+        </div>
+
+        {% endif %}
+
+        {% if not texto['archivo'] and not texto['archivo_isbn'] and not texto['archivo_codigo_barras'] %}
 
         <div class="sin-archivo">
 
-            No se adjuntó un archivo digital.
+            No se adjuntaron archivos digitales.
 
         </div>
 

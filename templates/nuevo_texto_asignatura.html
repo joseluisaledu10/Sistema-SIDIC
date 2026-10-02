@@ -1134,6 +1134,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
         </div>
 
+        <div class="form-grupo">
+            <label>CDD</label>
+            <input
+                type="text"
+                name="cdd"
+                value="{{ request.form.get('cdd', '') }}"
+                placeholder="Código Dewey"
+            >
+        </div>
+
+        <div class="form-grupo">
+            <label>Código UAP</label>
+            <input
+                type="text"
+                name="codigo_uap"
+                value="{{ request.form.get('codigo_uap', '') }}"
+                placeholder="Código UAP"
+            >
+        </div>
+
 
         <!-- DOI -->
 
@@ -1218,6 +1238,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
             </span>
 
+        </div>
+
+        <div class="form-grupo" style="margin-top: 18px;">
+
+            <label>
+
+                Respaldo del ISBN
+
+            </label>
+
+            <input
+                type="file"
+                name="archivo_isbn"
+            >
+
+            <span class="texto-ayuda">
+
+                Opcional. Adjunte el documento, imagen u otro archivo que respalde el ISBN.
+
+            </span>
+
+        </div>
+
+        <div class="form-grupo" style="margin-top: 18px;">
+            <label>Código de barras del ISBN</label>
+            <input type="file" name="archivo_codigo_barras">
+            <span class="texto-ayuda">
+                Opcional. Adjunte la imagen o documento del código de barras ISBN.
+            </span>
         </div>
 
     </div>

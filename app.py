@@ -129,6 +129,29 @@ def archivo_permitido(nombre_archivo):
         in EXTENSIONES_PERMITIDAS
     )
 
+def subir_adjunto_texto_asignatura(archivo, servicio_drive, carpeta_id):
+
+    nombre_archivo = secure_filename(archivo.filename) or "archivo"
+    extension = os.path.splitext(nombre_archivo)[1]
+
+    with tempfile.NamedTemporaryFile(
+        suffix=extension,
+        delete=False
+    ) as archivo_temporal:
+        ruta_temporal = archivo_temporal.name
+
+    try:
+        archivo.save(ruta_temporal)
+        return subir_archivo(
+            servicio_drive,
+            ruta_temporal,
+            nombre_archivo,
+            carpeta_id
+        )
+    finally:
+        if os.path.exists(ruta_temporal):
+            os.remove(ruta_temporal)
+
 def conectar_bd():
     conexion = sqlite3.connect(DATABASE)
     conexion.row_factory = sqlite3.Row
@@ -149,9 +172,22 @@ def crear_bd():
             usuario TEXT NOT NULL UNIQUE,
             contraseña TEXT NOT NULL,
             rol TEXT NOT NULL,
-            estado INTEGER DEFAULT 1
+            estado INTEGER DEFAULT 1,
+            cambiar_password INTEGER NOT NULL DEFAULT 0
         )
     """)
+
+    columnas_usuarios = conexion.execute(
+        "PRAGMA table_info(usuarios)"
+    ).fetchall()
+    nombres_columnas_usuarios = [
+        columna["name"]
+        for columna in columnas_usuarios
+    ]
+    if "cambiar_password" not in nombres_columnas_usuarios:
+        conexion.execute(
+            "ALTER TABLE usuarios ADD COLUMN cambiar_password INTEGER NOT NULL DEFAULT 0"
+        )
 
     conexion.execute("""
         CREATE TABLE IF NOT EXISTS documentos (
@@ -781,10 +817,14 @@ def crear_bd():
             paginas INTEGER,
 
             isbn TEXT,
+            cdd TEXT,
+            codigo_uap TEXT,
             doi TEXT,
             url TEXT,
 
             archivo TEXT,
+            archivo_isbn TEXT,
+            archivo_codigo_barras TEXT,
 
             estado INTEGER NOT NULL DEFAULT 1,
 
@@ -793,6 +833,25 @@ def crear_bd():
             usuario TEXT NOT NULL
         )
     """)
+
+    columnas_textos = conexion.execute(
+        "PRAGMA table_info(textos_asignatura)"
+    ).fetchall()
+    nombres_columnas_textos = [
+        columna["name"]
+        for columna in columnas_textos
+    ]
+    columnas_textos_nuevas = {
+        "archivo_isbn": "TEXT",
+        "archivo_codigo_barras": "TEXT",
+        "cdd": "TEXT",
+        "codigo_uap": "TEXT"
+    }
+    for columna, tipo in columnas_textos_nuevas.items():
+        if columna not in nombres_columnas_textos:
+            conexion.execute(
+                f"ALTER TABLE textos_asignatura ADD COLUMN {columna} {tipo}"
+            )
 
     # =========================================================
     # RELACIÓN TEXTOS EN ASIGNATURA - INVESTIGADORES
@@ -8786,19 +8845,27 @@ def ver_texto_asignatura(id):
     # =====================================================
 
     nombre_archivo = None
+    nombre_archivo_isbn = None
 
-    if texto["archivo"]:
+    if texto["archivo"] or texto["archivo_isbn"]:
 
         try:
 
             servicio_drive = conectar_google_drive()
 
-            archivo_drive = servicio_drive.files().get(
-                fileId=texto["archivo"],
-                fields="name"
-            ).execute()
+            if texto["archivo"]:
+                archivo_drive = servicio_drive.files().get(
+                    fileId=texto["archivo"],
+                    fields="name"
+                ).execute()
+                nombre_archivo = archivo_drive.get("name")
 
-            nombre_archivo = archivo_drive.get("name")
+            if texto["archivo_isbn"]:
+                archivo_isbn_drive = servicio_drive.files().get(
+                    fileId=texto["archivo_isbn"],
+                    fields="name"
+                ).execute()
+                nombre_archivo_isbn = archivo_isbn_drive.get("name")
 
         except Exception as e:
 
@@ -8813,6 +8880,7 @@ def ver_texto_asignatura(id):
         texto=texto,
         investigadores=investigadores,
         nombre_archivo=nombre_archivo,
+        nombre_archivo_isbn=nombre_archivo_isbn,
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
@@ -8909,6 +8977,8 @@ def editar_texto_asignatura(id):
             "isbn",
             ""
         ).strip()
+        cdd = request.form.get("cdd", "").strip()
+        codigo_uap = request.form.get("codigo_uap", "").strip()
 
         doi = request.form.get(
             "doi",
@@ -9035,11 +9105,21 @@ def editar_texto_asignatura(id):
         # =================================================
 
         archivo_id = texto["archivo"]
+        archivo_isbn_id = texto["archivo_isbn"]
+        archivo_codigo_barras_id = texto["archivo_codigo_barras"]
 
         archivo_nuevo_id = None
+        archivo_isbn_nuevo_id = None
+        archivo_codigo_barras_nuevo_id = None
 
         archivo_subido = request.files.get(
             "archivo"
+        )
+        archivo_isbn_subido = request.files.get(
+            "archivo_isbn"
+        )
+        archivo_codigo_barras_subido = request.files.get(
+            "archivo_codigo_barras"
         )
 
         ruta_temporal = None
@@ -9051,84 +9131,63 @@ def editar_texto_asignatura(id):
             # SI HAY ARCHIVO NUEVO
             # =============================================
 
-            if archivo_subido and archivo_subido.filename:
-
-                carpeta_temp = os.path.join(
-                    os.getcwd(),
-                    "temp"
-                )
-
-                os.makedirs(
-                    carpeta_temp,
-                    exist_ok=True
-                )
-
-                ruta_temporal = os.path.join(
-                    carpeta_temp,
-                    archivo_subido.filename
-                )
-
-                archivo_subido.save(
-                    ruta_temporal
-                )
-
-
+            if (
+                (archivo_subido and archivo_subido.filename)
+                or (archivo_isbn_subido and archivo_isbn_subido.filename)
+                or (archivo_codigo_barras_subido and archivo_codigo_barras_subido.filename)
+            ):
                 servicio_drive = conectar_google_drive()
-
                 carpeta_textos = obtener_carpeta_textos_asignatura(
                     servicio_drive
                 )
 
-
-                archivo_drive = subir_archivo(
-                    servicio_drive,
-                    ruta_temporal,
-                    archivo_subido.filename,
-                    carpeta_textos
-                )
-
-                archivo_nuevo_id = archivo_drive.get(
-                    "id"
-                )
-
-
-                # =========================================
-                # ELIMINAR ARCHIVO TEMPORAL
-                # =========================================
-
-                if os.path.exists(
-                    ruta_temporal
-                ):
-
-                    os.remove(
-                        ruta_temporal
+                if archivo_subido and archivo_subido.filename:
+                    archivo_drive = subir_adjunto_texto_asignatura(
+                        archivo_subido,
+                        servicio_drive,
+                        carpeta_textos
                     )
+                    archivo_nuevo_id = archivo_drive.get("id")
 
-                    ruta_temporal = None
+                    if archivo_id:
+                        try:
+                            eliminar_archivo(servicio_drive, archivo_id)
+                        except Exception as e:
+                            print("No se pudo eliminar el archivo anterior:", e)
 
+                    archivo_id = archivo_nuevo_id
 
-                # =========================================
-                # ELIMINAR ARCHIVO ANTERIOR
-                # =========================================
+                if archivo_isbn_subido and archivo_isbn_subido.filename:
+                    archivo_isbn_drive = subir_adjunto_texto_asignatura(
+                        archivo_isbn_subido,
+                        servicio_drive,
+                        carpeta_textos
+                    )
+                    archivo_isbn_nuevo_id = archivo_isbn_drive.get("id")
 
-                if archivo_id:
+                    if archivo_isbn_id:
+                        try:
+                            eliminar_archivo(servicio_drive, archivo_isbn_id)
+                        except Exception as e:
+                            print("No se pudo eliminar el respaldo ISBN anterior:", e)
 
-                    try:
+                    archivo_isbn_id = archivo_isbn_nuevo_id
 
-                        eliminar_archivo(
-                            servicio_drive,
-                            archivo_id
-                        )
+                if archivo_codigo_barras_subido and archivo_codigo_barras_subido.filename:
+                    archivo_codigo_barras_drive = subir_adjunto_texto_asignatura(
+                        archivo_codigo_barras_subido,
+                        servicio_drive,
+                        carpeta_textos
+                    )
+                    archivo_codigo_barras_nuevo_id = archivo_codigo_barras_drive.get("id")
 
-                    except Exception as e:
+                    if archivo_codigo_barras_id:
+                        try:
+                            eliminar_archivo(servicio_drive, archivo_codigo_barras_id)
+                        except Exception as e:
+                            print("No se pudo eliminar el código de barras anterior:", e)
 
-                        print(
-                            "No se pudo eliminar el archivo anterior:",
-                            e
-                        )
-
-
-                archivo_id = archivo_nuevo_id
+                    archivo_codigo_barras_id = archivo_codigo_barras_nuevo_id
 
 
             # =================================================
@@ -9150,9 +9209,13 @@ def editar_texto_asignatura(id):
                     anio = ?,
                     paginas = ?,
                     isbn = ?,
+                    cdd = ?,
+                    codigo_uap = ?,
                     doi = ?,
                     url = ?,
                     archivo = ?,
+                    archivo_isbn = ?,
+                    archivo_codigo_barras = ?,
                     observaciones = ?,
                     estado = ?
                 WHERE id = ?
@@ -9169,9 +9232,13 @@ def editar_texto_asignatura(id):
                 anio,
                 paginas,
                 isbn,
+                cdd,
+                codigo_uap,
                 doi,
                 url,
                 archivo_id,
+                archivo_isbn_id,
+                archivo_codigo_barras_id,
                 observaciones,
                 estado,
                 id
@@ -9266,23 +9333,23 @@ def editar_texto_asignatura(id):
             # UN ERROR DESPUÉS, ELIMINARLO DE DRIVE
             # =============================================
 
-            if archivo_nuevo_id:
-
-                try:
-
-                    servicio_drive = conectar_google_drive()
-
-                    eliminar_archivo(
-                        servicio_drive,
-                        archivo_nuevo_id
-                    )
-
-                except Exception as error_drive:
-
-                    print(
-                        "No se pudo eliminar el archivo nuevo:",
-                        error_drive
-                    )
+            for archivo_nuevo in (
+                archivo_nuevo_id,
+                archivo_isbn_nuevo_id,
+                archivo_codigo_barras_nuevo_id
+            ):
+                if archivo_nuevo:
+                    try:
+                        servicio_drive = conectar_google_drive()
+                        eliminar_archivo(
+                            servicio_drive,
+                            archivo_nuevo
+                        )
+                    except Exception as error_drive:
+                        print(
+                            "No se pudo eliminar el archivo nuevo:",
+                            error_drive
+                        )
 
 
             conexion.close()
@@ -9353,21 +9420,41 @@ def editar_texto_asignatura(id):
     # =====================================================
 
     nombre_archivo = None
+    nombre_archivo_isbn = None
+    nombre_archivo_codigo_barras = None
 
-    if texto["archivo"]:
+    if texto["archivo"] or texto["archivo_isbn"] or texto["archivo_codigo_barras"]:
 
         try:
 
             servicio_drive = conectar_google_drive()
 
-            archivo_drive = servicio_drive.files().get(
-                fileId=texto["archivo"],
-                fields="name"
-            ).execute()
+            if texto["archivo"]:
+                archivo_drive = servicio_drive.files().get(
+                    fileId=texto["archivo"],
+                    fields="name"
+                ).execute()
+                nombre_archivo = archivo_drive.get(
+                    "name"
+                )
 
-            nombre_archivo = archivo_drive.get(
-                "name"
-            )
+            if texto["archivo_isbn"]:
+                archivo_isbn_drive = servicio_drive.files().get(
+                    fileId=texto["archivo_isbn"],
+                    fields="name"
+                ).execute()
+                nombre_archivo_isbn = archivo_isbn_drive.get(
+                    "name"
+                )
+
+            if texto["archivo_codigo_barras"]:
+                archivo_codigo_barras_drive = servicio_drive.files().get(
+                    fileId=texto["archivo_codigo_barras"],
+                    fields="name"
+                ).execute()
+                nombre_archivo_codigo_barras = archivo_codigo_barras_drive.get(
+                    "name"
+                )
 
         except Exception as e:
 
@@ -9386,6 +9473,8 @@ def editar_texto_asignatura(id):
         investigadores=investigadores,
         seleccionados=seleccionados,
         nombre_archivo=nombre_archivo,
+        nombre_archivo_isbn=nombre_archivo_isbn,
+        nombre_archivo_codigo_barras=nombre_archivo_codigo_barras,
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
@@ -9567,6 +9656,8 @@ def nuevo_texto_asignatura():
         "isbn",
         ""
     ).strip()
+    cdd = request.form.get("cdd", "").strip()
+    codigo_uap = request.form.get("codigo_uap", "").strip()
 
     doi = request.form.get(
         "doi",
@@ -9706,8 +9797,16 @@ def nuevo_texto_asignatura():
     archivo_subido = request.files.get(
         "archivo"
     )
+    archivo_isbn_subido = request.files.get(
+        "archivo_isbn"
+    )
+    archivo_codigo_barras_subido = request.files.get(
+        "archivo_codigo_barras"
+    )
 
     archivo_id = None
+    archivo_isbn_id = None
+    archivo_codigo_barras_id = None
 
     archivo_nombre = None
 
@@ -9756,102 +9855,39 @@ def nuevo_texto_asignatura():
         # SUBIR ARCHIVO A GOOGLE DRIVE
         # =================================================
 
-        if archivo_subido and archivo_subido.filename:
-
-            print(
-                "Subiendo archivo del texto en asignatura a Google Drive..."
-            )
-
-            # ---------------------------------------------
-            # CONECTAR CON GOOGLE DRIVE
-            # ---------------------------------------------
-
+        if (
+            (archivo_subido and archivo_subido.filename)
+            or (archivo_isbn_subido and archivo_isbn_subido.filename)
+            or (archivo_codigo_barras_subido and archivo_codigo_barras_subido.filename)
+        ):
             servicio_drive = conectar_google_drive()
-
-            # ---------------------------------------------
-            # OBTENER CARPETA TEXTOS EN ASIGNATURA
-            # ---------------------------------------------
-
             carpeta_textos = obtener_carpeta_textos_asignatura(
                 servicio_drive
             )
 
-            print(
-                "Carpeta de textos en asignatura:",
-                carpeta_textos
-            )
-
-            # ---------------------------------------------
-            # CARPETA TEMPORAL
-            # ---------------------------------------------
-
-            carpeta_temporal = os.path.join(
-                os.getcwd(),
-                "temp"
-            )
-
-            os.makedirs(
-                carpeta_temporal,
-                exist_ok=True
-            )
-
-            # ---------------------------------------------
-            # NOMBRE REAL DEL ARCHIVO
-            # ---------------------------------------------
-
-            archivo_nombre = archivo_subido.filename
-
-            ruta_temporal = os.path.join(
-                carpeta_temporal,
-                archivo_nombre
-            )
-
-            # ---------------------------------------------
-            # GUARDAR TEMPORALMENTE
-            # ---------------------------------------------
-
-            archivo_subido.save(
-                ruta_temporal
-            )
-
-            # ---------------------------------------------
-            # SUBIR A GOOGLE DRIVE
-            # ---------------------------------------------
-
-            archivo_drive = subir_archivo(
-                servicio_drive,
-                ruta_temporal,
-                archivo_nombre,
-                carpeta_textos
-            )
-
-            archivo_id = archivo_drive.get(
-                "id"
-            )
-
-            print(
-                "Archivo subido correctamente:",
-                archivo_id
-            )
-
-            print(
-                "Nombre guardado en Drive:",
-                archivo_nombre
-            )
-
-            # ---------------------------------------------
-            # ELIMINAR TEMPORAL
-            # ---------------------------------------------
-
-            if os.path.exists(
-                ruta_temporal
-            ):
-
-                os.remove(
-                    ruta_temporal
+            if archivo_subido and archivo_subido.filename:
+                archivo_drive = subir_adjunto_texto_asignatura(
+                    archivo_subido,
+                    servicio_drive,
+                    carpeta_textos
                 )
+                archivo_id = archivo_drive.get("id")
 
-                ruta_temporal = None
+            if archivo_isbn_subido and archivo_isbn_subido.filename:
+                archivo_isbn_drive = subir_adjunto_texto_asignatura(
+                    archivo_isbn_subido,
+                    servicio_drive,
+                    carpeta_textos
+                )
+                archivo_isbn_id = archivo_isbn_drive.get("id")
+
+            if archivo_codigo_barras_subido and archivo_codigo_barras_subido.filename:
+                archivo_codigo_barras_drive = subir_adjunto_texto_asignatura(
+                    archivo_codigo_barras_subido,
+                    servicio_drive,
+                    carpeta_textos
+                )
+                archivo_codigo_barras_id = archivo_codigo_barras_drive.get("id")
 
         # =================================================
         # INSERTAR TEXTO EN ASIGNATURA
@@ -9871,16 +9907,20 @@ def nuevo_texto_asignatura():
                 anio,
                 paginas,
                 isbn,
+                cdd,
+                codigo_uap,
                 doi,
                 url,
                 archivo,
+                archivo_isbn,
+                archivo_codigo_barras,
                 estado,
                 observaciones,
                 usuario
             )
             VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
             codigo,
@@ -9895,9 +9935,13 @@ def nuevo_texto_asignatura():
             anio,
             paginas,
             isbn,
+            cdd,
+            codigo_uap,
             doi,
             url,
             archivo_id,
+            archivo_isbn_id,
+            archivo_codigo_barras_id,
             1,
             observaciones,
             session.get("usuario")
@@ -9955,10 +9999,10 @@ def nuevo_texto_asignatura():
             VALUES (?, ?, ?, ?, ?, datetime('now'))
         """, (
             session.get("usuario"),
-            "EDITAR",
+            "CREAR",
             "TEXTOS EN ASIGNATURA",
-            id,
-            f"Se modificó el texto en asignatura: {codigo} - {asignatura}"
+            texto_id,
+            f"Se creó el texto en asignatura: {codigo} - {asignatura}"
         ))
 
         # =================================================
