@@ -3318,6 +3318,9 @@ def abrir_archivo(archivo_id):
             archivo_id
         )
 
+        print("ARCHIVO:", nombre)
+        print("MIME TYPE:", mime_type)
+
         return send_file(
             contenido,
             mimetype=mime_type,
@@ -9098,6 +9101,11 @@ def editar_texto_asignatura(id):
             ""
         ).strip()
 
+        periodo_academico = request.form.get(
+            "periodo_academico",
+            ""
+        ).strip()
+
         editorial = request.form.get(
             "editorial",
             ""
@@ -9361,6 +9369,7 @@ def editar_texto_asignatura(id):
                     asignatura = ?,
                     carrera = ?,
                     facultad = ?,
+                    periodo_academico = ?,
                     editorial = ?,
                     institucion = ?,
                     edicion = ?,
@@ -9384,6 +9393,7 @@ def editar_texto_asignatura(id):
                 asignatura,
                 carrera,
                 facultad,
+                periodo_academico,
                 editorial,
                 institucion,
                 edicion,
@@ -9777,6 +9787,11 @@ def nuevo_texto_asignatura():
         ""
     ).strip()
 
+    periodo_academico = request.form.get(
+        "periodo_academico",
+        ""
+    ).strip()
+
     editorial = request.form.get(
         "editorial",
         ""
@@ -10059,6 +10074,7 @@ def nuevo_texto_asignatura():
                 asignatura,
                 carrera,
                 facultad,
+                periodo_academico,
                 editorial,
                 institucion,
                 edicion,
@@ -10080,13 +10096,14 @@ def nuevo_texto_asignatura():
             )
             VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
             codigo,
             asignatura,
             carrera,
             facultad,
+            periodo_academico,
             editorial,
             institucion,
             edicion,

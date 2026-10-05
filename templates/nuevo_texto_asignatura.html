@@ -689,6 +689,48 @@ Nuevo Texto en asignatura - Sistema DICyT
 
         </div>
 
+        <!-- PERÍODO ACADÉMICO -->
+        <div class="form-grupo">
+            <label>
+                Período académico
+            </label>
+
+            <select name="periodo_academico">
+                <option value="">Seleccione el período</option>
+
+                <option
+                    value="I-2026"
+                    {% if request.form.get('periodo_academico') == 'I-2026' %}selected{% endif %}
+                >
+                    I-2026
+                </option>
+
+                <option
+                    value="II-2026"
+                    {% if request.form.get('periodo_academico') == 'II-2026' %}selected{% endif %}
+                >
+                    II-2026
+                </option>
+
+                <option
+                    value="I-2027"
+                    {% if request.form.get('periodo_academico') == 'I-2027' %}selected{% endif %}
+                >
+                    I-2027
+                </option>
+
+                <option
+                    value="II-2027"
+                    {% if request.form.get('periodo_academico') == 'II-2027' %}selected{% endif %}
+                >
+                    II-2027
+                </option>
+            </select>
+
+            <span class="texto-ayuda">
+                Seleccione el período académico correspondiente.
+            </span>
+        </div>
 
     </div>
 
