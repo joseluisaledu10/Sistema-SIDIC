@@ -617,6 +617,73 @@ def crear_bd():
         """)
 
     # =========================================================
+    # TABLA ÁREAS
+    # =========================================================
+
+    conexion.execute("""
+        CREATE TABLE IF NOT EXISTS areas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            codigo TEXT NOT NULL UNIQUE,
+            nombre TEXT NOT NULL UNIQUE,
+
+            color TEXT,
+
+            estado INTEGER NOT NULL DEFAULT 1,
+
+            observaciones TEXT,
+
+            fecha_registro TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # =========================================================
+    # ÁREAS INICIALES DICyT
+    # =========================================================
+
+    areas_iniciales = [
+        ("ACJyP", "Área de Ciencias Jurídicas y Políticas"),
+        ("ACEF", "Área de Ciencias Económicas y Financieras"),
+        ("ACS", "Área de Ciencias de la Salud"),
+        ("ACSyH", "Área de Ciencias Sociales y Humanísticas"),
+        ("ACyT", "Área de Ciencia y Tecnología"),
+        ("ACBN", "Área de Ciencias Biológicas y Naturales")
+    ]
+
+    for codigo, nombre in areas_iniciales:
+
+        conexion.execute("""
+            INSERT OR IGNORE INTO areas (
+                codigo,
+                nombre
+            )
+            VALUES (?, ?)
+        """, (codigo, nombre))
+
+    # =========================================================
+    # RELACIÓN INVESTIGADORES - ÁREAS
+    # =========================================================
+
+    conexion.execute("""
+        CREATE TABLE IF NOT EXISTS investigadores_areas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            investigador_id INTEGER NOT NULL,
+            area_id INTEGER NOT NULL,
+
+            FOREIGN KEY (investigador_id)
+                REFERENCES investigadores(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (area_id)
+                REFERENCES areas(id)
+                ON DELETE CASCADE,
+
+            UNIQUE(investigador_id, area_id)
+        )
+    """)
+
+    # =========================================================
 
     # TABLA PUBLICACIONES
 
@@ -3866,14 +3933,29 @@ def ver_investigador(id):
         WHERE id = ?
     """, (id,)).fetchone()
 
-    conexion.close()
-
     if investigador is None:
+        conexion.close()
         return redirect(url_for("investigadores"))
+
+    # =====================================================
+    # OBTENER ÁREA DEL INVESTIGADOR
+    # =====================================================
+
+    area = conexion.execute("""
+        SELECT a.id, a.codigo, a.nombre
+        FROM investigadores_areas ia
+        INNER JOIN areas a
+            ON a.id = ia.area_id
+        WHERE ia.investigador_id = ?
+        LIMIT 1
+    """, (id,)).fetchone()
+
+    conexion.close()
 
     return render_template(
         "ver_investigador.html",
         investigador=investigador,
+        area=area,
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
@@ -4019,6 +4101,11 @@ def nuevo_investigador():
             "linea_investigacion", ""
         ).strip()
 
+        # =====================================================
+        # ÁREAS DE INVESTIGACIÓN
+        # =====================================================
+
+        area_id = request.form.get("areas", "").strip()
 
         # =====================================================
         # IDENTIFICADORES CIENTÍFICOS
@@ -4173,7 +4260,7 @@ def nuevo_investigador():
         # GUARDAR INVESTIGADOR
         # =====================================================
 
-        conexion.execute("""
+        cursor = conexion.execute("""
             INSERT INTO investigadores (
 
                 codigo,
@@ -4262,6 +4349,24 @@ def nuevo_investigador():
             session.get("usuario")
         ))
 
+        # =====================================================
+        # GUARDAR ÁREA DEL INVESTIGADOR
+        # =====================================================
+
+        investigador_id = cursor.lastrowid
+
+        if area_id:
+
+            conexion.execute("""
+                INSERT OR IGNORE INTO investigadores_areas (
+                    investigador_id,
+                    area_id
+                )
+                VALUES (?, ?)
+            """, (
+                investigador_id,
+                area_id
+            ))
 
         conexion.commit()
         conexion.close()
@@ -4379,6 +4484,15 @@ def editar_investigador(id):
 
         linea_investigacion = request.form.get(
             "linea_investigacion",
+            ""
+        ).strip()
+
+        # =================================================
+        # ÁREA DEL INVESTIGADOR
+        # =================================================
+
+        area_id = request.form.get(
+            "areas",
             ""
         ).strip()
 
@@ -4530,22 +4644,68 @@ def editar_investigador(id):
             id
         ))
 
+        # =================================================
+        # ACTUALIZAR ÁREA DEL INVESTIGADOR
+        # =================================================
+
+        conexion.execute("""
+            DELETE FROM investigadores_areas
+            WHERE investigador_id = ?
+        """, (id,))
+
+
+        if area_id:
+
+            conexion.execute("""
+                INSERT OR IGNORE INTO investigadores_areas (
+                    investigador_id,
+                    area_id
+                )
+                VALUES (?, ?)
+            """, (
+                id,
+                area_id
+            ))
+
+
         conexion.commit()
         conexion.close()
 
-        return redirect(
-            url_for("investigadores")
-        )
+        return redirect(url_for("investigadores"))
 
     # =====================================================
     # MOSTRAR FORMULARIO
     # =====================================================
+
+    # OBTENER ÁREA ACTUAL DEL INVESTIGADOR
+    area_actual = conexion.execute("""
+        SELECT area_id
+        FROM investigadores_areas
+        WHERE investigador_id = ?
+        LIMIT 1
+    """, (id,)).fetchone()
+
+    area_id_actual = (
+        area_actual["area_id"]
+        if area_actual
+        else None
+    )
+
+    # OBTENER ÁREAS DISPONIBLES
+    areas = conexion.execute("""
+        SELECT id, codigo, nombre
+        FROM areas
+        WHERE estado = 1
+        ORDER BY id
+    """).fetchall()
 
     conexion.close()
 
     return render_template(
         "editar_investigador.html",
         investigador=investigador,
+        areas=areas,
+        area_id_actual=area_id_actual,
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )

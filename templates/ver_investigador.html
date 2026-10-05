@@ -677,12 +677,22 @@ Ver Investigador - DICyT
             <div class="dato">
 
                 <span class="dato-label">
-                    Facultad
+                    Área de investigación
                 </span>
 
                 <span class="dato-valor">
 
-                    {{ investigador["facultad"] or "No registrado" }}
+                    {% if area %}
+
+                        {{ area["nombre"] }}
+
+                    {% else %}
+
+                        <span class="dato-vacio">
+                            No asignada
+                        </span>
+
+                    {% endif %}
 
                 </span>
 

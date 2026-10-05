@@ -609,16 +609,37 @@ Editar Investigador - DICyT
 
                 <div class="campo">
 
-                    <label for="facultad">
-                        Facultad
+                    <label for="areas">
+                        Facultad / Área
                     </label>
 
-                    <input
-                        type="text"
-                        id="facultad"
-                        name="facultad"
-                        value="{{ investigador['facultad'] or '' }}"
+                    <select
+                        id="areas"
+                        name="areas"
                     >
+
+                        <option value="">
+                            Seleccionar área
+                        </option>
+
+                        {% for area in areas %}
+
+                            <option
+                                value="{{ area['id'] }}"
+                                {% if area['id'] == area_id_actual %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ area['nombre'] }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <small>
+                        Seleccione el área de investigación correspondiente.
+                    </small>
 
                 </div>
 
