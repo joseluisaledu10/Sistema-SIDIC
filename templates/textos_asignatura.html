@@ -520,6 +520,32 @@ Textos en asignatura - Sistema DICyT
 
 }
 
+.acciones-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-excel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    background: #217346;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-excel:hover {
+    background: #185c37;
+    color: #fff;
+}
+
 </style>
 
 {% endblock %}
@@ -531,39 +557,40 @@ Textos en asignatura - Sistema DICyT
      ENCABEZADO
 ===================================================== -->
 
+
 <div class="pagina-encabezado">
-
     <div class="pagina-titulo">
-
         <h2>
-
             <i class="fas fa-book-open"></i>
-
             Textos en asignatura
-
         </h2>
-
-        <p>
-
-            Registro de materiales académicos utilizados en asignaturas
-
-        </p>
-
+        <p>Registro de materiales académicos utilizados en asignaturas</p>
     </div>
 
+    <div class="acciones-encabezado">
+        <a
+            href="{{ url_for(
+                'exportar_textos_asignatura',
+                buscar=buscar,
+                anio=anio,
+                estado=estado
+            ) }}"
+            class="btn-excel"
+        >
+            <i class="fas fa-file-excel"></i>
+            Descargar Excel
+        </a>
 
-    <a
-        href="{{ url_for('nuevo_texto_asignatura') }}"
-        class="btn-nuevo"
-    >
-
-        <i class="fas fa-plus"></i>
-
-        Nuevo texto
-
-    </a>
-
+        <a
+            href="{{ url_for('nuevo_texto_asignatura') }}"
+            class="btn-nuevo"
+        >
+            <i class="fas fa-plus"></i>
+            Nuevo texto
+        </a>
+    </div>
 </div>
+
 
 
 <!-- =====================================================

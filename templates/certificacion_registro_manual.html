@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+
+{% block title %}
+Registro manual - Sistema DICyT
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .certificados-contenedor {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .certificados-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .certificados-encabezado h1 {
+        color: #0d3b66;
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .certificados-encabezado p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .btn-volver {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .btn-volver:hover {
+        opacity: 0.9;
+    }
+
+    .opciones-certificado {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 25px;
+    }
+
+    .opcion-certificado {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        border: 1px solid #e1e5ea;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .opcion-certificado:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+        border-color: #0d3b66;
+    }
+
+    .opcion-icono {
+        width: 62px;
+        height: 62px;
+        border-radius: 12px;
+        background: #eaf1f8;
+        color: #0d3b66;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    .opcion-certificado h2 {
+        color: #0d3b66;
+        font-size: 21px;
+        margin-bottom: 10px;
+    }
+
+    .opcion-certificado p {
+        color: #6b7280;
+        line-height: 1.6;
+        font-size: 14px;
+        margin-bottom: 18px;
+        flex-grow: 1;
+    }
+
+    .opcion-lista {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px 0;
+    }
+
+    .opcion-lista li {
+        color: #374151;
+        font-size: 14px;
+        padding: 6px 0;
+    }
+
+    .opcion-lista li i {
+        color: #0d3b66;
+        margin-right: 8px;
+    }
+
+    .opcion-accion {
+        margin-top: auto;
+        color: #0d3b66;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+
+        .opciones-certificado {
+            grid-template-columns: 1fr 1fr;
+        }
+
+    }
+
+    @media (max-width: 650px) {
+
+        .opciones-certificado {
+            grid-template-columns: 1fr;
+        }
+
+        .certificados-encabezado {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+    }
+
+</style>
+
+
+<div class="certificados-contenedor">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="certificados-encabezado">
+
+        <div>
+
+            <h1>
+                <i class="fa-solid fa-pen-to-square"></i>
+                Registro manual
+            </h1>
+
+            <p>
+                Seleccione el tipo de certificado que desea generar.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('nuevo_certificado') }}"
+            class="btn-volver"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Volver
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         OPCIONES
+    ====================================================== -->
+
+    <div class="opciones-certificado">
+
+
+        <!-- =================================================
+             MONOGRAFÍA
+        ================================================== -->
+
+        <a
+            href="#"
+            class="opcion-certificado"
+        >
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-file-lines"></i>
+
+            </div>
+
+
+            <h2>
+                Monografía
+            </h2>
+
+
+            <p>
+                Generación de certificados correspondientes a
+                trabajos de investigación en modalidad de monografía.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos del investigador
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título de la monografía
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Área de investigación
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- =================================================
+             ABP
+        ================================================== -->
+
+        <a
+            href="#"
+            class="opcion-certificado"
+        >
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-lightbulb"></i>
+
+            </div>
+
+
+            <h2>
+                Aprendizaje Basado en Problemas (ABP)
+            </h2>
+
+
+            <p>
+                Certificados relacionados con trabajos desarrollados
+                mediante la metodología de Aprendizaje Basado en Problemas.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos del investigador
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título del trabajo
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Área de investigación
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- =================================================
+             PERFIL DE INVESTIGACIÓN
+        ================================================== -->
+
+        <a
+            href="#"
+            class="opcion-certificado"
+        >
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-user-graduate"></i>
+
+            </div>
+
+
+            <h2>
+                Perfil de Investigación
+            </h2>
+
+
+            <p>
+                Certificados correspondientes a perfiles de investigación
+                registrados mediante el sistema de forma manual.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos del investigador
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título del perfil
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Área de investigación
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- =================================================
+             INFORME DE INVESTIGACIÓN
+        ================================================== -->
+
+        <a
+            href="#"
+            class="opcion-certificado"
+        >
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-file-contract"></i>
+
+            </div>
+
+
+            <h2>
+                Informe de Investigación
+            </h2>
+
+
+            <p>
+                Certificados correspondientes a informes de investigación
+                registrados mediante el sistema de forma manual.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos del investigador
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título del informe
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Área de investigación
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- =================================================
+             ARTÍCULO ELABORADO
+        ================================================== -->
+
+        <a
+            href="#"
+            class="opcion-certificado"
+        >
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-newspaper"></i>
+
+            </div>
+
+
+            <h2>
+                Artículo Elaborado (Manuscrito)
+            </h2>
+
+
+            <p>
+                Certificados para artículos científicos elaborados en
+                calidad de manuscrito y registrados manualmente.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos del investigador
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título del manuscrito
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Área de investigación
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- =================================================
+             PRODUCCIÓN INTELECTUAL
+        ================================================== -->
+
+        <a href="{{ url_for('nuevo_certificado_produccion_intelectual') }}"
+            class="opcion-certificado">
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-book-open"></i>
+
+            </div>
+
+
+            <h2>
+                Producción Intelectual
+            </h2>
+
+
+            <p>
+                Certificados relacionados con producción intelectual
+                y publicaciones que requieren un registro manual.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos del investigador
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Datos de la producción
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Información de publicación
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

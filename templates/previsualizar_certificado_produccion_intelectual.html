@@ -1,0 +1,1200 @@
+{% extends "base.html" %}
+
+{% block title %}
+Previsualizar Certificado - Producción Intelectual
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   PREVISUALIZACIÓN
+========================================================= */
+
+.preview-contenedor {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.preview-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.preview-titulo h2 {
+    margin: 0 0 5px 0;
+}
+
+.preview-titulo p {
+    margin: 0;
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   HOJA CARTA
+========================================================= */
+
+.certificado-hoja {
+    position: relative;
+    width: 216mm;
+    height: 279.4mm;
+    margin: 0 auto;
+    background-image: url("{{ url_for('static', filename='certificados/fondo_produccion_intelectual.png') }}");
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+body {
+    font-family: "Calibri", Arial, sans-serif;
+}
+
+/* =========================================================
+   CONTENIDO
+========================================================= */
+
+.certificado-contenido {
+    position: absolute;
+    left: 43mm;
+    right: 7mm;
+    top: 25mm;
+    bottom: 25mm;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   NÚMERO DE CERTIFICADO
+========================================================= */
+
+.certificado-numero {
+    position: absolute;
+
+    top: -10mm;
+    right: -3mm;
+
+    min-width: 45mm;
+    padding: 7px 7px;
+
+    box-sizing: border-box;
+
+    background: #F2F2F2;
+    color: #1F1F1F;
+
+    text-align: center;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    border-radius: 2px;
+}
+
+
+/* =========================================================
+   QR
+========================================================= */
+
+.certificado-qr {
+    position: absolute;
+
+    left: -40mm;
+    bottom: -8mm;
+
+    width: 28mm;
+
+    text-align: center;
+}
+
+.certificado-qr img {
+    width: 25mm;
+    height: 25mm;
+
+    display: block;
+
+    margin: 0 auto;
+}
+
+.certificado-qr-codigo {
+    margin-top: -1mm;
+    font-family: "Calibri", Arial, sans-serif;
+    font-size: 6.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #111827;
+    text-align: center;
+}
+
+.certificado-qr-codigo strong {
+    display: block;
+    margin-top: 0.5mm;
+    font-size: 8px;
+    letter-spacing: 0.4px;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.certificado-encabezado {
+    text-align: center;
+
+    margin-top: 22mm;
+    margin-bottom: 10mm;
+
+    position: relative;
+    top: -25mm;
+}
+
+.vicerrectorado {
+
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+
+    margin-bottom: 2mm;
+}
+
+.direccion-dicyt {
+
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   DESTINATARIO
+========================================================= */
+
+.certifica-destinatario {
+    display: flex;
+    align-items: center;
+
+    position: relative;
+    left: 8mm;
+
+    width: 140mm;
+
+    margin-bottom: 7mm;
+}
+
+.certifica-a {
+    flex: 0 0 auto;
+
+    font-size: 17px;
+    font-weight: 400;
+
+    margin-right: 5mm;
+}
+
+.certificado-nombre {
+    flex: 1;
+
+    font-size: 25px;
+    font-weight: 700;
+
+    line-height: 1.15;
+
+    text-align: center;
+
+    min-width: 0;
+
+    overflow-wrap: break-word;
+}
+
+
+/* =========================================================
+   INTRODUCCIÓN
+========================================================= */
+
+.certificado-introduccion {
+    font-size: 16px;
+    line-height: 1.5;
+
+    text-align: justify;
+
+    margin-bottom: 7mm;
+}
+
+
+/* =========================================================
+   DETALLES
+========================================================= */
+
+.certificado-detalles {
+    width: 70%;
+
+    margin: 0 auto;
+
+    border-collapse: collapse;
+
+    font-size: 15px;
+
+    line-height: 1.4;
+}
+
+
+.certificado-detalles td {
+    padding: 2.5px 3px;
+
+    vertical-align: top;
+}
+
+.certificado-detalles td:first-child {
+    width: 50%;
+
+    font-weight: 700;
+
+    text-align: left;
+}
+
+.certificado-detalles td:last-child {
+    width: 40%;
+
+    text-align: left;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+
+
+/* =========================================================
+   TÍTULO
+========================================================= */
+
+.fila-titulo td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.titulo-etiqueta {
+    font-weight: 700;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.titulo-articulo {
+    font-weight: 700;
+    font-size: 19px;
+    text-align: center;
+    line-height: 1.4;
+
+    width: 120%;
+    margin-left: -7.5%;
+}
+
+
+/* =========================================================
+   TEXTO FINAL
+========================================================= */
+
+.certificado-final {
+    margin-top: 9mm;
+
+    font-size: 16px;
+
+    line-height: 1.5;
+
+    text-align: justify;
+}
+
+
+/* =========================================================
+   FECHA
+========================================================= */
+
+.certificado-fecha {
+    margin-top: 8mm;
+
+    font-size: 16px;
+
+    text-align: right;
+}
+
+.certificado-fecha {
+    position: relative;
+    top: -6mm;
+}
+
+/* =========================================================
+   FIRMA
+========================================================= */
+
+.certificado-firma {
+    position: absolute;
+    left: 40mm;
+    right: 10mm;
+    bottom: 12mm;
+
+    text-align: center;
+}
+
+.firma-linea {
+    width: 65mm;
+
+    margin: 0 auto 4px auto;
+
+    border-top: 1px solid #111827;
+}
+
+.firma-nombre {
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.firma-cargo {
+    font-size: 10px;
+
+    line-height: 1.25;
+
+    margin-top: 2px;
+}
+
+.firma-institucion {
+    font-size: 10px;
+
+    margin-top: 2px;
+}
+
+
+/* =========================================================
+   RECIBIDO
+========================================================= */
+
+.certificado-recibido {
+    position: absolute;
+
+    left: 25mm;
+    right: 25mm;
+
+    bottom: 10mm;
+
+    border-top: 1px solid #9ca3af;
+
+    padding-top: 4mm;
+
+    font-size: 10px;
+}
+
+.recibido-titulo {
+    font-weight: 700;
+
+    margin-bottom: 3mm;
+}
+
+.recibido-fila {
+    display: flex;
+
+    gap: 12mm;
+
+    margin-bottom: 2mm;
+}
+
+.recibido-item {
+    flex: 1;
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.preview-acciones {
+    max-width: 1100px;
+
+    margin: 22px auto 0 auto;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.preview-acciones-derecha {
+    display: flex;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   IMPRESIÓN
+========================================================= */
+
+@page {
+    size: Letter portrait;
+    margin: 0;
+}
+
+@media print {
+
+    html,
+    body {
+        width: 216mm;
+        height: 279.4mm;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        background: #ffffff !important;
+    }
+
+    .sidebar,
+    .navbar,
+    .preview-encabezado,
+    .preview-acciones {
+        display: none !important;
+    }
+
+    .preview-contenedor {
+        max-width: none;
+
+        margin: 0;
+        padding: 0;
+    }
+
+    .certificado-hoja {
+        width: 216mm;
+        height: 279.4mm;
+
+        margin: 0;
+
+        box-shadow: none;
+
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+.bloque-datos-certificado {
+    position: relative;
+    top: 10mm;
+}
+
+
+.alerta-borrador {
+    background: #fff4d6;
+    border: 1px solid #e4c56a;
+    border-left: 5px solid #d69e00;
+    color: #624b00;
+    padding: 12px 16px;
+    margin: 15px auto;
+    border-radius: 6px;
+    max-width: 1000px;
+}
+
+.alerta-borrador strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.alerta-borrador p {
+    margin: 0;
+}
+
+
+/* =====================================================
+   BOTONES DE ACCIONES - PREVISUALIZACIÓN
+===================================================== */
+
+.preview-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.preview-acciones-derecha {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.preview-acciones a,
+.preview-acciones button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 43px;
+    padding: 11px 18px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.preview-acciones a i,
+.preview-acciones button i {
+    font-size: 15px;
+}
+
+/* Acción principal */
+
+.preview-acciones .btn-primario {
+    background: #174a8b;
+    color: #ffffff;
+    border: 1px solid #174a8b;
+    box-shadow: 0 3px 7px rgba(23, 74, 139, 0.16);
+}
+
+.preview-acciones .btn-primario:hover {
+    background: #103967;
+    border-color: #103967;
+    box-shadow: 0 5px 12px rgba(23, 74, 139, 0.24);
+    transform: translateY(-1px);
+}
+
+/* Acción secundaria */
+
+.preview-acciones .btn-secundario {
+    background: #ffffff;
+    color: #344054;
+    border: 1px solid #d0d5dd;
+    box-shadow: 0 2px 5px rgba(16, 24, 40, 0.05);
+}
+
+.preview-acciones .btn-secundario:hover {
+    background: #f2f5f9;
+    color: #174a8b;
+    border-color: #a9bfdc;
+    transform: translateY(-1px);
+}
+
+/* Accesibilidad con teclado */
+
+.preview-acciones a:focus-visible,
+.preview-acciones button:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, 0.35);
+    outline-offset: 3px;
+}
+
+/* Formularios de los botones */
+
+.preview-acciones form {
+    display: inline-flex;
+    margin: 0;
+}
+
+/* Adaptación para pantallas pequeñas */
+
+@media (max-width: 600px) {
+    .preview-acciones {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .preview-acciones > a,
+    .preview-acciones-derecha {
+        width: 100%;
+    }
+
+    .preview-acciones-derecha {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .preview-acciones a,
+    .preview-acciones button,
+    .preview-acciones form {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .preview-acciones a,
+    .preview-acciones button {
+        transition: none;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="preview-contenedor">
+
+
+    {% if titulos_similares %}
+    <div style="background:#fff4d6; border:1px solid #e4c56a;
+                border-left:5px solid #d69e00; color:#624b00;
+                padding:14px 18px; margin-bottom:18px; border-radius:6px;">
+        <strong>⚠️ Atención: se encontraron títulos similares</strong>
+        <p>
+            Revise estos registros antes de emitir el certificado.
+            Esta advertencia no significa necesariamente que sea el mismo trabajo.
+        </p>
+
+        <ul>
+            {% for similar in titulos_similares %}
+            <li style="margin-bottom:10px;">
+                <strong>{{ similar.titulo }}</strong><br>
+                Autor: {{ similar.investigador or 'No especificado' }}<br>
+                Certificado: {{ similar.numero_certificado or 'Sin número' }}<br>
+                Similitud textual aproximada: {{ similar.similitud }}%
+
+                <br>
+                <a href="{{ url_for('previsualizar_certificado_produccion_intelectual', id=similar.id) }}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   style="display:inline-block; margin-top:6px;
+                          color:#1F4E79; font-weight:700;
+                          text-decoration:underline;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    Ver certificado existente
+                </a>
+
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+
+    {% if es_borrador %}
+    <div class="alerta-borrador">
+        <strong>
+            <i class="fa-solid fa-eye"></i>
+            Vista previa provisional
+        </strong>
+        <p>
+            Este certificado todavía no está registrado ni emitido.
+            Puedes volver al formulario para corregir los datos.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- =====================================================
+         ENCABEZADO DE LA VISTA
+    ====================================================== -->
+
+    <div class="preview-encabezado">
+
+        <div class="preview-titulo">
+
+            <h2>
+                <i class="fa-solid fa-eye"></i>
+                Previsualizar certificado
+            </h2>
+
+            <p>
+                Revise el diseño y la información antes de emitir el certificado.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CERTIFICADO
+    ====================================================== -->
+
+    <div class="certificado-hoja">
+
+
+        <div class="certificado-contenido">
+
+
+            <!-- =================================================
+                 NÚMERO
+            ================================================== -->
+
+            <div class="certificado-numero">
+
+                {% set partes_numero = certificado['numero_certificado'].split('-') %}
+
+                {% if partes_numero|length == 2 %}
+
+                    Nº DICyT. - DIR. {{ "%03d"|format(partes_numero[0]|int) }}/{{ partes_numero[1] }}
+
+                {% else %}
+
+                    {{ certificado['numero_certificado'] }}
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 QR
+            ================================================== -->
+
+            <div class="certificado-qr">
+
+                {% if certificado['archivo_qr'] %}
+
+                    <img
+                        src="{{ url_for(
+                            'static',
+                            filename=certificado['archivo_qr']
+                        ) }}"
+                        alt="Código QR de verificación"
+                    >
+
+                    <div class="certificado-qr-codigo">
+                        <div>Código de verificación:</div>
+                        <strong>{{ certificado['codigo_verificacion'][-8:] }}</strong>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 ENCABEZADO
+            ================================================== -->
+
+            <div class="certificado-encabezado">
+
+                <div class="vicerrectorado">
+                    VICERRECTORADO
+                </div>
+
+                <div class="direccion-dicyt">
+
+                    Dirección de Investigación,
+                    Ciencia y Tecnología
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DESTINATARIO
+            ================================================== -->
+
+            <div class="bloque-datos-certificado">
+
+                <div class="certifica-destinatario">
+
+                    <span class="certifica-a">A:</span>
+
+                    <span class="certificado-nombre">
+                        {{ certificado['investigador'] }}
+                    </span>
+
+                </div>
+
+
+                <!-- =================================================
+                    INTRODUCCIÓN
+                ================================================== -->
+
+                <div class="certificado-introduccion">
+
+                    Ha presentado trabajo(s) de <strong>Producción intelectual</strong>,
+                    el mismo que se adjunta al presente certificado,
+                    de acuerdo con el siguiente detalle:
+
+                </div>
+
+
+                <!-- =================================================
+                    DETALLES
+                ================================================== -->
+
+                <table class="certificado-detalles">
+
+                    <tr>
+
+                        <td>
+                            Tipo de documento:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['tipo_documento'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Participación:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['participacion'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr class="fila-titulo">
+
+                        <td colspan="2">
+
+                            <div class="titulo-etiqueta">
+                                Título del Artículo:
+                            </div>
+
+                            <div class="titulo-articulo">
+                                {{ certificado['titulo'] or '' }}
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Área / Facultad:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['area_facultad'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Fecha de publicación:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['fecha_publicacion'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Categoría:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['categoria'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Indexada:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['indexada'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Medio de Publicación:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['medio_publicacion'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Nombre de la revista:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['nombre_revista'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            DOI:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['doi'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            ISSN:
+                        </td>
+
+                        <td>
+
+                            {{ certificado['issn'] or '' }}
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <!-- =================================================
+                    TEXTO FINAL
+                ================================================== -->
+
+                <div class="certificado-final">
+
+                    Es cuanto se certifica para fines de ascenso
+                    en el Escalafón Docente de la
+                    Universidad Amazónica de Pando.
+
+                </div>
+
+
+                <!-- =================================================
+                    FECHA
+                ================================================== -->
+
+                <div class="certificado-fecha">
+
+                    {% set meses = {
+                        '01': 'enero',
+                        '02': 'febrero',
+                        '03': 'marzo',
+                        '04': 'abril',
+                        '05': 'mayo',
+                        '06': 'junio',
+                        '07': 'julio',
+                        '08': 'agosto',
+                        '09': 'septiembre',
+                        '10': 'octubre',
+                        '11': 'noviembre',
+                        '12': 'diciembre'
+                    } %}
+
+                    {% set partes = fecha_emision.split('-') %}
+
+                    {% if partes|length == 3 %}
+
+                        Cobija, {{ partes[2]|int }}
+                        de {{ meses.get(partes[1], partes[1]) }}
+                        de {{ partes[0] }}
+
+                    {% else %}
+
+                        Cobija, {{ fecha_emision }}
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             FIRMA
+        ====================================================== -->
+
+        <div class="certificado-firma">
+
+            <div class="firma-linea"></div>
+
+            {% if directora %}
+
+                <div class="firma-nombre">
+
+                    {{ directora['nombre_completo'] }}
+
+                </div>
+
+                <div class="firma-cargo">
+
+                    {{ directora['cargo'] }}
+
+                </div>
+
+            {% endif %}
+
+            <div class="firma-institucion">
+
+                Universidad Amazónica de Pando
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <!-- =====================================================
+        ACCIONES
+    ====================================================== -->
+
+    <div class="preview-acciones">
+
+        {% if es_borrador %}
+
+            <!-- EDITAR DATOS DEL BORRADOR -->
+
+            <a
+                href="{{ url_for('nuevo_certificado_produccion_intelectual') }}"
+                class="btn btn-secundario"
+                style="text-decoration:none;"
+            >
+                <i class="fa-solid fa-pen-to-square"></i>
+                Editar datos
+            </a>
+
+            <div class="preview-acciones-derecha">
+
+                <!-- EMITIR CERTIFICADO -->
+
+                <form
+                    method="POST"
+                    action="{{ url_for('generar_certificado_produccion_intelectual') }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('¿Deseas emitir definitivamente este certificado? Verifica que todos los datos sean correctos.');"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-primario"
+                    >
+                        <i class="fa-solid fa-certificate"></i>
+                        Emitir certificado
+                    </button>
+                </form>
+
+            </div>
+
+        {% elif certificado['estado'] == 'Emitido' and certificado['archivo_pdf'] %}
+
+            <!-- DESCARGAR PDF -->
+
+            <a
+                href="{{ url_for(
+                    'descargar_pdf_produccion_intelectual',
+                    id=certificado['id']
+                ) }}"
+                class="btn btn-primario"
+                style="text-decoration:none;"
+            >
+                <i class="fa-solid fa-download"></i>
+                Descargar PDF
+            </a>
+
+            <div class="preview-acciones-derecha">
+
+                <!-- VOLVER AL LISTADO GENERAL -->
+
+                <a
+                    href="{{ url_for('certificaciones') }}"
+                    class="btn btn-secundario"
+                    style="text-decoration:none;"
+                >
+                    <i class="fa-solid fa-list"></i>
+                    Volver al listado general
+                </a>
+
+            </div>
+
+        {% else %}
+
+            <!-- REGISTRO EXISTENTE AÚN NO EMITIDO -->
+
+            <a
+                href="{{ url_for('certificaciones') }}"
+                class="btn btn-secundario"
+                style="text-decoration:none;"
+            >
+                <i class="fa-solid fa-list"></i>
+                Volver al listado general
+            </a>
+
+            <div class="preview-acciones-derecha">
+
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'generar_certificado_produccion_intelectual',
+                        id=certificado['id']
+                    ) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('¿Deseas generar el PDF de este certificado?');"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-primario"
+                    >
+                        <i class="fa-solid fa-file-pdf"></i>
+                        Generar PDF
+                    </button>
+                </form>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+
+{% endblock %}

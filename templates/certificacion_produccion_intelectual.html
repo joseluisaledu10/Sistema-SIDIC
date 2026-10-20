@@ -1,0 +1,535 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Producción Intelectual - Sistema DICyT
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .formulario-contenedor {
+        max-width: 1100px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .formulario-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .formulario-encabezado h1 {
+        color: #0d3b66;
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .formulario-encabezado p {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .btn-volver {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .btn-volver:hover {
+        opacity: 0.9;
+    }
+
+    .formulario-card {
+        background: white;
+        border: 1px solid #e1e5ea;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .formulario-titulo {
+        background: #f7f9fc;
+        border-bottom: 1px solid #e1e5ea;
+        padding: 20px 25px;
+    }
+
+    .formulario-titulo h2 {
+        margin: 0;
+        color: #0d3b66;
+        font-size: 20px;
+    }
+
+    .formulario-titulo p {
+        margin: 6px 0 0;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .formulario-cuerpo {
+        padding: 28px;
+    }
+
+    .seccion-formulario {
+        margin-bottom: 30px;
+    }
+
+    .seccion-formulario:last-child {
+        margin-bottom: 0;
+    }
+
+    .seccion-formulario h3 {
+        color: #0d3b66;
+        font-size: 17px;
+        margin: 0 0 18px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .seccion-formulario h3 i {
+        margin-right: 8px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 22px;
+    }
+
+    .campo {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .campo-completo {
+        grid-column: 1 / -1;
+    }
+
+    .campo label {
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .campo label .obligatorio {
+        color: #dc3545;
+    }
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #374151;
+        background: white;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+        outline: none;
+        border-color: #0d3b66;
+        box-shadow: 0 0 0 3px rgba(13,59,102,0.10);
+    }
+
+    .campo textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .ayuda-campo {
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .acciones-formulario {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-cancelar,
+    .btn-continuar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 18px;
+        border-radius: 6px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .btn-cancelar {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-continuar {
+        background: #0d3b66;
+        color: white;
+    }
+
+    .btn-cancelar:hover,
+    .btn-continuar:hover {
+        opacity: 0.92;
+    }
+
+    @media (max-width: 800px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo {
+            grid-column: auto;
+        }
+
+        .formulario-encabezado {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .acciones-formulario {
+            flex-direction: column;
+        }
+
+        .btn-cancelar,
+        .btn-continuar {
+            justify-content: center;
+        }
+    }
+</style>
+
+{% set datos = datos_formulario or {} %}
+
+<div class="formulario-contenedor">
+
+    <div class="formulario-encabezado">
+        <div>
+            <h1>
+                <i class="fa-solid fa-book-open"></i>
+                Producción Intelectual
+            </h1>
+
+            <p>
+                Registro manual de información para la emisión del certificado.
+            </p>
+        </div>
+
+        <a href="{{ url_for('nuevo_certificado_registro_manual') }}"
+           class="btn-volver">
+            <i class="fa-solid fa-arrow-left"></i>
+            Volver
+        </a>
+    </div>
+
+    <div class="formulario-card">
+
+        <div class="formulario-titulo">
+            <h2>
+                <i class="fa-solid fa-file-circle-plus"></i>
+                Datos de la producción intelectual
+            </h2>
+
+            <p>
+                Complete la información solicitada para preparar el certificado.
+            </p>
+        </div>
+
+        <div class="formulario-cuerpo">
+
+            <form method="POST"
+                  action="{{ url_for('nuevo_certificado_produccion_intelectual') }}">
+
+                <!-- DATOS DEL INVESTIGADOR -->
+
+                <div class="seccion-formulario">
+                    <h3>
+                        <i class="fa-solid fa-user"></i>
+                        Datos del investigador
+                    </h3>
+
+                    <div class="form-grid">
+                        <div class="campo campo-completo">
+                            <label for="investigador">
+                                Investigador / Autor
+                                <span class="obligatorio">*</span>
+                            </label>
+
+                            <input type="text"
+                                   id="investigador"
+                                   name="investigador"
+                                   placeholder="Ingrese el nombre completo"
+                                   value="{{ datos.get('investigador', '') }}"
+                                   required>
+
+                            <span class="ayuda-campo">
+                                Puede registrar personas que no estén incorporadas
+                                en el módulo de investigadores.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN DEL DOCUMENTO -->
+
+                <div class="seccion-formulario">
+                    <h3>
+                        <i class="fa-solid fa-file-lines"></i>
+                        Información del documento
+                    </h3>
+
+                    <div class="form-grid">
+
+                        <div class="campo">
+                            <label for="tipo_documento">
+                                Tipo de documento
+                                <span class="obligatorio">*</span>
+                            </label>
+
+                            <select id="tipo_documento"
+                                    name="tipo_documento"
+                                    required>
+                                <option value="">Seleccione una opción</option>
+
+                                {% for opcion in [
+                                    'Artículo Científico',
+                                    'Artículo de Revisión',
+                                    'Libro',
+                                    'Capítulo de Libro',
+                                    'Otro'
+                                ] %}
+                                <option value="{{ opcion }}"
+                                    {% if datos.get('tipo_documento', '') == opcion %}selected{% endif %}>
+                                    {{ opcion }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="participacion">
+                                Participación
+                                <span class="obligatorio">*</span>
+                            </label>
+
+                            <select id="participacion"
+                                    name="participacion"
+                                    required>
+                                <option value="">Seleccione una opción</option>
+
+                                {% for opcion in [
+                                    'Autor',
+                                    'Co-Autor',
+                                    'Autor principal',
+                                    'Coordinador',
+                                    'Editor',
+                                    'Otro'
+                                ] %}
+                                <option value="{{ opcion }}"
+                                    {% if datos.get('participacion', '') == opcion %}selected{% endif %}>
+                                    {{ opcion }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="campo campo-completo">
+                            <label for="titulo">
+                                Título de la producción intelectual
+                                <span class="obligatorio">*</span>
+                            </label>
+
+                            <input type="text"
+                                   id="titulo"
+                                   name="titulo"
+                                   placeholder="Ingrese el título completo"
+                                   value="{{ datos.get('titulo', '') }}"
+                                   required>
+                        </div>
+
+                        <div class="campo">
+                            <label for="area_facultad">
+                                Área / Facultad
+                                <span class="obligatorio">*</span>
+                            </label>
+
+                            <select id="area_facultad"
+                                    name="area_facultad"
+                                    required>
+                                <option value="">Seleccione un área</option>
+
+                                {% for opcion in [
+                                    ('ACJyP', 'ACJyP'),
+                                    ('ACEF', 'ACEF'),
+                                    ('ACS', 'ACS'),
+                                    ('ACSyH', 'ACSyH'),
+                                    ('ACyT', 'ACyT'),
+                                    ('ACBN', 'ACBN'),
+                                    ('OTRA', 'Otra / No registrada')
+                                ] %}
+                                <option value="{{ opcion[0] }}"
+                                    {% if datos.get('area_facultad', '') == opcion[0] %}selected{% endif %}>
+                                    {{ opcion[1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="fecha_publicacion">
+                                Fecha de publicación
+                            </label>
+
+                            <input type="date"
+                                   id="fecha_publicacion"
+                                   name="fecha_publicacion"
+                                   value="{{ datos.get('fecha_publicacion', '') }}">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- PUBLICACIÓN -->
+
+                <div class="seccion-formulario">
+                    <h3>
+                        <i class="fa-solid fa-globe"></i>
+                        Datos de publicación
+                    </h3>
+
+                    <div class="form-grid">
+
+                        <div class="campo">
+                            <label for="categoria">Categoría</label>
+
+                            <select id="categoria" name="categoria">
+                                <option value="">Seleccione una opción</option>
+
+                                {% for opcion in ['Nacional', 'Internacional', 'Otro'] %}
+                                <option value="{{ opcion }}"
+                                    {% if datos.get('categoria', '') == opcion %}selected{% endif %}>
+                                    {{ opcion }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="indexada">Indexada</label>
+
+                            <input type="text"
+                                   id="indexada"
+                                   name="indexada"
+                                   placeholder="Ingrese la indexación correspondiente"
+                                   value="{{ datos.get('indexada', '') }}">
+                        </div>
+
+                        <div class="campo">
+                            <label for="medio_publicacion">Medio de publicación</label>
+
+                            <input type="text"
+                                   id="medio_publicacion"
+                                   name="medio_publicacion"
+                                   placeholder="Ingrese el medio de publicación"
+                                   value="{{ datos.get('medio_publicacion', '') }}">
+                        </div>
+
+                        <div class="campo">
+                            <label for="nombre_revista">Nombre de revista</label>
+
+                            <input type="text"
+                                   id="nombre_revista"
+                                   name="nombre_revista"
+                                   placeholder="Nombre de la revista"
+                                   value="{{ datos.get('nombre_revista', '') }}">
+                        </div>
+
+                        <div class="campo">
+                            <label for="doi">DOI</label>
+
+                            <input type="text"
+                                   id="doi"
+                                   name="doi"
+                                   placeholder="Ej.: 10.xxxx/xxxxx"
+                                   value="{{ datos.get('doi', '') }}">
+                        </div>
+
+                        <div class="campo">
+                            <label for="issn">ISSN</label>
+
+                            <input type="text"
+                                   id="issn"
+                                   name="issn"
+                                   placeholder="Ej.: 1234-5678"
+                                   value="{{ datos.get('issn', '') }}">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- OBSERVACIONES -->
+
+                <div class="seccion-formulario">
+                    <h3>
+                        <i class="fa-solid fa-comment"></i>
+                        Observaciones
+                    </h3>
+
+                    <div class="form-grid">
+                        <div class="campo campo-completo">
+                            <label for="observaciones">Observaciones</label>
+
+                            <textarea id="observaciones"
+                                      name="observaciones"
+                                      placeholder="Ingrese alguna observación adicional, si corresponde.">{{ datos.get('observaciones', '') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCIONES -->
+
+                <div class="acciones-formulario">
+
+                    <a href="{{ url_for('nuevo_certificado_registro_manual') }}"
+                       class="btn-cancelar">
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn-continuar">
+                        <i class="fa-solid fa-eye"></i>
+                        Continuar a la previsualización
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

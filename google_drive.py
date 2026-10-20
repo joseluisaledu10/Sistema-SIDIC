@@ -1,5 +1,6 @@
 import os
 import io
+import unicodedata
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -481,3 +482,133 @@ def descargar_archivo(
     contenido.seek(0)
 
     return contenido, nombre, mime_type
+
+# =========================================================
+
+# CERTIFICACIONES
+
+# =========================================================
+
+# =========================================================
+# NORMALIZA SIGLA ÁREA CERTIFICADOS
+# =========================================================
+
+def normalizar_sigla_area_certificado(area):
+    """Devuelve la sigla oficial del área o SIN_AREA si no se reconoce."""
+
+    if not area:
+        return "SIN_AREA"
+
+    texto = str(area).strip().lower()
+    texto = unicodedata.normalize("NFD", texto)
+    texto = "".join(
+        caracter for caracter in texto
+        if unicodedata.category(caracter) != "Mn"
+    )
+
+    # Reconocer siglas oficiales
+    siglas = {
+        "acjyp": "ACJyP",
+        "acef": "ACEF",
+        "acs": "ACS",
+        "acsyh": "ACSyH",
+        "acyt": "ACyT",
+        "acbn": "ACBN",
+    }
+
+    if texto in siglas:
+        return siglas[texto]
+
+    # Reconocer nombres completos de las áreas
+    if "juridic" in texto and "politic" in texto:
+        return "ACJyP"
+
+    if "economicas" in texto and "financier" in texto:
+        return "ACEF"
+
+    if "salud" in texto:
+        return "ACS"
+
+    if "sociales" in texto and "humanistic" in texto:
+        return "ACSyH"
+
+    if "ciencia y tecnologia" in texto or "ciencias y tecnologia" in texto:
+        return "ACyT"
+
+    if "biologicas" in texto and "naturales" in texto:
+        return "ACBN"
+
+    return "SIN_AREA"
+
+# =========================================================
+# CARPETA CERTIFICACIONES
+# =========================================================
+
+def obtener_carpeta_certificaciones(servicio):
+    carpeta_dicyt = obtener_carpeta_dicyt(servicio)
+
+    return obtener_o_crear_carpeta(
+        servicio,
+        "CERTIFICACIONES",
+        carpeta_dicyt
+    )
+
+# =========================================================
+# CARPETA CERTIFICACIONES-ÁREA + AÑO
+# =========================================================
+
+def obtener_carpeta_certificacion_por_area_anio(
+    servicio, tipo_archivo, area, anio
+):
+    """Obtiene o crea CERTIFICACIONES/TIPO/ÁREA/AÑO."""
+
+    tipo_archivo = str(tipo_archivo).strip().upper()
+
+    if tipo_archivo not in ("PDF", "QR"):
+        raise ValueError("El tipo de archivo debe ser PDF o QR.")
+
+    sigla_area = normalizar_sigla_area_certificado(area)
+    anio = str(anio).strip()
+
+    if not anio.isdigit() or len(anio) != 4:
+        raise ValueError("El año del certificado no es válido.")
+
+    carpeta_certificaciones = obtener_carpeta_certificaciones(servicio)
+
+    carpeta_tipo = obtener_o_crear_carpeta(
+        servicio,
+        tipo_archivo,
+        carpeta_certificaciones
+    )
+
+    carpeta_area = obtener_o_crear_carpeta(
+        servicio,
+        sigla_area,
+        carpeta_tipo
+    )
+
+    carpeta_anio = obtener_o_crear_carpeta(
+        servicio,
+        anio,
+        carpeta_area
+    )
+
+    return carpeta_anio
+
+# =========================================================
+# CARPETA CERTIFICACIONES-PDF
+# =========================================================
+
+def obtener_carpeta_pdf_certificacion(servicio, area, anio):
+    return obtener_carpeta_certificacion_por_area_anio(
+        servicio, "PDF", area, anio
+    )
+
+# =========================================================
+# CARPETA CERTIFICACIONES-QR
+# =========================================================
+
+def obtener_carpeta_qr_certificacion(servicio, area, anio):
+    return obtener_carpeta_certificacion_por_area_anio(
+        servicio, "QR", area, anio
+    )

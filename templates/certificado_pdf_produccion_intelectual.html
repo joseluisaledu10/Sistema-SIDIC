@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Certificado - Producción Intelectual
+    </title>
+
+    <style>
+
+        @page {
+            size: Letter portrait;
+            margin: 0;
+        }
+
+        html,
+        body {
+            width: 216mm;
+            height: 279.4mm;
+
+            margin: 0;
+            padding: 0;
+
+            background: #ffffff;
+        }
+
+        body {
+            font-family: "Calibri", Arial, sans-serif;
+        }
+
+        /* =====================================================
+           HOJA DEL CERTIFICADO
+        ====================================================== */
+
+        .certificado-hoja {
+
+            position: relative;
+
+            width: 216mm;
+            height: 279.4mm;
+
+            margin: 0;
+
+            background-image: url("file:///{{ ruta_fondo }}");
+
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            overflow: hidden;
+
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+
+
+        /* =====================================================
+           CONTENIDO
+        ====================================================== */
+
+        .certificado-contenido {
+
+            position: absolute;
+
+            left: 43mm;
+            right: 7mm;
+
+            top: 25mm;
+            bottom: 25mm;
+
+            box-sizing: border-box;
+        }
+
+
+        /* =====================================================
+           NÚMERO DE CERTIFICADO
+        ====================================================== */
+
+        .certificado-numero {
+
+            position: absolute;
+
+            top: -10mm;
+            right: -3mm;
+
+            min-width: 45mm;
+
+            padding: 7px 7px;
+
+            box-sizing: border-box;
+
+            background: #F2F2F2;
+            color: #1F1F1F;
+
+            text-align: center;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            border-radius: 2px;
+        }
+
+
+        /* =====================================================
+           QR
+        ====================================================== */
+
+        .certificado-qr {
+
+            position: absolute;
+
+            left: -40mm;
+            bottom: -8mm;
+
+            width: 28mm;
+
+            text-align: center;
+        }
+
+        .certificado-qr img {
+
+            width: 25mm;
+            height: 25mm;
+
+            display: block;
+
+            margin: 0 auto;
+        }
+
+        .certificado-qr-codigo {
+            margin-top: -1mm;
+            font-family: "Calibri", Arial, sans-serif;
+            font-size: 6.5px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #111827;
+            text-align: center;
+        }
+
+        .certificado-qr-codigo strong {
+            display: block;
+            margin-top: 0.5mm;
+            font-size: 8px;
+            letter-spacing: 0.4px;
+        }
+
+
+        /* =====================================================
+           ENCABEZADO
+        ====================================================== */
+
+        .certificado-encabezado {
+
+            text-align: center;
+
+            margin-top: 22mm;
+            margin-bottom: 10mm;
+
+            position: relative;
+
+            top: -25mm;
+        }
+
+        .vicerrectorado {
+
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+
+            margin-bottom: 2mm;
+        }
+
+        .direccion-dicyt {
+
+            font-family: Arial, sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           DESTINATARIO
+        ====================================================== */
+
+        .certifica-destinatario {
+
+            display: flex;
+
+            align-items: center;
+
+            position: relative;
+
+            left: 8mm;
+
+            width: 140mm;
+
+            margin-bottom: 7mm;
+        }
+
+        .certifica-a {
+
+            flex: 0 0 auto;
+
+            font-size: 17px;
+            font-weight: 400;
+
+            margin-right: 5mm;
+        }
+
+        .certificado-nombre {
+
+            flex: 1;
+
+            font-size: 25px;
+            font-weight: 700;
+
+            line-height: 1.15;
+
+            text-align: center;
+
+            min-width: 0;
+
+            overflow-wrap: break-word;
+        }
+
+
+        /* =====================================================
+           INTRODUCCIÓN
+        ====================================================== */
+
+        .certificado-introduccion {
+
+            font-size: 16px;
+
+            line-height: 1.5;
+
+            text-align: justify;
+
+            margin-bottom: 7mm;
+        }
+
+
+        /* =====================================================
+           DETALLES
+        ====================================================== */
+
+        .certificado-detalles {
+
+            width: 68%;
+
+            margin: 0 auto;
+
+            border-collapse: collapse;
+
+            font-size: 15px;
+
+            line-height: 1.4;
+        }
+
+        .certificado-detalles td {
+
+            padding: 2.5px 3px;
+
+            vertical-align: top;
+        }
+
+        .certificado-detalles td:first-child {
+
+            width: 68%;
+
+            font-weight: 700;
+
+            text-align: left;
+        }
+
+        .certificado-detalles td:last-child {
+
+            width: 62%;
+
+            text-align: left;
+        }
+
+
+        /* =====================================================
+           TÍTULO
+        ====================================================== */
+
+        .fila-titulo td {
+
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+
+        .titulo-etiqueta {
+
+            font-weight: 700;
+
+            text-align: left;
+
+            margin-bottom: 5px;
+        }
+
+        .titulo-articulo {
+
+            font-weight: 700;
+
+            font-size: 19px;
+
+            text-align: center;
+
+            line-height: 1.4;
+
+            width: 120%;
+
+            margin-left: -7.5%;
+        }
+
+
+        /* =====================================================
+           TEXTO FINAL
+        ====================================================== */
+
+        .certificado-final {
+
+            margin-top: 9mm;
+
+            font-size: 16px;
+
+            line-height: 1.5;
+
+            text-align: justify;
+        }
+
+
+        /* =====================================================
+           FECHA
+        ====================================================== */
+
+        .certificado-fecha {
+
+            margin-top: 8mm;
+
+            font-size: 16px;
+
+            text-align: right;
+
+            position: relative;
+
+            top: -6mm;
+        }
+
+
+        /* =====================================================
+           FIRMA
+        ====================================================== */
+
+        .certificado-firma {
+
+            position: absolute;
+
+            left: 40mm;
+            right: 10mm;
+
+            bottom: 12mm;
+
+            text-align: center;
+        }
+
+        .firma-linea {
+
+            width: 65mm;
+
+            margin: 0 auto 4px auto;
+
+            border-top: 1px solid #111827;
+        }
+
+        .firma-nombre {
+
+            font-size: 11px;
+
+            font-weight: 700;
+        }
+
+        .firma-cargo {
+
+            font-size: 10px;
+
+            line-height: 1.25;
+
+            margin-top: 2px;
+        }
+
+        .firma-institucion {
+
+            font-size: 10px;
+
+            margin-top: 2px;
+        }
+
+
+        /* =====================================================
+           BLOQUE DE DATOS
+        ====================================================== */
+
+        .bloque-datos-certificado {
+
+            position: relative;
+
+            top: 10mm;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="certificado-hoja">
+
+
+    <!-- =====================================================
+         CONTENIDO
+    ====================================================== -->
+
+    <div class="certificado-contenido">
+
+
+        <!-- =================================================
+             NÚMERO
+        ================================================== -->
+
+        <div class="certificado-numero">
+
+            {% set partes_numero = certificado['numero_certificado'].split('-') %}
+
+            {% if partes_numero|length == 2 %}
+
+                Nº DICyT. - DIR. {{ "%03d"|format(partes_numero[0]|int) }}/{{ partes_numero[1] }}
+
+            {% else %}
+
+                {{ certificado['numero_certificado'] }}
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             QR
+        ================================================== -->
+
+        <div class="certificado-qr">
+
+            {% if ruta_qr_archivo %}
+
+                <img
+                    src="file:///{{ ruta_qr_archivo }}"
+                    alt="Código QR de verificación"
+                >
+
+                <div class="certificado-qr-codigo">
+                    <div>Código de verificación:</div>
+                    <strong>{{ certificado['codigo_verificacion'][-8:] }}</strong>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             ENCABEZADO
+        ================================================== -->
+
+        <div class="certificado-encabezado">
+
+            <div class="vicerrectorado">
+
+                VICERRECTORADO
+
+            </div>
+
+            <div class="direccion-dicyt">
+
+                Dirección de Investigación,
+                Ciencia y Tecnología
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DATOS
+        ================================================== -->
+
+        <div class="bloque-datos-certificado">
+
+
+            <!-- =================================================
+                 DESTINATARIO
+            ================================================== -->
+
+            <div class="certifica-destinatario">
+
+                <span class="certifica-a">
+
+                    A:
+
+                </span>
+
+                <span class="certificado-nombre">
+
+                    {{ certificado['investigador'] }}
+
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 INTRODUCCIÓN
+            ================================================== -->
+
+            <div class="certificado-introduccion">
+
+                Ha presentado trabajo(s) de
+                <strong>Producción intelectual</strong>,
+                el mismo que se adjunta al presente certificado,
+                de acuerdo con el siguiente detalle:
+
+            </div>
+
+
+            <!-- =================================================
+                 DETALLES
+            ================================================== -->
+
+            <table class="certificado-detalles">
+
+
+                <tr>
+
+                    <td>
+                        Tipo de documento:
+                    </td>
+
+                    <td>
+                        {{ certificado['tipo_documento'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Participación:
+                    </td>
+
+                    <td>
+                        {{ certificado['participacion'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr class="fila-titulo">
+
+                    <td colspan="2">
+
+                        <div class="titulo-etiqueta">
+
+                            Título del Artículo:
+
+                        </div>
+
+                        <div class="titulo-articulo">
+
+                            {{ certificado['titulo'] or '' }}
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Área / Facultad:
+                    </td>
+
+                    <td>
+                        {{ certificado['area_facultad'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Fecha de publicación:
+                    </td>
+
+                    <td>
+                        {{ certificado['fecha_publicacion'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Categoría:
+                    </td>
+
+                    <td>
+                        {{ certificado['categoria'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Indexada:
+                    </td>
+
+                    <td>
+                        {{ certificado['indexada'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Medio de Publicación:
+                    </td>
+
+                    <td>
+                        {{ certificado['medio_publicacion'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Nombre de la revista:
+                    </td>
+
+                    <td>
+                        {{ certificado['nombre_revista'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        DOI:
+                    </td>
+
+                    <td>
+                        {{ certificado['doi'] or '' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        ISSN:
+                    </td>
+
+                    <td>
+                        {{ certificado['issn'] or '' }}
+                    </td>
+
+                </tr>
+
+
+            </table>
+
+
+            <!-- =================================================
+                 TEXTO FINAL
+            ================================================== -->
+
+            <div class="certificado-final">
+
+                Es cuanto se certifica para fines de ascenso
+                en el Escalafón Docente de la
+                Universidad Amazónica de Pando.
+
+            </div>
+
+
+            <!-- =================================================
+                 FECHA
+            ================================================== -->
+
+            <div class="certificado-fecha">
+
+
+                {% set meses = {
+
+                    '01': 'enero',
+                    '02': 'febrero',
+                    '03': 'marzo',
+                    '04': 'abril',
+                    '05': 'mayo',
+                    '06': 'junio',
+                    '07': 'julio',
+                    '08': 'agosto',
+                    '09': 'septiembre',
+                    '10': 'octubre',
+                    '11': 'noviembre',
+                    '12': 'diciembre'
+
+                } %}
+
+
+                {% set partes = fecha_emision.split('-') %}
+
+
+                {% if partes|length == 3 %}
+
+                    Cobija, {{ partes[2]|int }}
+                    de {{ meses.get(partes[1], partes[1]) }}
+                    de {{ partes[0] }}
+
+                {% else %}
+
+                    Cobija, {{ fecha_emision }}
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FIRMA
+    ====================================================== -->
+
+    <div class="certificado-firma">
+
+
+        <div class="firma-linea"></div>
+
+
+        {% if directora %}
+
+            <div class="firma-nombre">
+
+                {{ directora['nombre_completo'] }}
+
+            </div>
+
+
+            <div class="firma-cargo">
+
+                {{ directora['cargo'] }}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="firma-institucion">
+
+            Universidad Amazónica de Pando
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

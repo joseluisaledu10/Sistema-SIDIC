@@ -1,0 +1,966 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}
+Certificaciones - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   CERTIFICACIONES
+========================================================= */
+.certificaciones-contenedor {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+.certificaciones-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.certificaciones-titulo h2 {
+    color: #0d3b66;
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.certificaciones-titulo p {
+    margin: 0;
+    color: #6b7280;
+}
+
+/* =========================================================
+   TARJETAS DE RESUMEN
+========================================================= */
+.resumen-certificaciones {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.resumen-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.resumen-card:hover {
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.09);
+    transform: translateY(-2px);
+}
+
+.resumen-icono {
+    width: 45px;
+    height: 45px;
+    border-radius: 9px;
+    background: #eaf2f8;
+    color: #1f4e79;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.resumen-numero {
+    font-size: 23px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.1;
+}
+
+.resumen-label {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =========================================================
+   TARJETA PRINCIPAL
+========================================================= */
+.certificaciones-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.certificaciones-card-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.certificaciones-card-titulo i {
+    color: #1f4e79;
+    font-size: 18px;
+}
+
+.certificaciones-card-titulo h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #1f2937;
+}
+
+/* =========================================================
+   FILTROS
+========================================================= */
+.filtros-certificaciones {
+    display: grid;
+    grid-template-columns: minmax(200px, 2fr) repeat(4, minmax(130px, 1fr));
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 18px;
+    padding: 18px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.filtro-grupo label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.filtro-grupo input,
+.filtro-grupo select {
+    width: 100%;
+    min-width: 0;
+    height: 39px;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.filtro-grupo input:focus,
+.filtro-grupo select:focus {
+    outline: none;
+    border-color: #8B1E2D;
+    box-shadow: 0 0 0 2px rgba(139, 30, 45, 0.10);
+}
+
+.filtros-acciones {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    grid-column: 1 / -1;
+    padding-top: 3px;
+}
+
+.btn-filtrar-certificados,
+.btn-limpiar-filtros {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 15px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-filtrar-certificados {
+    background: #A94350;
+    color: #FFFFFF;
+    border: 1px solid #A94350;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.btn-filtrar-certificados:hover {
+    background: #8B1E2D;
+    border-color: #8B1E2D;
+}
+
+.btn-limpiar-filtros {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #4b5563;
+}
+
+.btn-limpiar-filtros:hover {
+    background: #f3f4f6;
+}
+
+.resultado-filtros {
+    margin: 0 0 16px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+/* =========================================================
+   TABLA - ENCABEZADO ROJO INSTITUCIONAL
+========================================================= */
+.tabla-certificaciones {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #eadfe1;
+}
+
+/* Encabezado rojo vino */
+.tabla-certificaciones thead th {
+    background: #A94350;
+    color: #FFFFFF;
+    padding: 14px 12px;
+    border: none;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Filas de la tabla */
+.tabla-certificaciones tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #eeeeee;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* Última fila sin borde inferior */
+.tabla-certificaciones tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Efecto suave al pasar el cursor */
+.tabla-certificaciones tbody tr:hover {
+    background-color: #F9EEF0;
+}
+
+/* Esquinas redondeadas del encabezado */
+.tabla-certificaciones thead th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.tabla-certificaciones thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+/* =========================================================
+   NÚMERO DE CERTIFICADO
+========================================================= */
+.numero-certificado {
+    font-weight: 700;
+    color: #1f4e79;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   INVESTIGADOR
+========================================================= */
+.investigador-nombre {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.investigador-sin-registro {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* =========================================================
+   ÁREA
+========================================================= */
+.area-certificado {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 9px;
+    border-radius: 7px;
+    background: #eef4fb;
+    border: 1px solid #d6e4f0;
+    color: #1f4e79;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.area-sin-asignar {
+    color: #9ca3af;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* =========================================================
+   TIPO DE DOCUMENTO
+========================================================= */
+.tipo-documento {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 9px;
+    border-radius: 7px;
+    background: #f3f6f9;
+    border: 1px solid #dce3e9;
+    color: #1f4e79;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   ESTADO
+========================================================= */
+.estado-certificado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.estado-activo {
+    background: #ecfdf3;
+    color: #15803d;
+}
+
+.estado-inactivo {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones-certificado {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.btn-accion-certificado {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    border: 1px solid #dbe2e8;
+    background: #ffffff;
+    color: #64748B;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+/* VER CERTIFICADO: AZUL */
+.btn-accion-certificado[href*="/certificaciones/ver/"] {
+    background: #EAF3FC;
+    border-color: #D2E4F7;
+    color: #2864A0;
+}
+
+.btn-accion-certificado[href*="/certificaciones/ver/"]:hover {
+    background: #D7E8FA;
+    border-color: #AFCFEF;
+    color: #214F80;
+}
+
+/* DESCARGAR PDF: ROJO VINO */
+.btn-accion-certificado[href*="/certificaciones/descargar/"] {
+    background: #F9EDEF;
+    border-color: #EED7DB;
+    color: #A94350;
+}
+
+.btn-accion-certificado[href*="/certificaciones/descargar/"]:hover {
+    background: #F0DADD;
+    border-color: #DDB8BE;
+    color: #8B1E2D;
+}
+
+/* MÁS OPCIONES */
+.btn-accion-certificado[href="#"] {
+    background: #F1F3F5;
+    border-color: #E0E4E8;
+    color: #64748B;
+}
+
+.btn-accion-certificado[href="#"]:hover {
+    background: #E5E9ED;
+    border-color: #CBD2D9;
+}
+
+/* ACCIONES DESHABILITADAS */
+.btn-accion-certificado.disabled {
+    color: #9ca3af;
+    cursor: default;
+}
+
+/* =========================================================
+   ESTADO VACÍO
+========================================================= */
+.estado-vacio {
+    text-align: center;
+    padding: 55px 20px;
+}
+
+.estado-vacio-icono {
+    font-size: 42px;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+}
+
+.estado-vacio-titulo {
+    font-size: 17px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 5px;
+}
+
+.estado-vacio-texto {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* =========================================================
+   BOTÓN NUEVO CERTIFICADO
+========================================================= */
+.btn-nuevo-certificado {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #0d3b66;
+    color: #ffffff;
+    padding: 11px 18px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-nuevo-certificado:hover {
+    background-color: #155d98;
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   CONTENEDOR DESPLAZAMIENTO PARA LA TABLA
+========================================================= */
+
+/* Tabla con desplazamiento vertical y horizontal */
+.contenedor-tabla-certificaciones {
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #eadfe1;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+/* Encabezado fijo al deslizar */
+.contenedor-tabla-certificaciones .tabla-certificaciones thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Mantener el diseño redondeado */
+.contenedor-tabla-certificaciones .tabla-certificaciones {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+}
+
+/* Estilo del deslizador */
+.contenedor-tabla-certificaciones::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+.contenedor-tabla-certificaciones::-webkit-scrollbar-thumb {
+    background: #b77b83;
+    border-radius: 10px;
+}
+
+.contenedor-tabla-certificaciones::-webkit-scrollbar-track {
+    background: #f7f0f1;
+}
+
+/* =========================================================
+   COLORES TARJETAS DE RESUMEN
+========================================================= */
+
+/* Colores de las tarjetas de resumen */
+/* Certificados registrados: azul claro */
+.resumen-card:nth-child(1) {
+    background: #EAF3FC;
+    border: 1px solid #D2E4F7;
+}
+
+.resumen-card:nth-child(1) .resumen-icono {
+    background: #D7E8FA;
+    color: #2864A0;
+}
+
+.resumen-card:nth-child(1) .resumen-numero {
+    color: #214F80;
+}
+
+.resumen-card:nth-child(1) .resumen-label {
+    color: #42678F;
+}
+
+
+/* Certificados emitidos: verde suave */
+.resumen-card:nth-child(2) {
+    background: #EAF5EE;
+    border: 1px solid #D3E9DA;
+}
+
+.resumen-card:nth-child(2) .resumen-icono {
+    background: #D6ECDD;
+    color: #24804A;
+}
+
+.resumen-card:nth-child(2) .resumen-numero {
+    color: #17663A;
+}
+
+.resumen-card:nth-child(2) .resumen-label {
+    color: #3F7654;
+}
+
+
+/* Certificados anulados: rojo vino suave */
+.resumen-card:nth-child(3) {
+    background: #F9EDEF;
+    border: 1px solid #EED7DB;
+}
+
+.resumen-card:nth-child(3) .resumen-icono {
+    background: #F0DADD;
+    color: #8B1E2D;
+}
+
+.resumen-card:nth-child(3) .resumen-numero {
+    color: #8B1E2D;
+}
+
+.resumen-card:nth-child(3) .resumen-label {
+    color: #8B1E2D;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 1100px) {
+    .filtros-certificaciones {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filtro-busqueda {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 900px) {
+    .resumen-certificaciones {
+        grid-template-columns: 1fr;
+    }
+
+    .certificaciones-card {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .certificaciones-encabezado {
+        flex-direction: column;
+    }
+
+    .filtros-certificaciones {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .filtro-busqueda,
+    .filtros-acciones {
+        grid-column: auto;
+    }
+
+    .btn-nuevo-certificado {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="certificaciones-contenedor">
+
+    <!-- ENCABEZADO -->
+    <div class="certificaciones-encabezado">
+        <div class="certificaciones-titulo">
+            <h2>
+                <i class="fa-solid fa-certificate"></i>
+                Certificaciones
+            </h2>
+            <p>
+                Gestión y consulta de certificados emitidos por la DICyT.
+            </p>
+        </div>
+
+        <a href="{{ url_for('nuevo_certificado') }}"
+           class="btn-nuevo-certificado">
+            <i class="fa-solid fa-plus"></i>
+            Nuevo certificado
+        </a>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="resumen-certificaciones">
+
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fa-solid fa-certificate"></i>
+            </div>
+            <div>
+                <div class="resumen-numero">
+                    {{ total_certificados }}
+                </div>
+                <div class="resumen-label">
+                    Certificados registrados
+                </div>
+            </div>
+        </div>
+
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <div class="resumen-numero">
+                    {{ total_activos }}
+                </div>
+                <div class="resumen-label">
+                    Certificados emitidos
+                </div>
+            </div>
+        </div>
+
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div>
+                <div class="resumen-numero">
+                    {{ total_anulados }}
+                </div>
+                <div class="resumen-label">
+                    Certificados anulados
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LISTADO -->
+    <div class="certificaciones-card">
+
+        <div class="certificaciones-card-titulo">
+            <i class="fa-solid fa-list"></i>
+            <h3>Historial de certificados</h3>
+        </div>
+
+        <!-- FILTROS -->
+        <form method="GET"
+              action="{{ url_for('certificaciones') }}"
+              class="filtros-certificaciones">
+
+            <div class="filtro-grupo filtro-busqueda">
+                <label for="buscar">Buscar certificado</label>
+                <input type="text"
+                       id="buscar"
+                       name="buscar"
+                       placeholder="N.º, investigador o documento..."
+                       value="{{ buscar_filtro }}">
+            </div>
+
+            <div class="filtro-grupo">
+                <label for="area">Área</label>
+                <select id="area" name="area">
+                    <option value="">Todas las áreas</option>
+                    {% for area_item in areas_disponibles %}
+                    <option value="{{ area_item['id'] }}"
+                        {% if area_filtro|string == area_item['id']|string %}selected{% endif %}>
+                        {{ area_item['codigo'] }} — {{ area_item['nombre'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label for="tipo">Tipo de documento</label>
+                <select id="tipo" name="tipo">
+                    <option value="">Todos los tipos</option>
+                    {% for tipo_item in tipos_disponibles %}
+                    <option value="{{ tipo_item }}"
+                        {% if tipo_filtro == tipo_item %}selected{% endif %}>
+                        {{ tipo_item }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label for="anio">Gestión</label>
+                <select id="anio" name="anio">
+                    <option value="">Todas las gestiones</option>
+                    {% for anio_item in anios_disponibles %}
+                    <option value="{{ anio_item }}"
+                        {% if anio_filtro|string == anio_item|string %}selected{% endif %}>
+                        {{ anio_item }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado">
+                    <option value="">Todos los estados</option>
+                    <option value="activo"
+                        {% if estado_filtro == 'activo' %}selected{% endif %}>
+                        Activos / Emitidos
+                    </option>
+                    <option value="anulado"
+                        {% if estado_filtro == 'anulado' %}selected{% endif %}>
+                        Anulados / No emitidos
+                    </option>
+                </select>
+            </div>
+
+            <div class="filtros-acciones">
+                <button type="submit" class="btn-filtrar-certificados">
+                    <i class="fa-solid fa-filter"></i>
+                    Filtrar
+                </button>
+
+                <a href="{{ url_for('certificaciones') }}"
+                   class="btn-limpiar-filtros">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Limpiar filtros
+                </a>
+            </div>
+        </form>
+
+        <div class="resultado-filtros">
+            Mostrando {{ certificados|length }} certificado(s).
+        </div>
+
+        <!-- TABLA -->
+        {% if certificados %}
+        <div class="contenedor-tabla-certificaciones">
+            <table id="tablaCertificaciones" class="tabla-certificaciones">
+                <thead>
+                    <tr>
+                        <th>N.º DICyT</th>
+                        <th>Investigador</th>
+                        <th>Área</th>
+                        <th>Tipo de documento</th>
+                        <th>Fecha de emisión</th>
+                        <th>Estado</th>
+                        <th style="width: 120px;">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for certificado in certificados %}
+                    <tr>
+                        <!-- NÚMERO -->
+                        <td>
+                            <span class="numero-certificado">
+                                {{ certificado['numero_completo'] }}
+                            </span>
+                        </td>
+
+                        <!-- INVESTIGADOR -->
+                        <td>
+                            {% if certificado['nombre'] %}
+                            <div class="investigador-nombre">
+                                {{ certificado['nombre'] }}
+                                {{ certificado['apellido'] }}
+                            </div>
+                            {% else %}
+                            <span class="investigador-sin-registro">
+                                Sin investigador registrado
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- ÁREA -->
+                        <td>
+                            {% if certificado['area_codigo'] %}
+                            <span class="area-certificado"
+                                  title="{{ certificado['area_nombre'] or certificado['area_codigo'] }}">
+                                {{ certificado['area_codigo'] }}
+                            </span>
+                            {% else %}
+                            <span class="area-sin-asignar">
+                                Sin área asignada
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- TIPO DE DOCUMENTO -->
+                        <td>
+                            <span class="tipo-documento">
+                                {% if certificado['tipo_documento'] == 'Texto de Asignatura' %}
+                                    <i class="fa-solid fa-book"></i>
+                                {% elif certificado['tipo_documento'] == 'Artículo' %}
+                                    <i class="fa-solid fa-newspaper"></i>
+                                {% elif certificado['tipo_documento'] == 'Libro' %}
+                                    <i class="fa-solid fa-book-open"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-file-lines"></i>
+                                {% endif %}
+                                {{ certificado['tipo_documento'] or 'No especificado' }}
+                            </span>
+                        </td>
+
+                        <!-- FECHA -->
+                        <td>
+                            {{ certificado['fecha_emision'] or 'No registrada' }}
+                        </td>
+
+                        <!-- ESTADO -->
+                        <td>
+                            {% if certificado['origen'] == 'manual' %}
+                                {% if certificado['estado'] == 'Emitido' %}
+                                <span class="estado-certificado estado-activo">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    Emitido
+                                </span>
+                                {% else %}
+                                <span class="estado-certificado estado-inactivo">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    {{ certificado['estado'] or 'Registrado' }}
+                                </span>
+                                {% endif %}
+                            {% else %}
+                                {% if certificado['estado'] == 1 %}
+                                <span class="estado-certificado estado-activo">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    Activo
+                                </span>
+                                {% else %}
+                                <span class="estado-certificado estado-inactivo">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    Anulado
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+
+                        <!-- ACCIONES -->
+                        <td>
+                            <div class="acciones-certificado">
+
+                                <!-- VER CERTIFICADO -->
+                                <a href="{{ url_for(
+                                        'ver_certificado',
+                                        id=certificado['id'],
+                                        origen=certificado['origen']
+                                    ) }}"
+                                class="btn-accion-certificado"
+                                title="Ver certificado"
+                                aria-label="Ver certificado"
+                                target="_blank"
+                                rel="noopener">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+                                <!-- DESCARGAR PDF -->
+                                <a href="{{ url_for(
+                                        'descargar_certificado',
+                                        id=certificado['id'],
+                                        origen=certificado['origen']
+                                    ) }}"
+                                   class="btn-accion-certificado"
+                                   title="Descargar PDF"
+                                   aria-label="Descargar PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </a>
+
+                                <!-- MÁS OPCIONES: PENDIENTE -->
+                                <a href="#"
+                                   class="btn-accion-certificado disabled"
+                                   title="Más opciones - Próximamente"
+                                   aria-label="Más opciones">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <!-- ESTADO VACÍO -->
+        <div class="estado-vacio">
+            <div class="estado-vacio-icono">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <div class="estado-vacio-titulo">
+                No se encontraron certificados
+            </div>
+            <div class="estado-vacio-texto">
+                No hay certificados que coincidan con los criterios seleccionados.
+                Prueba cambiando los filtros o pulsa «Limpiar filtros».
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

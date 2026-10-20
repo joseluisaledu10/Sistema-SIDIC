@@ -1,1014 +1,797 @@
+
 {% extends "base.html" %}
 
 {% block title %}
 Inicio - DICyT
 {% endblock %}
 
-
 {% block extra_css %}
-
 <style>
+/* =========================================================
+   CONTENEDOR GENERAL
+========================================================= */
+.inicio-container {
+    width: 100%;
+    color: #17365d;
+}
 
-    /* =========================================================
-       CONTENEDOR PRINCIPAL
-    ========================================================= */
+.seccion-inicio {
+    margin-bottom: 28px;
+}
 
-    .inicio-container {
+.titulo-seccion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
 
-        width: 100%;
+.titulo-seccion > i {
+    color: #174a83;
+    font-size: 18px;
+}
 
-    }
+.titulo-seccion h3 {
+    margin: 0;
+    color: #173b66;
+    font-size: 16px;
+    font-weight: 700;
+}
 
+/* =========================================================
+   BIENVENIDA
+========================================================= */
 
-    /* =========================================================
-       BIENVENIDA
-    ========================================================= */
+.bienvenida {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 155px;
+    padding: 28px 30px;
+    margin-bottom: 28px;
+    border-radius: 17px;
+    color: #fff;
 
-    .bienvenida {
+    /* Degradado azul a partir del color del menú lateral */
+    background: linear-gradient(
+        115deg,
+        #0d3b66 0%,
+        #155d98 50%,
+        #347fc0 100%
+    );
 
-        background: white;
+    box-shadow: 0 8px 22px rgba(21, 93, 152, 0.22);
+}
 
-        padding: 25px 28px;
+.bienvenida::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 310px;
+    height: 310px;
+    right: 12%;
+    top: -205px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.09);
+}
 
-        border-radius: 10px;
+.bienvenida::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 250px;
+    height: 250px;
+    right: 27%;
+    bottom: -205px;
+    border-radius: 50%;
+    border: 32px solid rgba(255,255,255,0.08);
+}
 
-        margin-bottom: 25px;
+.bienvenida-principal {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
 
-        box-shadow:
-            0 2px 8px rgba(0,0,0,0.08);
+.bienvenida-icono {
+    width: 66px;
+    height: 66px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 19px;
+    background: rgba(255,255,255,0.17);
+    border: 1px solid rgba(255,255,255,0.18);
+}
 
-        border-left: 4px solid #0d3b66;
+.bienvenida-icono i {
+    color: white;
+    font-size: 29px;
+}
 
-    }
+.bienvenida-texto h2 {
+    margin: 0 0 9px;
+    color: #fff;
+    font-size: 24px;
+    line-height: 1.3;
+    font-weight: 750;
+}
 
+.bienvenida-texto p {
+    margin: 0;
+    color: rgba(255,255,255,0.92);
+    font-size: 13px;
+    line-height: 1.8;
+}
 
-    .bienvenida h2 {
+.bienvenida-texto .bienvenida-institucion {
+    margin-top: 8px;
+    color: rgba(255,255,255,0.80);
+    font-size: 12px;
+}
 
-        color: #0d3b66;
+.bienvenida-resumen {
+    flex: 0 0 245px;
+    padding: 8px 0 8px 25px;
+    border-left: 1px solid rgba(255,255,255,0.32);
+}
 
-        margin: 0 0 8px 0;
+.bienvenida-resumen-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 700;
+}
 
-        font-size: 23px;
+.bienvenida-resumen-titulo i {
+    font-size: 20px;
+}
 
-        font-weight: 700;
+.bienvenida-resumen p {
+    margin: 0;
+    color: rgba(255,255,255,0.85);
+    font-size: 12px;
+    line-height: 1.8;
+}
 
-    }
+/* =========================================================
+   TARJETAS PRINCIPALES CON DEGRADADOS
+========================================================= */
+.tarjetas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
 
+.tarjeta {
+    --color-1: #2674ed;
+    --color-2: #36b6ef;
 
-    .bienvenida p {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-height: 145px;
+    padding: 21px;
+    border: none;
+    border-radius: 16px;
+    color: white;
+    background: linear-gradient(
+        130deg,
+        var(--color-1),
+        var(--color-2)
+    );
+    box-shadow: 0 7px 17px rgba(30,72,130,0.15);
+    transition: transform .22s ease, box-shadow .22s ease;
+}
 
-        color: #666;
+.tarjeta::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 155px;
+    height: 155px;
+    right: -52px;
+    bottom: -85px;
+    border: 22px solid rgba(255,255,255,0.09);
+    border-radius: 50%;
+}
 
-        line-height: 1.6;
+.tarjeta::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 100px;
+    height: 100px;
+    right: -25px;
+    top: -65px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+}
 
-        margin: 0;
+.tarjeta:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(30,72,130,0.22);
+}
 
-        font-size: 14px;
+.tarjeta-azul {
+    --color-1: #1760df;
+    --color-2: #35a9ef;
+}
 
-    }
+.tarjeta-verde {
+    --color-1: #00a98d;
+    --color-2: #30c9a6;
+}
 
+.tarjeta-morado {
+    --color-1: #7040e7;
+    --color-2: #ad65f5;
+}
 
-    /* =========================================================
-       TITULOS DE SECCIÓN
-    ========================================================= */
+.tarjeta-ambar {
+    --color-1: #ff762c;
+    --color-2: #ffb13f;
+}
 
-    .seccion-inicio {
+.icono-tarjeta {
+    flex: 0 0 60px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    background: rgba(255,255,255,0.19);
+    border: 1px solid rgba(255,255,255,0.18);
+}
 
-        margin-bottom: 25px;
+.icono-tarjeta i {
+    font-size: 26px;
+}
 
-    }
+.tarjeta-contenido {
+    flex: 1;
+    min-width: 0;
+}
 
+.tarjeta h3 {
+    margin: 0 0 8px;
+    color: rgba(255,255,255,0.94);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+}
 
-    .titulo-seccion {
+.numero {
+    margin: 0;
+    color: white;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
 
-        display: flex;
+.descripcion-tarjeta {
+    margin-top: 7px;
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    line-height: 1.4;
+}
 
-        align-items: center;
+/* =========================================================
+   INVESTIGADORES: TARJETAS BLANCAS
+========================================================= */
+.investigadores-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
 
-        gap: 10px;
+.investigador-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    min-width: 0;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e9eef5;
+    border-radius: 15px;
+    box-shadow: 0 4px 13px rgba(23,54,93,0.055);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
 
-        margin-bottom: 15px;
+.investigador-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 21px rgba(23,54,93,0.10);
+}
 
-    }
+.investigador-icono {
+    flex: 0 0 54px;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 23px;
+}
 
+.investigador-docente {
+    color: #2869d7;
+    background: linear-gradient(135deg, #e7efff, #d7e5ff);
+}
 
-    .titulo-seccion i {
+.investigador-estudiante {
+    color: #159e83;
+    background: linear-gradient(135deg, #ddf8ef, #c3f1e3);
+}
 
-        color: #0d3b66;
+.investigador-info {
+    flex: 1;
+    min-width: 0;
+}
 
-        font-size: 18px;
+.investigador-info .nombre {
+    color: #33445c;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
 
-    }
+.investigador-info .cantidad {
+    color: #173e76;
+    font-size: 29px;
+    line-height: 1.2;
+    font-weight: 800;
+}
 
+.investigador-info .descripcion {
+    margin-top: 5px;
+    color: #8994a5;
+    font-size: 11px;
+    line-height: 1.5;
+}
 
-    .titulo-seccion h3 {
+/* =========================================================
+   PRODUCCIÓN CIENTÍFICA: TARJETAS BLANCAS
+========================================================= */
+.produccion-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
 
-        margin: 0;
+.produccion-card {
+    --acento: #2675e8;
+    --fondo-icono: #e7f0ff;
 
-        color: #0d3b66;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 137px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid #e9eef5;
+    border-top: 3px solid var(--acento);
+    border-radius: 13px;
+    box-shadow: 0 4px 12px rgba(23,54,93,0.055);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
 
-        font-size: 17px;
+.produccion-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 20px rgba(23,54,93,0.10);
+}
 
-        font-weight: 700;
+.produccion-card .icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    color: var(--acento);
+    background: var(--fondo-icono);
+    font-size: 19px;
+}
 
-    }
+.produccion-card .nombre {
+    color: #536176;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+    margin-bottom: 5px;
+    overflow-wrap: anywhere;
+}
 
+.produccion-card .valor {
+    color: #173e76;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
 
-    /* =========================================================
-       TARJETAS
-    ========================================================= */
+/* Colores de cada categoría */
+.produccion-articulos {
+    --acento: #2674e8;
+    --fondo-icono: #e7f0ff;
+}
 
+.produccion-libros {
+    --acento: #16a085;
+    --fondo-icono: #def7ef;
+}
+
+.produccion-revistas {
+    --acento: #8a50df;
+    --fondo-icono: #f0e7ff;
+}
+
+.produccion-textos {
+    --acento: #e69b22;
+    --fondo-icono: #fff2d9;
+}
+
+.produccion-sociedades {
+    --acento: #e35d79;
+    --fondo-icono: #ffebf0;
+}
+
+/* =========================================================
+   ADAPTACIÓN A DIFERENTES PANTALLAS
+========================================================= */
+@media (max-width: 1250px) {
     .tarjetas {
-
-        display: grid;
-
-        grid-template-columns:
-            repeat(4, 1fr);
-
-        gap: 18px;
-
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
-
-    .tarjeta {
-
-        position: relative;
-
-        background: white;
-
-        padding: 20px;
-
-        border-radius: 10px;
-
-        min-height: 105px;
-
-        box-shadow:
-            0 2px 8px rgba(0,0,0,0.08);
-
-        border-left: 4px solid #0d3b66;
-
-        overflow: hidden;
-
-        transition: 0.2s;
-
-    }
-
-
-    .tarjeta:hover {
-
-        transform: translateY(-3px);
-
-        box-shadow:
-            0 5px 14px rgba(0,0,0,0.12);
-
-    }
-
-
-    .tarjeta h3 {
-
-        color: #666;
-
-        margin: 0 0 10px 0;
-
-        font-size: 13px;
-
-        font-weight: 600;
-
-        text-transform: uppercase;
-
-    }
-
-
-    .numero {
-
-        font-size: 30px;
-
-        font-weight: 700;
-
-        color: #0d3b66;
-
-        line-height: 1;
-
-    }
-
-
-    .descripcion-tarjeta {
-
-        margin-top: 7px;
-
-        color: #999;
-
-        font-size: 11px;
-
-    }
-
-
-    /* =========================================================
-       ICONO DE TARJETA
-    ========================================================= */
-
-    .icono-tarjeta {
-
-        position: absolute;
-
-        right: 17px;
-
-        top: 50%;
-
-        transform: translateY(-50%);
-
-        width: 44px;
-
-        height: 44px;
-
-        border-radius: 10px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        font-size: 20px;
-
-    }
-
-
-    /* =========================================================
-       COLORES
-    ========================================================= */
-
-    .tarjeta-azul {
-
-        border-left-color: #0d3b66;
-
-    }
-
-
-    .tarjeta-azul .icono-tarjeta {
-
-        background: #e8f1f8;
-
-        color: #0d3b66;
-
-    }
-
-
-    .tarjeta-celeste {
-
-        border-left-color: #2684b8;
-
-    }
-
-
-    .tarjeta-celeste .icono-tarjeta {
-
-        background: #e8f5fb;
-
-        color: #2684b8;
-
-    }
-
-
-    .tarjeta-verde {
-
-        border-left-color: #2e7d32;
-
-    }
-
-
-    .tarjeta-verde .icono-tarjeta {
-
-        background: #e8f5e9;
-
-        color: #2e7d32;
-
-    }
-
-
-    .tarjeta-morado {
-
-        border-left-color: #6a4c93;
-
-    }
-
-
-    .tarjeta-morado .icono-tarjeta {
-
-        background: #f1eafb;
-
-        color: #6a4c93;
-
-    }
-
-
-    .tarjeta-ambar {
-
-        border-left-color: #c27c0e;
-
-    }
-
-
-    .tarjeta-ambar .icono-tarjeta {
-
-        background: #fff5df;
-
-        color: #c27c0e;
-
-    }
-
-
-    .tarjeta-turquesa {
-
-        border-left-color: #168c8c;
-
-    }
-
-
-    .tarjeta-turquesa .icono-tarjeta {
-
-        background: #e5f7f7;
-
-        color: #168c8c;
-
-    }
-
-
-    .tarjeta-indigo {
-
-        border-left-color: #4056a1;
-
-    }
-
-
-    .tarjeta-indigo .icono-tarjeta {
-
-        background: #e9edff;
-
-        color: #4056a1;
-
-    }
-
-
-    .tarjeta-roja {
-
-        border-left-color: #b23a48;
-
-    }
-
-
-    .tarjeta-roja .icono-tarjeta {
-
-        background: #fdecef;
-
-        color: #b23a48;
-
-    }
-
-
-    /* =========================================================
-       PRODUCCIÓN CIENTÍFICA
-    ========================================================= */
 
     .produccion-grid {
-
-        display: grid;
-
-        grid-template-columns:
-            repeat(5, 1fr);
-
-        gap: 16px;
-
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .bienvenida-resumen {
+        flex-basis: 215px;
+    }
+}
 
-    .produccion-card {
-
-        background: white;
-
-        border-radius: 10px;
-
-        padding: 18px;
-
-        min-height: 90px;
-
-        box-shadow:
-            0 2px 8px rgba(0,0,0,0.08);
-
-        border-top: 3px solid #0d3b66;
-
-        transition: 0.2s;
-
+@media (max-width: 850px) {
+    .bienvenida {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
-
-    .produccion-card:hover {
-
-        transform: translateY(-2px);
-
-        box-shadow:
-            0 5px 14px rgba(0,0,0,0.11);
-
+    .bienvenida-resumen {
+        flex: auto;
+        width: 100%;
+        padding: 14px 0 0;
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.28);
     }
-
-
-    .produccion-card .icono {
-
-        font-size: 18px;
-
-        color: #0d3b66;
-
-        margin-bottom: 8px;
-
-    }
-
-
-    .produccion-card .nombre {
-
-        color: #666;
-
-        font-size: 12px;
-
-        font-weight: 600;
-
-        margin-bottom: 6px;
-
-    }
-
-
-    .produccion-card .valor {
-
-        color: #0d3b66;
-
-        font-size: 25px;
-
-        font-weight: 700;
-
-    }
-
-
-    /* =========================================================
-       INVESTIGADORES
-    ========================================================= */
 
     .investigadores-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
-        display: grid;
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-        gap: 18px;
-
+@media (max-width: 600px) {
+    .tarjetas {
+        grid-template-columns: 1fr;
+        gap: 13px;
     }
 
+    .tarjeta {
+        min-height: 125px;
+        padding: 19px;
+    }
+
+    .produccion-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .produccion-card {
+        padding: 15px;
+    }
+
+    .bienvenida {
+        padding: 22px;
+    }
+
+    .bienvenida-principal {
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .bienvenida-icono {
+        width: 49px;
+        height: 49px;
+        border-radius: 14px;
+    }
+
+    .bienvenida-icono i {
+        font-size: 22px;
+    }
+
+    .bienvenida-texto h2 {
+        font-size: 20px;
+    }
 
     .investigador-card {
-
-        background: white;
-
-        border-radius: 10px;
-
-        padding: 20px;
-
-        box-shadow:
-            0 2px 8px rgba(0,0,0,0.08);
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 16px;
-
+        padding: 18px;
     }
+}
 
-
-    .investigador-icono {
-
-        width: 48px;
-
-        height: 48px;
-
-        border-radius: 10px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        font-size: 21px;
-
-        flex-shrink: 0;
-
+@media (max-width: 380px) {
+    .produccion-grid {
+        grid-template-columns: 1fr;
     }
+}
 
-
-    .investigador-docente {
-
-        background: #e8f1f8;
-
-        color: #0d3b66;
-
+@media (prefers-reduced-motion: reduce) {
+    .tarjeta,
+    .investigador-card,
+    .produccion-card {
+        transition: none;
     }
-
-
-    .investigador-estudiante {
-
-        background: #e8f5e9;
-
-        color: #2e7d32;
-
-    }
-
-
-    .investigador-info {
-
-        flex: 1;
-
-    }
-
-
-    .investigador-info .nombre {
-
-        color: #555;
-
-        font-size: 13px;
-
-        font-weight: 600;
-
-        margin-bottom: 4px;
-
-    }
-
-
-    .investigador-info .descripcion {
-
-        color: #999;
-
-        font-size: 11px;
-
-    }
-
-
-    .investigador-info .cantidad {
-
-        color: #0d3b66;
-
-        font-size: 25px;
-
-        font-weight: 700;
-
-    }
-
-
-    /* =========================================================
-       RESPONSIVE
-    ========================================================= */
-
-    @media (max-width: 1100px) {
-
-        .tarjetas {
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-        }
-
-
-        .produccion-grid {
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
-        }
-
-    }
-
-
-    @media (max-width: 700px) {
-
-        .tarjetas {
-
-            grid-template-columns: 1fr;
-
-        }
-
-
-        .produccion-grid {
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-        }
-
-
-        .investigadores-grid {
-
-            grid-template-columns: 1fr;
-
-        }
-
-    }
-
-
-    @media (max-width: 450px) {
-
-        .produccion-grid {
-
-            grid-template-columns: 1fr;
-
-        }
-
-    }
-
+}
 </style>
-
 {% endblock %}
 
-
 {% block content %}
-
 <div class="inicio-container">
-
 
     <!-- =====================================================
          BIENVENIDA
     ====================================================== -->
+    <section class="bienvenida">
 
-    <div class="bienvenida">
+        <div class="bienvenida-principal">
+            <div class="bienvenida-icono">
+                <i class="fa-solid fa-rocket"></i>
+            </div>
 
-        <h2>
-            Resumen del Sistema
-        </h2>
+            <div class="bienvenida-texto">
+                <h2>¡Bienvenido a SIDIC!</h2>
 
-        <p>
+                <p>
+                    Sistema Integral de Documentación e Información Científica.
+                </p>
 
-            Bienvenido al Sistema Integral de Documentación e
-            Información Científica.
-
-            <br>
-
-            Dirección de Investigación, Ciencia y Tecnología – DICyT
-
-            <br>
-
-            Universidad Amazónica de Pando
-
-        </p>
-
-    </div>
-
-
-    <!-- =====================================================
-        RESUMEN GENERAL
-    ====================================================== -->
-
-    <div class="seccion-inicio">
-
-        <div class="titulo-seccion">
-
-            <i class="fa-solid fa-chart-simple"></i>
-
-            <h3>
-                Resumen general
-            </h3>
-
+                <p class="bienvenida-institucion">
+                    Universidad Amazónica de Pando
+                    &nbsp; | &nbsp;
+                    Dirección de Investigación, Ciencia y Tecnología – DICyT
+                </p>
+            </div>
         </div>
 
+        <div class="bienvenida-resumen">
+            <div class="bienvenida-resumen-titulo">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Resumen del sistema</span>
+            </div>
+
+            <p>
+                Consulta la información registrada y accede a los
+                principales indicadores de la actividad científica.
+            </p>
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         RESUMEN GENERAL
+    ====================================================== -->
+    <section class="seccion-inicio">
+
+        <div class="titulo-seccion">
+            <i class="fa-solid fa-chart-simple"></i>
+            <h3>Resumen general</h3>
+        </div>
 
         <div class="tarjetas">
 
-
-            <!-- =================================================
-                DOCUMENTOS
-            ================================================== -->
-
+            <!-- DOCUMENTOS -->
             <div class="tarjeta tarjeta-azul">
-
-                <h3>
-                    Documentos
-                </h3>
-
-                <div class="numero">
-                    {{ total_documentos }}
-                </div>
-
-                <div class="descripcion-tarjeta">
-                    Documentos registrados
-                </div>
-
                 <div class="icono-tarjeta">
-
                     <i class="fa-solid fa-folder-open"></i>
-
                 </div>
 
+                <div class="tarjeta-contenido">
+                    <h3>Documentos</h3>
+                    <div class="numero">{{ total_documentos }}</div>
+                    <div class="descripcion-tarjeta">
+                        Documentos registrados
+                    </div>
+                </div>
             </div>
 
-
-            <!-- =================================================
-                INVESTIGADORES
-            ================================================== -->
-
+            <!-- INVESTIGADORES -->
             <div class="tarjeta tarjeta-verde">
-
-                <h3>
-                    Investigadores
-                </h3>
-
-                <div class="numero">
-                    {{ total_investigadores }}
-                </div>
-
-                <div class="descripcion-tarjeta">
-                    Investigadores registrados
-                </div>
-
                 <div class="icono-tarjeta">
-
                     <i class="fa-solid fa-users"></i>
-
                 </div>
 
+                <div class="tarjeta-contenido">
+                    <h3>Investigadores</h3>
+                    <div class="numero">{{ total_investigadores }}</div>
+                    <div class="descripcion-tarjeta">
+                        Investigadores registrados
+                    </div>
+                </div>
             </div>
 
-
-            <!-- =================================================
-                PUBLICACIONES
-            ================================================== -->
-
+            <!-- PUBLICACIONES -->
             <div class="tarjeta tarjeta-morado">
-
-                <h3>
-                    Publicaciones
-                </h3>
-
-                <div class="numero">
-                    {{ total_publicaciones }}
-                </div>
-
-                <div class="descripcion-tarjeta">
-                    Producción científica
-                </div>
-
                 <div class="icono-tarjeta">
-
                     <i class="fa-solid fa-book-open"></i>
-
                 </div>
 
+                <div class="tarjeta-contenido">
+                    <h3>Publicaciones</h3>
+                    <div class="numero">{{ total_publicaciones }}</div>
+                    <div class="descripcion-tarjeta">
+                        Producción científica
+                    </div>
+                </div>
             </div>
 
-
-            <!-- =================================================
-                GESTIONES
-            ================================================== -->
-
+            <!-- GESTIONES -->
             <div class="tarjeta tarjeta-ambar">
-
-                <h3>
-                    Gestiones
-                </h3>
-
-                <div class="numero">
-                    {{ total_gestiones }}
-                </div>
-
-                <div class="descripcion-tarjeta">
-                    Actividades registradas
-                </div>
-
                 <div class="icono-tarjeta">
-
                     <i class="fa-solid fa-clipboard-list"></i>
-
                 </div>
 
+                <div class="tarjeta-contenido">
+                    <h3>Gestiones</h3>
+                    <div class="numero">{{ total_gestiones }}</div>
+                    <div class="descripcion-tarjeta">
+                        Actividades registradas
+                    </div>
+                </div>
             </div>
-
 
         </div>
-
-    </div>
-
-
+    </section>
 
     <!-- =====================================================
          INVESTIGADORES
     ====================================================== -->
-
-    <div class="seccion-inicio">
+    <section class="seccion-inicio">
 
         <div class="titulo-seccion">
-
             <i class="fa-solid fa-users"></i>
-
-            <h3>
-                Investigadores
-            </h3>
-
+            <h3>Investigadores</h3>
         </div>
-
 
         <div class="investigadores-grid">
 
-
             <!-- DOCENTES -->
-
             <div class="investigador-card">
 
                 <div class="investigador-icono investigador-docente">
-
                     <i class="fa-solid fa-chalkboard-user"></i>
-
                 </div>
 
-
                 <div class="investigador-info">
-
                     <div class="nombre">
                         Docentes investigadores
                     </div>
 
-                    <div class="cantidad">
-                        {{ docentes }}
-                    </div>
+                    <div class="cantidad">{{ docentes }}</div>
 
                     <div class="descripcion">
                         Personal docente registrado
                     </div>
-
                 </div>
 
             </div>
 
-
             <!-- ESTUDIANTES -->
-
             <div class="investigador-card">
 
                 <div class="investigador-icono investigador-estudiante">
-
                     <i class="fa-solid fa-user-graduate"></i>
-
                 </div>
 
-
                 <div class="investigador-info">
-
                     <div class="nombre">
                         Estudiantes investigadores
                     </div>
 
-                    <div class="cantidad">
-                        {{ estudiantes }}
-                    </div>
+                    <div class="cantidad">{{ estudiantes }}</div>
 
                     <div class="descripcion">
                         Estudiantes registrados
                     </div>
-
                 </div>
 
             </div>
 
-
         </div>
-
-    </div>
-
+    </section>
 
     <!-- =====================================================
          PRODUCCIÓN CIENTÍFICA
     ====================================================== -->
-
-    <div class="seccion-inicio">
+    <section class="seccion-inicio">
 
         <div class="titulo-seccion">
-
             <i class="fa-solid fa-flask"></i>
-
-            <h3>
-                Producción científica
-            </h3>
-
+            <h3>Producción científica</h3>
         </div>
-
 
         <div class="produccion-grid">
 
-
             <!-- ARTÍCULOS -->
-
-            <div class="produccion-card">
-
+            <div class="produccion-card produccion-articulos">
                 <div class="icono">
-
                     <i class="fa-solid fa-file-lines"></i>
-
                 </div>
 
-                <div class="nombre">
-                    Artículos
-                </div>
-
-                <div class="valor">
-                    {{ total_articulos }}
-                </div>
-
+                <div class="nombre">Artículos</div>
+                <div class="valor">{{ total_articulos }}</div>
             </div>
-
 
             <!-- LIBROS -->
-
-            <div class="produccion-card">
-
+            <div class="produccion-card produccion-libros">
                 <div class="icono">
-
                     <i class="fa-solid fa-book"></i>
-
                 </div>
 
-                <div class="nombre">
-                    Libros
-                </div>
-
-                <div class="valor">
-                    {{ total_libros }}
-                </div>
-
+                <div class="nombre">Libros</div>
+                <div class="valor">{{ total_libros }}</div>
             </div>
-
 
             <!-- REVISTAS -->
-
-            <div class="produccion-card">
-
+            <div class="produccion-card produccion-revistas">
                 <div class="icono">
-
                     <i class="fa-solid fa-newspaper"></i>
-
                 </div>
 
-                <div class="nombre">
-                    Revistas
-                </div>
-
-                <div class="valor">
-                    {{ total_revistas }}
-                </div>
-
+                <div class="nombre">Revistas</div>
+                <div class="valor">{{ total_revistas }}</div>
             </div>
 
-
-            <!-- TEXTOS -->
-
-            <div class="produccion-card">
-
+            <!-- TEXTOS EN ASIGNATURA -->
+            <div class="produccion-card produccion-textos">
                 <div class="icono">
-
                     <i class="fa-solid fa-book-open"></i>
-
                 </div>
 
-                <div class="nombre">
-                    Textos en Asignatura
-                </div>
-
-                <div class="valor">
-                    {{ total_textos }}
-                </div>
-
+                <div class="nombre">Textos en Asignatura</div>
+                <div class="valor">{{ total_textos }}</div>
             </div>
 
-
-            <!-- SOCIEDADES -->
-
-            <div class="produccion-card">
-
+            <!-- SOCIEDADES CIENTÍFICAS -->
+            <div class="produccion-card produccion-sociedades">
                 <div class="icono">
-
                     <i class="fa-solid fa-people-group"></i>
-
                 </div>
 
-                <div class="nombre">
-                    Sociedades Científicas
-                </div>
-
-                <div class="valor">
-                    {{ total_sociedades }}
-                </div>
-
+                <div class="nombre">Sociedades Científicas</div>
+                <div class="valor">{{ total_sociedades }}</div>
             </div>
-
 
         </div>
-
-    </div>
-
+    </section>
 
 </div>
-
 {% endblock %}

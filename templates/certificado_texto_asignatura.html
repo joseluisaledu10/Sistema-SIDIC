@@ -1,0 +1,636 @@
+{% extends "base.html" %}
+
+{% block title %}
+Seleccionar investigador - Certificación
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   CERTIFICACIÓN - TEXTO DE ASIGNATURA
+========================================================= */
+
+.certificacion-contenedor {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.certificacion-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.certificacion-titulo h2 {
+    margin: 0 0 6px 0;
+}
+
+.certificacion-titulo p {
+    margin: 0;
+    color: #6b7280;
+}
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
+.certificacion-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.certificacion-card-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.certificacion-card-titulo i {
+    color: #1f4e79;
+    font-size: 18px;
+}
+
+.certificacion-card-titulo h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #1f2937;
+}
+
+/* =========================================================
+   INFORMACIÓN DEL DOCUMENTO
+========================================================= */
+
+.documento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 25px;
+}
+
+.documento-item {
+    min-width: 0;
+}
+
+.documento-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 5px;
+}
+
+.documento-valor {
+    font-size: 15px;
+    color: #1f2937;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.documento-valor.destacado {
+    color: #1f4e79;
+    font-weight: 700;
+}
+
+/* =========================================================
+   TIPO DE DOCUMENTO
+========================================================= */
+
+.tipo-documento {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    background: #f3f6f9;
+    border: 1px solid #dce3e9;
+    border-radius: 7px;
+    color: #1f4e79;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   AUTORES
+========================================================= */
+
+.autores-info {
+    margin-bottom: 18px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.tabla-autores {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-autores th {
+    background: #f8fafc;
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.tabla-autores td {
+    padding: 14px;
+    border-bottom: 1px solid #edf0f3;
+    vertical-align: middle;
+    color: #374151;
+    font-size: 14px;
+}
+
+.tabla-autores tbody tr:hover {
+    background: #fafafa;
+}
+
+/* =========================================================
+   NÚMERO DE AUTOR
+========================================================= */
+
+.autor-numero {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #1f4e79;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* =========================================================
+   NOMBRE DEL INVESTIGADOR
+========================================================= */
+
+.investigador-nombre {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.investigador-tipo {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =========================================================
+   ÁREA
+========================================================= */
+
+.area-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 9px;
+    border-radius: 7px;
+    background: #f3f6f9;
+    border: 1px solid #dce3e9;
+}
+
+.area-codigo {
+    font-weight: 700;
+    color: #1f4e79;
+}
+
+.area-nombre {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.accion-certificado {
+    white-space: nowrap;
+}
+
+.certificacion-acciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .documento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tabla-autores {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .documento-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .certificacion-encabezado {
+        flex-direction: column;
+    }
+
+    .certificacion-card {
+        padding: 18px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="certificacion-contenedor">
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="certificacion-encabezado">
+
+        <div class="certificacion-titulo">
+
+            <h2>
+                <i class="fa-solid fa-certificate"></i>
+                Certificación de documento
+            </h2>
+
+            <p>
+                Seleccione el investigador para preparar su certificado.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMACIÓN DEL DOCUMENTO
+    ====================================================== -->
+
+    <div class="certificacion-card">
+
+        <div class="certificacion-card-titulo">
+
+            <i class="fa-solid fa-file-lines"></i>
+
+            <h3>
+                Información del documento
+            </h3>
+
+        </div>
+
+
+        <div class="documento-grid">
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Código
+                </span>
+
+                <div class="documento-valor destacado">
+                    {{ texto['codigo'] }}
+                </div>
+
+            </div>
+
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Tipo de documento
+                </span>
+
+                <div class="documento-valor">
+
+                    <span class="tipo-documento">
+
+                        <i class="fa-solid fa-book"></i>
+
+                        Texto de Asignatura
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Asignatura
+                </span>
+
+                <div class="documento-valor">
+                    {{ texto['asignatura'] }}
+                </div>
+
+            </div>
+
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Programa / Carrera
+                </span>
+
+                <div class="documento-valor">
+                    {{ texto['carrera'] or 'No registrado' }}
+                </div>
+
+            </div>
+
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Área / Facultad
+                </span>
+
+                <div class="documento-valor">
+                    {{ texto['facultad'] or 'No registrada' }}
+                </div>
+
+            </div>
+
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Periodo académico
+                </span>
+
+                <div class="documento-valor destacado">
+                    {{ texto['periodo_academico'] or 'No registrado' }}
+                </div>
+
+            </div>
+
+
+            <div class="documento-item">
+
+                <span class="documento-label">
+                    Año
+                </span>
+
+                <div class="documento-valor">
+                    {{ texto['anio'] or 'No registrado' }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INVESTIGADORES
+    ====================================================== -->
+
+    <div class="certificacion-card">
+
+        <div class="certificacion-card-titulo">
+
+            <i class="fa-solid fa-users"></i>
+
+            <h3>
+                Investigadores / Autores
+            </h3>
+
+        </div>
+
+
+        <div class="autores-info">
+
+            Este documento tiene
+            <strong>{{ investigadores|length }}</strong>
+            investigador(es) registrado(s).
+
+            Seleccione un investigador para preparar su certificado individual.
+
+        </div>
+
+
+        <div style="overflow-x:auto;">
+
+            <table class="tabla-autores">
+
+                <thead>
+
+                    <tr>
+
+                        <th style="width:70px;">
+                            Nº
+                        </th>
+
+                        <th>
+                            Investigador
+                        </th>
+
+                        <th>
+                            Carrera / Área
+                        </th>
+
+                        <th>
+                            Área de investigación
+                        </th>
+
+                        <th style="width:190px;">
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for investigador in investigadores %}
+
+                    <tr>
+
+                        <!-- Número -->
+
+                        <td>
+
+                            <span class="autor-numero">
+                                {{ loop.index }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Investigador -->
+
+                        <td>
+
+                            <div class="investigador-nombre">
+
+                                {{ investigador['nombre'] }}
+                                {{ investigador['apellido'] }}
+
+                            </div>
+
+                            <div class="investigador-tipo">
+
+                                {{ investigador['tipo'] or 'Investigador' }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Carrera -->
+
+                        <td>
+
+                            {{ investigador['carrera_area'] or 'No registrada' }}
+
+                        </td>
+
+
+                        <!-- Área -->
+
+                        <td>
+
+                            {% if investigador['area_codigo'] %}
+
+                                <span class="area-badge">
+
+                                    <span class="area-codigo">
+                                        {{ investigador['area_codigo'] }}
+                                    </span>
+
+                                    <span class="area-nombre">
+                                        {{ investigador['area_nombre'] }}
+                                    </span>
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="texto-ayuda">
+                                    Área no asignada
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Acción -->
+
+                        <td>
+
+                            <a
+                                href="{{ url_for(
+                                    'preparar_certificado_texto_asignatura',
+                                    texto_id=texto['id'],
+                                    investigador_id=investigador['id']
+                                ) }}"
+                                class="btn btn-primario accion-certificado"
+                                style="text-decoration:none;"
+                            >
+
+                                <i class="fa-solid fa-certificate"></i>
+
+                                Preparar certificado
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            style="text-align:center; padding:30px;"
+                        >
+
+                            <span class="texto-ayuda">
+
+                                <i class="fa-solid fa-circle-info"></i>
+
+                                No existen investigadores registrados
+                                para este documento.
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCIONES
+    ====================================================== -->
+
+    <div class="certificacion-acciones">
+
+        <a
+            href="{{ url_for('certificacion_textos_asignatura') }}"
+            class="btn btn-secundario"
+            style="text-decoration:none;"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Volver a Certificación Textos en Asignatura
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

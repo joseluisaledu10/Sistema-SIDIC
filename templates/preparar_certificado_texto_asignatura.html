@@ -1,0 +1,697 @@
+{% extends "base.html" %}
+
+{% block title %}
+Datos del Certificado - Sistema DICyT
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   DATOS DEL CERTIFICADO
+========================================================= */
+
+.certificado-contenedor {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Encabezado */
+
+.certificado-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.certificado-titulo h2 {
+    margin: 0 0 6px 0;
+}
+
+.certificado-titulo p {
+    margin: 0;
+    color: #6b7280;
+}
+
+/* Tarjetas */
+
+.certificado-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.certificado-card-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.certificado-card-titulo i {
+    color: #1f4e79;
+    font-size: 18px;
+}
+
+.certificado-card-titulo h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #1f2937;
+}
+
+/* Información */
+
+.certificado-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 25px;
+}
+
+.certificado-item {
+    min-width: 0;
+}
+
+.certificado-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    letter-spacing: 0.3px;
+}
+
+.certificado-valor {
+    font-size: 15px;
+    color: #1f2937;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.certificado-valor.destacado {
+    font-weight: 700;
+    color: #1f4e79;
+}
+
+/* Investigador */
+
+.investigador-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.investigador-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.investigador-icono {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #eaf2f8;
+    color: #1f4e79;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.investigador-nombre {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 3px;
+}
+
+.investigador-subtexto {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.participacion {
+    text-align: right;
+}
+
+.participacion-label {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.participacion-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #eaf2f8;
+    color: #1f4e79;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Área */
+
+.area-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    border-radius: 7px;
+    background: #f3f6f9;
+    border: 1px solid #dce3e9;
+}
+
+.area-codigo {
+    font-weight: 700;
+    color: #1f4e79;
+}
+
+.area-nombre {
+    color: #4b5563;
+    font-size: 13px;
+}
+
+/* Datos de emisión */
+
+.numero-certificado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #fafafa;
+    border: 1px dashed #cbd5e1;
+}
+
+.numero-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.numero-icono {
+    width: 45px;
+    height: 45px;
+    border-radius: 9px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.numero-titulo {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 3px;
+}
+
+.numero-ayuda {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.numero-pendiente {
+    font-size: 15px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+/* Botones */
+
+.certificado-acciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.acciones-derecha {
+    display: flex;
+    gap: 10px;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+
+    .certificado-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .investigador-panel,
+    .numero-certificado {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .participacion {
+        text-align: left;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .certificado-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .certificado-encabezado {
+        flex-direction: column;
+    }
+
+    .certificado-acciones {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .acciones-derecha {
+        justify-content: flex-end;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="certificado-contenedor">
+
+<!-- =====================================================
+     ENCABEZADO
+====================================================== -->
+
+<div class="certificado-encabezado">
+
+    <div class="certificado-titulo">
+
+        <h2>
+            <i class="fa-solid fa-certificate"></i>
+            Datos del certificado
+        </h2>
+
+        <p>
+            Revise y confirme la información antes de continuar.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMACIÓN DEL DOCUMENTO
+====================================================== -->
+
+<div class="certificado-card">
+
+    <div class="certificado-card-titulo">
+
+        <i class="fa-solid fa-file-lines"></i>
+
+        <h3>
+            Información del documento
+        </h3>
+
+    </div>
+
+
+    <div class="certificado-grid">
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Código
+            </span>
+
+            <div class="certificado-valor destacado">
+                {{ texto['codigo'] }}
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Tipo de documento
+            </span>
+
+            <div class="certificado-valor">
+                Texto de Asignatura
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Asignatura
+            </span>
+
+            <div class="certificado-valor">
+                {{ texto['asignatura'] }}
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Programa / Carrera
+            </span>
+
+            <div class="certificado-valor">
+                {{ texto['carrera'] or 'No registrado' }}
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Área / Facultad
+            </span>
+
+            <div class="certificado-valor">
+                {{ texto['facultad'] or 'No registrada' }}
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Periodo académico
+            </span>
+
+            <div class="certificado-valor destacado">
+                {{ texto['periodo_academico'] or 'No registrado' }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INVESTIGADOR
+====================================================== -->
+
+<div class="certificado-card">
+
+    <div class="certificado-card-titulo">
+
+        <i class="fa-solid fa-user-tie"></i>
+
+        <h3>
+            Investigador
+        </h3>
+
+    </div>
+
+
+    <div class="investigador-panel">
+
+        <div class="investigador-info">
+
+            <div class="investigador-icono">
+
+                <i class="fa-solid fa-user"></i>
+
+            </div>
+
+
+            <div>
+
+                <div class="investigador-nombre">
+
+                    {{ investigador['nombre'] }}
+                    {{ investigador['apellido'] }}
+
+                </div>
+
+
+                <div class="investigador-subtexto">
+
+                    {{ investigador['grado_academico'] or '' }}
+
+                    {% if investigador['carrera_area'] %}
+                        · {{ investigador['carrera_area'] }}
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="participacion">
+
+            <span class="participacion-label">
+                Participación
+            </span>
+
+            <span class="participacion-badge">
+
+                <i class="fa-solid fa-pen-nib"></i>
+                Autor
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div style="margin-top: 20px;">
+
+        <div class="certificado-grid">
+
+            <div class="certificado-item">
+
+                <span class="certificado-label">
+                    Área de investigación
+                </span>
+
+                <div class="certificado-valor">
+
+                    {% if investigador['area_codigo'] %}
+
+                        <span class="area-badge">
+
+                            <span class="area-codigo">
+                                {{ investigador['area_codigo'] }}
+                            </span>
+
+                            <span style="color:#9ca3af;">·</span>
+
+                            <span class="area-nombre">
+                                {{ investigador['area_nombre'] }}
+                            </span>
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="texto-ayuda">
+                            Área no asignada
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="certificado-item">
+
+                <span class="certificado-label">
+                    Cargo
+                </span>
+
+                <div class="certificado-valor">
+
+                    {{ investigador['cargo'] or 'No registrado' }}
+
+                </div>
+
+            </div>
+
+
+            <div class="certificado-item">
+
+                <span class="certificado-label">
+                    Facultad
+                </span>
+
+                <div class="certificado-valor">
+
+                    {{ investigador['facultad'] or 'No registrada' }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DATOS DE EMISIÓN
+====================================================== -->
+
+<div class="certificado-card">
+
+    <div class="certificado-card-titulo">
+
+        <i class="fa-solid fa-id-card"></i>
+
+        <h3>
+            Datos de emisión
+        </h3>
+
+    </div>
+
+
+    <div class="certificado-grid">
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Número de certificado
+            </span>
+
+            <div class="certificado-valor">
+
+                Se asignará automáticamente
+
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Fecha de emisión
+            </span>
+
+            <div class="certificado-valor destacado">
+
+                Se asignará automáticamente
+
+            </div>
+
+        </div>
+
+
+        <div class="certificado-item">
+
+            <span class="certificado-label">
+                Estado
+            </span>
+
+            <div class="certificado-valor">
+
+                Pendiente de emisión
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ACCIONES
+====================================================== -->
+
+<div class="certificado-acciones">
+
+    <a
+        href="{{ url_for(
+            'nuevo_certificado_texto_asignatura',
+            id=texto['id']
+        ) }}"
+        class="btn btn-secundario"
+        style="text-decoration:none;"
+    >
+
+        <i class="fa-solid fa-arrow-left"></i>
+
+        Volver
+
+    </a>
+
+
+    <div class="acciones-derecha">
+
+        <form
+            method="GET"
+            action="{{ url_for(
+                'previsualizar_certificado_texto_asignatura',
+                texto_id=texto['id'],
+                investigador_id=investigador['id']
+            ) }}"
+            style="margin:0;"
+        >
+
+            <button
+                type="submit"
+                class="btn btn-primario"
+            >
+
+                <i class="fa-solid fa-eye"></i>
+
+                Previsualizar certificado
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

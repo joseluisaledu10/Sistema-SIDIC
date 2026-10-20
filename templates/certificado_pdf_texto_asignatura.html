@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+
+<title>Certificado</title>
+
+
+<style>
+/* =========================================================
+   CONFIGURACIÓN DE PÁGINA
+========================================================= */
+
+@page {
+    size: Letter portrait;
+    margin: 0;
+}
+
+html,
+body {
+    width: 216mm;
+    height: 279.4mm;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+}
+
+/* =========================================================
+   HOJA CARTA
+========================================================= */
+
+.certificado-hoja {
+    width: 216mm;
+    height: 279.4mm;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+
+    background-image: url("file:///{{ ruta_fondo }}");
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 216mm 279.4mm;
+
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111827;
+
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+/* =========================================================
+   CERTIFICADO ENCABEZADO
+========================================================= */
+
+.certificado-encabezado {
+    text-align: center;
+    margin-bottom: 8mm;
+}
+
+.vicerrectorado {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2mm;
+    position: relative;
+    top: -37mm;
+}
+
+.direccion-dicyt {
+    font-size: 17px;
+    font-weight: 700;
+    position: relative;
+    top: -40mm;
+}
+
+/* =========================================================
+   CONTENIDO DINÁMICO
+========================================================= */
+
+.certificado-contenido {
+    position: absolute;
+    left: 43mm;
+    right: 7mm;
+    top: 72mm;
+    bottom: 32mm;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   NÚMERO DE CERTIFICADO
+========================================================= */
+
+.certificado-numero {
+    position: absolute;
+    top: -43mm;
+    right: 0;
+    transform: translate(2mm, -15mm);
+
+    min-width: 50mm;
+    padding: 5px 9px;
+    box-sizing: border-box;
+
+    background: {{ investigador['area_color'] or '#1F4E79' }};
+    color: #ffffff;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 2px;
+}
+
+/* =========================================================
+   QR DE CERTIFICADO
+========================================================= */
+
+.certificado-qr {
+    position: absolute;
+    bottom: 5mm;
+    left: -42mm;
+    right: auto;
+    top: 150mm;
+    width: 28mm;
+    text-align: center;
+}
+
+.certificado-qr img {
+    width: 30mm;
+    height: 30mm;
+    display: block;
+    margin: 0 auto;
+}
+
+.certificado-qr-codigo {
+    margin-top: 0mm;
+    font-size: 7px;
+    font-weight: 700;
+    color: #111827;
+    word-break: break-all;
+    text-align: center;
+    width: 100%;
+}
+
+/* =========================================================
+   CUERPO
+========================================================= */
+
+.certificado-cuerpo {
+    position: absolute;
+    top: -12mm;
+    left: 0;
+    right: 0;
+
+    font-size: 18px;
+    line-height: 1.55;
+    text-align: justify;
+}
+
+/* =========================================================
+   CERTIFICA QUE
+========================================================= */
+
+.certifica-que {
+    margin-bottom: -9mm;
+}
+
+/* =========================================================
+   NOMBRE DEL INVESTIGADOR
+========================================================= */
+
+.certificado-nombre {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    padding-bottom: 3px;
+}
+
+.certificado-nombre::after {
+    content: "";
+    display: block;
+    width: 120mm;
+    height: 1px;
+    background: #111827;
+    margin: 3px auto 0 auto;
+}
+
+/* =========================================================
+   INTRODUCCIÓN
+========================================================= */
+
+.certificado-introduccion {
+    margin-bottom: 6mm;
+}
+
+/* =========================================================
+   DETALLES
+========================================================= */
+
+.certificado-detalles {
+    width: 65%;
+    margin: 2mm auto 0 auto;
+    border-collapse: collapse;
+    font-size: 17px;
+    line-height: 1.45;
+}
+
+.certificado-detalles td {
+    padding: 2.5px 3px;
+    vertical-align: top;
+}
+
+.certificado-detalles td:first-child {
+    width: 60%;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.certificado-detalles td:last-child {
+    width: 58%;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   ASIGNATURA
+========================================================= */
+
+.asignatura-fila {
+    text-align: center !important;
+    padding-top: 4mm !important;
+    padding-bottom: 3mm !important;
+}
+
+.asignatura-titulo {
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2mm;
+}
+
+.asignatura-valor {
+    text-align: center;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* =========================================================
+   TEXTO FINAL
+========================================================= */
+
+.certificado-final {
+    margin-top: 7mm;
+    font-size: 18.7px;
+    line-height: 1.55;
+    text-align: justify;
+}
+
+/* =========================================================
+   FECHA
+========================================================= */
+
+.certificado-fecha {
+    margin-top: 0mm;
+    font-size: 18.7px;
+    text-align: right;
+}
+
+/* =========================================================
+   FIRMA
+========================================================= */
+
+.certificado-firma {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -15mm;
+    width: 75mm;
+    text-align: center;
+}
+
+.firma-linea {
+    width: 65mm;
+    margin: 0 auto 4px auto;
+    border-top: 1px solid #111827;
+}
+
+.firma-nombre {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.firma-cargo {
+    font-size: 10px;
+    line-height: 1.25;
+    margin-top: 2px;
+}
+
+.firma-institucion {
+    font-size: 10px;
+    margin-top: 2px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="certificado-hoja">
+
+    <!-- =================================================
+         CONTENIDO DINÁMICO
+    ================================================== -->
+
+    <div class="certificado-contenido">
+
+        <!-- =================================================
+             NÚMERO
+        ================================================== -->
+
+        <div class="certificado-numero">
+            {{ numero_completo }}
+        </div>
+
+
+        <!-- =================================================
+             QR
+        ================================================== -->
+
+        <div class="certificado-qr">
+
+            <img
+                src="file:///{{ ruta_qr_archivo }}"
+                alt="Código QR de verificación"
+            >
+
+            <div class="certificado-qr-codigo">
+                {{ codigo_verificacion }}
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CUERPO
+        ================================================== -->
+
+        <div class="certificado-cuerpo">
+
+            <!-- =================================================
+                 ENCABEZADO
+            ================================================== -->
+
+            <div class="certificado-encabezado">
+
+                <div class="vicerrectorado">
+                    VICERRECTORADO
+                </div>
+
+                <div class="direccion-dicyt">
+                    Dirección de Investigación, Ciencia y Tecnología
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CERTIFICA QUE
+            ================================================== -->
+
+            <div class="certifica-que">
+                Certifica que:
+            </div>
+
+
+            <!-- =================================================
+                 INVESTIGADOR
+            ================================================== -->
+
+            <div class="certificado-nombre">
+
+                {{ investigador['nombre'] }}
+                {{ investigador['apellido'] }}
+
+            </div>
+
+
+            <!-- =================================================
+                 INTRODUCCIÓN
+            ================================================== -->
+
+            <div class="certificado-introduccion">
+
+                Ha presentado trabajo (s) de investigación,
+                el mismo que se adjunta al presente certificado,
+                de acuerdo al siguiente detalle:
+
+            </div>
+
+
+            <!-- =================================================
+                 DETALLE
+            ================================================== -->
+
+            <table class="certificado-detalles">
+
+                <tr>
+
+                    <td>
+                        Nivel de investigación:
+                    </td>
+
+                    <td>
+                        Texto de Asignatura
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Participación:
+                    </td>
+
+                    <td>
+                        Autor
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td
+                        colspan="2"
+                        class="asignatura-fila"
+                    >
+
+                        <div class="asignatura-titulo">
+                            Asignatura:
+                        </div>
+
+                        <div class="asignatura-valor">
+                            “{{ texto['asignatura'] or '' }}”
+                        </div>
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Área Académica:
+                    </td>
+
+                    <td>
+                        {{ investigador['area_codigo'] or 'No registrada' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Programa/Carrera:
+                    </td>
+
+                    <td>
+                        {{ texto['carrera'] or 'No registrado' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Periodo académico:
+                    </td>
+
+                    <td>
+                        {{ texto['periodo_academico'] or 'No registrado' }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Tiempo de validez:
+                    </td>
+
+                    <td>
+                        2 Años
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <!-- =================================================
+                 TEXTO FINAL
+            ================================================== -->
+
+            <div class="certificado-final">
+
+                Es cuanto se certifica, para los fines de Evaluación
+                Docente en la Universidad Amazónica de Pando.
+
+            </div>
+
+
+            <!-- =================================================
+                 FECHA
+            ================================================== -->
+
+            <div class="certificado-fecha">
+
+                {% set meses = {
+                    '01': 'enero',
+                    '02': 'febrero',
+                    '03': 'marzo',
+                    '04': 'abril',
+                    '05': 'mayo',
+                    '06': 'junio',
+                    '07': 'julio',
+                    '08': 'agosto',
+                    '09': 'septiembre',
+                    '10': 'octubre',
+                    '11': 'noviembre',
+                    '12': 'diciembre'
+                } %}
+
+                {% set partes = fecha_emision.split('-') %}
+
+                {% if partes|length == 3 %}
+
+                    Cobija, {{ partes[2]|int }}
+                    de {{ meses.get(partes[1], partes[1]) }}
+                    de {{ partes[0] }}
+
+                {% else %}
+
+                    Cobija, {{ fecha_emision }}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FIRMA DIRECTORA
+        ================================================== -->
+
+        <div class="certificado-firma">
+
+            <div class="firma-linea"></div>
+
+            {% if directora %}
+
+                <div class="firma-nombre">
+                    {{ directora['nombre_completo'] }}
+                </div>
+
+                <div class="firma-cargo">
+                    {{ directora['cargo'] }}
+                </div>
+
+            {% endif %}
+
+            <div class="firma-institucion">
+                Universidad Amazónica de Pando
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+{% extends "base.html" %}
+
+{% block title %}
+Seleccionar Texto en Asignatura - Certificaciones
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .certificados-contenedor {
+        max-width: 1250px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .certificados-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .certificados-encabezado h1 {
+        color: #0d3b66;
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .certificados-encabezado p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .btn-volver {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .btn-volver:hover {
+        opacity: 0.9;
+    }
+
+    .certificacion-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e1e5ea;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .certificacion-card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .certificacion-card-header i {
+        color: #0d3b66;
+        font-size: 19px;
+    }
+
+    .certificacion-card-header h2 {
+        margin: 0;
+        color: #0d3b66;
+        font-size: 18px;
+    }
+
+    .certificacion-filtros {
+        padding: 18px 24px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .campo-busqueda {
+        position: relative;
+        max-width: 450px;
+    }
+
+    .campo-busqueda i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+
+    .campo-busqueda input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 14px 10px 38px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .campo-busqueda input:focus {
+        border-color: #0d3b66;
+        box-shadow: 0 0 0 2px rgba(13,59,102,0.10);
+    }
+
+    .tabla-contenedor {
+        overflow-x: auto;
+    }
+
+    .tabla-certificacion {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tabla-certificacion th {
+        background: #f1f5f9;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: left;
+        padding: 13px 16px;
+        border-bottom: 1px solid #dfe3e8;
+        white-space: nowrap;
+    }
+
+    .tabla-certificacion td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #edf0f2;
+        color: #374151;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .tabla-certificacion tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .codigo-documento {
+        color: #0d3b66;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .asignatura-nombre {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .dato-secundario {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 3px;
+    }
+
+    .cantidad-autores {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #374151;
+        font-size: 13px;
+    }
+
+    .btn-certificar {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 13px;
+        background: #0d3b66;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .btn-certificar:hover {
+        background: #155d98;
+        transform: translateY(-1px);
+    }
+
+    .estado-vacio {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6b7280;
+    }
+
+    .estado-vacio i {
+        font-size: 42px;
+        color: #cbd5e1;
+        margin-bottom: 15px;
+    }
+
+    .estado-vacio h3 {
+        margin: 0 0 8px;
+        color: #374151;
+    }
+
+    .estado-vacio p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+
+        .certificados-encabezado {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+    }
+
+</style>
+
+
+<div class="certificados-contenedor">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="certificados-encabezado">
+
+        <div>
+
+            <h1>
+                <i class="fa-solid fa-book"></i>
+                Textos en Asignatura
+            </h1>
+
+            <p>
+                Seleccione el texto que desea utilizar para generar
+                un certificado.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('nuevo_certificado_modulo') }}"
+            class="btn-volver"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Volver
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         LISTADO
+    ====================================================== -->
+
+    <div class="certificacion-card">
+
+
+        <div class="certificacion-card-header">
+
+            <i class="fa-solid fa-file-circle-check"></i>
+
+            <h2>
+                Seleccionar documento
+            </h2>
+
+        </div>
+
+
+        <!-- BUSCADOR -->
+
+        <div class="certificacion-filtros">
+
+            <div class="campo-busqueda">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="buscarTexto"
+                    placeholder="Buscar por código, asignatura o carrera..."
+                    onkeyup="filtrarTextos()"
+                >
+
+            </div>
+
+        </div>
+
+
+        {% if textos %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-certificacion">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Código
+                        </th>
+
+                        <th>
+                            Asignatura
+                        </th>
+
+                        <th>
+                            Programa / Carrera
+                        </th>
+
+                        <th>
+                            Facultad
+                        </th>
+
+                        <th>
+                            Periodo
+                        </th>
+
+                        <th>
+                            Investigadores
+                        </th>
+
+                        <th>
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tablaTextos">
+
+                    {% for texto in textos %}
+
+                    <tr>
+
+                        <td>
+
+                            <span class="codigo-documento">
+
+                                {{ texto['codigo'] or 'Sin código' }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="asignatura-nombre">
+
+                                {{ texto['asignatura'] or 'Sin asignatura' }}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            {{ texto['carrera'] or 'Sin carrera' }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ texto['facultad'] or 'Sin facultad' }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ texto['periodo_academico'] or texto['anio'] or '-' }}
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="cantidad-autores">
+
+                                <i class="fa-solid fa-users"></i>
+
+                                {{ texto['cantidad_investigadores'] }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{{ url_for(
+                                    'nuevo_certificado_texto_asignatura',
+                                    id=texto['id']
+                                ) }}"
+                                class="btn-certificar"
+                            >
+
+                                <i class="fa-solid fa-certificate"></i>
+
+                                Certificar
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="estado-vacio">
+
+            <i class="fa-solid fa-book-open"></i>
+
+            <h3>
+                No hay textos disponibles
+            </h3>
+
+            <p>
+                No existen Textos en Asignatura activos
+                registrados en el sistema.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function filtrarTextos() {
+
+        const texto =
+            document.getElementById("buscarTexto")
+                .value
+                .toLowerCase()
+                .trim();
+
+        const filas =
+            document.querySelectorAll("#tablaTextos tr");
+
+        filas.forEach(function(fila) {
+
+            const contenido =
+                fila.textContent.toLowerCase();
+
+            fila.style.display =
+                contenido.includes(texto)
+                    ? ""
+                    : "none";
+
+        });
+
+    }
+
+</script>
+
+{% endblock %}

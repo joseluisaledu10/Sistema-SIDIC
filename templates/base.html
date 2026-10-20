@@ -518,64 +518,135 @@
         }
 
         .encabezado h1 {
-            color: #0d3b66;
+        color: #0d3b66;
+        font-size: clamp(18px, 1.5vw, 23px);
+        font-weight: 700;
+        line-height: 1.35;
+        letter-spacing: -0.35px;
+        max-width: 760px;
+
         }
 
-        
+        /* Adaptación para pantallas pequeñas */
+        @media (max-width: 700px) {
+            .encabezado {
+                padding: 18px 20px;
+            }
+
+            .encabezado h1 {
+                font-size: 19px;
+            }
+        }
+
+
         /* =========================
-            USUARIO
+        PERFIL DE USUARIO
         ========================= */
 
         .usuario-conectado {
             position: relative;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
-        .usuario-icono {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background-color: #0d3b66;
-            color: white;
+        .usuario-boton {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 7px 12px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease,
+                        border-color 0.2s ease;
+        }
+
+        .usuario-boton:hover {
+            background: #f1f6fb;
+            border-color: #dce8f2;
+        }
+
+        .usuario-icono,
+        .usuario-menu-icono {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: linear-gradient(
+                135deg,
+                #0d3b66,
+                #155d98
+            );
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 19px;
+            box-shadow: 0 3px 8px rgba(13, 59, 102, 0.16);
         }
 
         .usuario-info {
             display: flex;
             flex-direction: column;
-            line-height: 1.3;
+            gap: 3px;
+            line-height: 1.25;
         }
 
         .usuario-nombre {
-            font-weight: bold;
+            color: #0d3b66;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .usuario-rol {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .flecha-usuario {
+            color: #64748b;
+            font-size: 13px;
+            margin-left: 2px;
+        }
+
+        /* Menú desplegable del perfil */
+        .menu-usuario {
+            top: calc(100% + 8px);
+            right: 0;
+            width: 280px;
+            padding: 10px;
+            border: 1px solid #e4ebf2;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 12px 32px rgba(13, 59, 102, 0.16);
+            z-index: 1000;
+        }
+
+        .usuario-menu-cabecera {
+            padding: 14px 12px;
+            border-radius: 9px;
+            background: #f5f8fc;
+        }
+
+        .usuario-menu-cabecera strong {
             color: #0d3b66;
             font-size: 14px;
         }
 
-        .usuario-rol {
-            color: #777;
-            font-size: 12px;
+        .opcion-usuario {
+            padding: 12px;
+            border-radius: 9px;
+            transition: background 0.2s ease;
         }
 
-        .btn-logout {
-            margin-left: 15px;
-            padding: 9px 14px;
-            border: none;
-            border-radius: 7px;
-            background-color: #c62828;
-            color: white;
-            cursor: pointer;
-            font-size: 13px;
-            text-decoration: none;
+        .opcion-usuario:hover {
+            background: #edf4fa;
         }
 
-        .btn-logout:hover {
-            background-color: #a61c1c;
+        .opcion-usuario.salir:hover {
+            background: #fff0f0;
         }
 
         /* =========================
@@ -811,7 +882,7 @@
 
             opacity: 0.09;
         }
-        
+
 
         /* Convertir el logo blanco a azul institucional */
         .marca-agua-uap img {
@@ -829,6 +900,79 @@
                 brightness(75%)
                 contrast(90%);
         }
+
+
+        /* ================================
+        MENSAJES DEL SISTEMA
+        ================================ */
+
+        .mensaje-sistema {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px 18px;
+            margin: 0 0 20px 0;
+            border: 1px solid;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .mensaje-sistema i {
+            font-size: 20px;
+            margin-top: 1px;
+        }
+
+        .mensaje-sistema-contenido {
+            flex: 1;
+        }
+
+        .mensaje-sistema strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .mensaje-warning {
+            background: #fffbeb;
+            border-color: #f5d58a;
+            color: #92400e;
+        }
+
+        .mensaje-warning i {
+            color: #b7791f;
+        }
+
+        .mensaje-success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .mensaje-success i {
+            color: #16a34a;
+        }
+
+        .mensaje-info {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .mensaje-info i {
+            color: #2563eb;
+        }
+
+        .mensaje-danger {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .mensaje-danger i {
+            color: #dc2626;
+        }
+
 
     </style>
 
@@ -860,9 +1004,9 @@
                 src="{{ url_for('static', filename='img/logo_dicyt.png') }}"
                 alt="Logo DICyT"
             >
-            
-            
-            
+
+
+
         </div>
 
 
@@ -1019,7 +1163,7 @@
 
                     <div class="menu-grupo">
 
-                    
+
                     <div class="menu-seccion menu-subseccion"
                         onclick="toggleSubmenu('submenuPublicaciones', this)">
 
@@ -1087,12 +1231,12 @@
                         </a>
 
                     </div>
-                    
+
                     <!-- SOCIEDADES CIENTÍFICAS -->
 
-                    <div 
-                        class="menu-subitem" 
-                        onclick="window.location.href='{{ url_for('sociedades_cientificas') }}'" 
+                    <div
+                        class="menu-subitem"
+                        onclick="window.location.href='{{ url_for('sociedades_cientificas') }}'"
                     >
 
                         <i class="fa-solid fa-users-rectangle"></i>
@@ -1100,6 +1244,22 @@
                         <span>SOCIEDADES CIENTÍFICAS</span>
 
                     </div>
+
+                </div>
+
+            </li>
+
+            <!-- CERTIFICACIONES -->
+            <li class="menu-grupo">
+
+                <div class="menu-seccion"
+                    onclick="window.location.href='{{ url_for('certificaciones') }}'">
+
+                    <span class="icono-seccion">
+                        <i class="fa-solid fa-certificate"></i>
+                    </span>
+
+                    <span>CERTIFICACIONES</span>
 
                 </div>
 
@@ -1243,9 +1403,7 @@
                         onclick="toggleMenuUsuario()"
                     >
 
-                        <div class="usuario-icono">
-                            👤
-                        </div>
+                        <i class="fa-solid fa-user"></i>
 
                         <div class="usuario-info">
 
@@ -1275,9 +1433,7 @@
 
                         <div class="usuario-menu-cabecera">
 
-                            <div class="usuario-menu-icono">
-                                👤
-                            </div>
+                            <i class="fa-solid fa-user"></i>
 
                             <div>
 
@@ -1348,6 +1504,42 @@
                     alt=""
                 >
             </div>
+
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+                {% if mensajes %}
+                    <div class="mensajes-sistema">
+                        {% for categoria, mensaje in mensajes %}
+
+                            {% if categoria == 'warning' %}
+                                {% set icono = 'fa-triangle-exclamation' %}
+                                {% set titulo = 'Atención' %}
+                                {% set clase = 'mensaje-warning' %}
+                            {% elif categoria == 'success' %}
+                                {% set icono = 'fa-circle-check' %}
+                                {% set titulo = 'Operación realizada' %}
+                                {% set clase = 'mensaje-success' %}
+                            {% elif categoria == 'danger' or categoria == 'error' %}
+                                {% set icono = 'fa-circle-xmark' %}
+                                {% set titulo = 'No se pudo completar' %}
+                                {% set clase = 'mensaje-danger' %}
+                            {% else %}
+                                {% set icono = 'fa-circle-info' %}
+                                {% set titulo = 'Información' %}
+                                {% set clase = 'mensaje-info' %}
+                            {% endif %}
+
+                            <div class="mensaje-sistema {{ clase }}" role="status">
+                                <i class="fa-solid {{ icono }}" aria-hidden="true"></i>
+                                <div class="mensaje-sistema-contenido">
+                                    <strong>{{ titulo }}</strong>
+                                    {{ mensaje }}
+                                </div>
+                            </div>
+
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
 
             {% block content %}
             {% endblock %}

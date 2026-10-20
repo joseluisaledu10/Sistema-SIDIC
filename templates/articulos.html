@@ -76,6 +76,58 @@ Artículos - Sistema DICyT
     transform: translateY(-1px);
 }
 
+/* =========================================================
+   BOTÓN DESCARGAR EXCEL
+========================================================= */
+
+.btn-excel {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    background-color: #217346;
+
+    color: white;
+
+    padding: 11px 18px;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.btn-excel:hover {
+
+    background-color: #185c37;
+
+    color: white;
+
+    transform: translateY(-1px);
+}
+
+/* CONTENEDOR DE LOS BOTONES DEL ENCABEZADO */
+
+.acciones-encabezado {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
 
 /* =========================================================
    PANEL DE FILTROS
@@ -562,10 +614,16 @@ tbody tr:last-child td {
         grid-template-columns: 1fr;
     }
 
-    .btn-nuevo {
-
+    .acciones-encabezado {
         width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
 
+    .acciones-encabezado .btn-excel,
+    .acciones-encabezado .btn-nuevo {
+        width: 100%;
+        box-sizing: border-box;
         justify-content: center;
     }
 }
@@ -602,16 +660,32 @@ tbody tr:last-child td {
     </div>
 
 
-    <a
-        href="{{ url_for('nuevo_articulo') }}"
-        class="btn-nuevo"
-    >
 
-        <i class="fa-solid fa-plus"></i>
+    <div class="acciones-encabezado">
 
-        Nuevo artículo
+        <a
+            href="{{ url_for(
+                'exportar_articulos',
+                buscar=request.args.get('buscar', ''),
+                anio=request.args.get('anio', ''),
+                estado=request.args.get('estado', '')
+            ) }}"
+            class="btn-excel"
+        >
+            <i class="fa-solid fa-file-excel"></i>
+            Descargar Excel
+        </a>
 
-    </a>
+        <a
+            href="{{ url_for('nuevo_articulo') }}"
+            class="btn-nuevo"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Nuevo artículo
+        </a>
+
+    </div>
+
 
 </div>
 
@@ -914,7 +988,7 @@ tbody tr:last-child td {
 
                         <td>
 
-                        
+
                             <div class="acciones">
 
                                 <!-- VER -->

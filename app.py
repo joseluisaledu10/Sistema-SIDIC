@@ -688,7 +688,7 @@ def crear_bd():
     # TABLA PUBLICACIONES
 
     # =========================================================
-   
+
     # =========================================================
     # TABLA REVISTAS
     # =========================================================
@@ -945,7 +945,7 @@ def crear_bd():
         )
     """)
 
-    
+
     # =========================================================
     # TABLA AUDITORÍA
     # =========================================================
@@ -967,7 +967,7 @@ def crear_bd():
             fecha TEXT NOT NULL
         )
     """)
-    
+
     # =========================================================
     # ACTUALIZAR ESTADO DE PUBLICACIONES
     # 1 = ACTIVO
@@ -1041,15 +1041,3842 @@ def crear_bd():
                 WHERE estado IS NULL
                 """
             )
-    
+
 
 
     conexion.commit()
     conexion.close()
 
+# =========================================================
+# CERTIFICACIONES
+# NUMERACIÓN AUTOMÁTICA POR ÁREA Y AÑO
+# =========================================================
+
+def generar_numero_certificado(conexion, area_codigo=None):
+
+    anio_actual = datetime.now().year
+
+    if area_codigo:
+        ultimo = conexion.execute("""
+            SELECT MAX(c.numero)
+            FROM certificados c
+            LEFT JOIN investigadores_areas ia
+                ON ia.investigador_id = c.investigador_id
+            LEFT JOIN areas a
+                ON a.id = ia.area_id
+            WHERE c.anio = ?
+              AND a.codigo = ?
+        """, (anio_actual, area_codigo)).fetchone()
+    else:
+        ultimo = conexion.execute("""
+            SELECT MAX(numero)
+            FROM certificados
+            WHERE anio = ?
+        """, (anio_actual,)).fetchone()
+
+    ultimo_numero = ultimo[0] or 0
+
+    siguiente_numero = ultimo_numero + 1
+
+    if area_codigo:
+        numero_completo = (
+            f"Nº DICyT. – {area_codigo}. "
+            f"{siguiente_numero:03d}/{anio_actual}"
+        )
+    else:
+        numero_completo = (
+            f"Nº DICyT. {siguiente_numero:03d}/{anio_actual}"
+        )
+
+    return siguiente_numero, anio_actual, numero_completo
+
+# =========================================================
+# CERTIFICACIONES
+# NUMERACIÓN AUTOMÁTICA CERTIFICADOS MANUAL
+# =========================================================
+
+def generar_numero_certificado_manual(conexion, tipo_certificado):
+    """
+    Genera un número correlativo independiente para cada
+    tipo de certificado manual y para cada año.
+
+    Ejemplo:
+        PRODUCCION_INTELECTUAL → 001-2026
+        PRODUCCION_INTELECTUAL → 002-2026
+
+        MONOGRAFIA → 001-2026
+        MONOGRAFIA → 002-2026
+    """
+
+    anio_actual = datetime.now().year
+
+    ultimo = conexion.execute("""
+        SELECT MAX(
+            CAST(
+                CASE
+                    WHEN numero_certificado LIKE '%-%'
+                    THEN substr(numero_certificado, 1,
+                               instr(numero_certificado, '-') - 1)
+                    ELSE NULL
+                END
+            AS INTEGER)
+        )
+        FROM certificaciones_manuales
+        WHERE tipo_certificado = ?
+          AND numero_certificado LIKE ?
+    """, (
+        tipo_certificado,
+        f"%-{anio_actual}"
+    )).fetchone()
+
+    ultimo_numero = ultimo[0] or 0
+
+    siguiente_numero = ultimo_numero + 1
+
+    numero_certificado = (
+        f"{siguiente_numero:03d}-{anio_actual}"
+    )
+
+    return numero_certificado
+
+# =========================================================
+# CERTIFICACIONES
+# CÓDIGO AUTOMÁTICO CERTIFICADOS MANUAL
+# =========================================================
+
+def generar_codigo_verificacion_manual(anio, tipo_certificado):
+    """
+    Genera un código único de verificación para certificados manuales.
+    """
+
+    import secrets
+
+    prefijo = tipo_certificado.replace("_", "-")
+
+    codigo = secrets.token_hex(4).upper()
+
+    return f"MANUAL-{prefijo}-{anio}-{codigo}"
+
+# =========================================================
+# CERTIFICACIONES
+# CÓDIGO VERIFICACIÓN
+# =========================================================
+
+def generar_codigo_verificacion(anio, area_codigo):
+    import secrets
+
+    codigo = secrets.token_hex(4).upper()
+
+    return f"CERT-{anio}-{area_codigo}-{codigo}"
+
+# =========================================================
+# CERTIFICACIONES
+# CÓDIGO QR
+# =========================================================
+
+def generar_qr_certificado(codigo_verificacion, numero_completo):
+    import qrcode
+    import os
+
+    carpeta_qr = os.path.join(
+        "static",
+        "certificados",
+        "qr"
+    )
+
+    os.makedirs(carpeta_qr, exist_ok=True)
+
+    contenido_qr = (
+        "UNIVERSIDAD AMAZÓNICA DE PANDO\n"
+        "Dirección de Investigación, Ciencia y Tecnología\n"
+        f"Certificado: {numero_completo}\n"
+        f"Código de verificación: {codigo_verificacion}"
+    )
+
+    nombre_archivo = f"{codigo_verificacion}.png"
+
+    ruta_qr = os.path.join(
+        carpeta_qr,
+        nombre_archivo
+    )
+
+    qr = qrcode.QRCode(
+        version=2,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=4
+    )
+
+    qr.add_data(contenido_qr)
+    qr.make(fit=True)
+
+    imagen = qr.make_image()
+    imagen.save(ruta_qr)
+
+    return f"certificados/qr/{nombre_archivo}"
+
+
+# =========================================================
+# CERTIFICACIONES
+# LISTADO, BUSQUEDA Y FILTROS
+# =========================================================
+
+@app.route("/certificaciones")
+def certificaciones():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    buscar = request.args.get("buscar", "").strip()
+    tipo_filtro = request.args.get("tipo", "").strip()
+    anio_filtro = request.args.get("anio", "").strip()
+    estado_filtro = request.args.get("estado", "").strip()
+    area_filtro = request.args.get("area", "").strip()
+
+    conexion = conectar_bd()
+
+    try:
+        # =============================================
+        # AREAS ACTIVAS
+        # =============================================
+
+        areas_disponibles = conexion.execute("""
+            SELECT id, codigo, nombre
+            FROM areas
+            WHERE estado = 1
+            ORDER BY nombre
+        """).fetchall()
+
+        # =============================================
+        # CERTIFICADOS NORMALES
+        # =============================================
+
+        certificados_normales = conexion.execute("""
+            SELECT
+                c.id,
+                c.numero,
+                c.anio,
+                c.numero_completo,
+                c.tipo_documento,
+                c.fecha_emision,
+                c.estado,
+                COALESCE(c.area_id, ia.area_id) AS area_id,
+                COALESCE(a.codigo, ai.codigo) AS area_codigo,
+                COALESCE(a.nombre, ai.nombre) AS area_nombre,
+                i.nombre,
+                i.apellido
+            FROM certificados c
+            LEFT JOIN investigadores i
+                ON i.id = c.investigador_id
+            LEFT JOIN areas a
+                ON a.id = c.area_id
+            LEFT JOIN investigadores_areas ia
+                ON ia.investigador_id = i.id
+            LEFT JOIN areas ai
+                ON ai.id = ia.area_id
+                AND ai.estado = 1
+            ORDER BY c.anio DESC, c.numero DESC
+        """).fetchall()
+
+        # =============================================
+        # CERTIFICADOS MANUALES
+        # =============================================
+
+        certificados_manuales = conexion.execute("""
+            SELECT
+                id,
+                numero_certificado,
+                investigador,
+                tipo_documento,
+                fecha_registro,
+                estado,
+                tipo_certificado,
+                area_facultad
+            FROM certificaciones_manuales
+            ORDER BY id DESC
+        """).fetchall()
+
+    finally:
+        conexion.close()
+
+    # =============================================
+    # MAPA DE AREAS POR SIGLA
+    # =============================================
+
+    areas_por_codigo = {
+        area["codigo"].strip().casefold(): area
+        for area in areas_disponibles
+    }
+
+    # =============================================
+    # UNIFICAR CERTIFICADOS NORMALES
+    # =============================================
+
+    certificados = []
+
+    for certificado in certificados_normales:
+
+        nombre = certificado["nombre"] or ""
+        apellido = certificado["apellido"] or ""
+
+        certificados.append({
+            "id": certificado["id"],
+            "origen": "normal",
+            "numero": certificado["numero"],
+            "anio": certificado["anio"],
+            "numero_completo": certificado["numero_completo"],
+            "tipo_documento": certificado["tipo_documento"] or "",
+            "fecha_emision": certificado["fecha_emision"],
+            "estado": certificado["estado"],
+            "nombre": nombre,
+            "apellido": apellido,
+            "investigador": f"{nombre} {apellido}".strip(),
+            "area_id": certificado["area_id"],
+            "area_codigo": certificado["area_codigo"] or "",
+            "area_nombre": certificado["area_nombre"] or ""
+        })
+
+    # =============================================
+    # UNIFICAR CERTIFICADOS MANUALES
+    # =============================================
+
+    for certificado in certificados_manuales:
+
+        numero_original = certificado["numero_certificado"] or ""
+        partes_numero = numero_original.split("-")
+
+        numero = 0
+        anio = 0
+
+        if len(partes_numero) == 2:
+            if partes_numero[0].isdigit():
+                numero = int(partes_numero[0])
+
+            if partes_numero[1].isdigit():
+                anio = int(partes_numero[1])
+
+        if len(partes_numero) == 2 and anio:
+            numero_completo = (
+                f"Nº DICyT. - DIR. {numero:03d}/{anio}"
+            )
+        else:
+            numero_completo = numero_original
+
+        investigador = certificado["investigador"] or ""
+        area_original = (certificado["area_facultad"] or "").strip()
+
+        # Reconocer tanto la sigla como el nombre del área.
+        area_encontrada = None
+
+        for area in areas_disponibles:
+            if (
+                area_original.casefold() == area["codigo"].casefold()
+                or area_original.casefold() == area["nombre"].casefold()
+            ):
+                area_encontrada = area
+                break
+
+        certificados.append({
+            "id": certificado["id"],
+            "origen": "manual",
+            "numero": numero,
+            "anio": anio,
+            "numero_completo": numero_completo,
+            "tipo_documento": certificado["tipo_documento"] or "",
+            "fecha_emision": certificado["fecha_registro"],
+            "estado": certificado["estado"],
+            "nombre": investigador,
+            "apellido": "",
+            "investigador": investigador,
+            "area_id": (
+                area_encontrada["id"] if area_encontrada else None
+            ),
+            "area_codigo": (
+                area_encontrada["codigo"] if area_encontrada
+                else area_original
+            ),
+            "area_nombre": (
+                area_encontrada["nombre"] if area_encontrada
+                else area_original
+            )
+        })
+
+    # =============================================
+    # ORDEN GENERAL
+    # =============================================
+
+    certificados.sort(
+        key=lambda x: (x["anio"], x["numero"]),
+        reverse=True
+    )
+
+
+    # =============================================
+    # OPCIONES DE FILTROS AUTOMÁTICAS
+    # =============================================
+
+    # Obtener todos los tipos de documentos registrados
+    # en certificados normales y manuales.
+    tipos_disponibles = sorted({
+        str(c["tipo_documento"]).strip()
+        for c in certificados
+        if c["tipo_documento"]
+        and str(c["tipo_documento"]).strip()
+    }, key=str.casefold)
+
+    # Obtener todas las gestiones disponibles.
+    # Ordenar desde el año más reciente al más antiguo.
+    anios_disponibles = sorted({
+        int(c["anio"])
+        for c in certificados
+        if c["anio"]
+        and str(c["anio"]).isdigit()
+    }, reverse=True)
+
+    # =============================================
+    # APLICAR FILTROS
+    # =============================================
+
+    certificados_filtrados = []
+
+    for certificado in certificados:
+
+        texto_busqueda = " ".join([
+            str(certificado["numero_completo"] or ""),
+            str(certificado["investigador"] or ""),
+            str(certificado["tipo_documento"] or ""),
+            str(certificado["fecha_emision"] or ""),
+            str(certificado["area_codigo"] or ""),
+            str(certificado["area_nombre"] or "")
+        ]).casefold()
+
+        if buscar.casefold() not in texto_busqueda:
+            continue
+
+        if (
+            tipo_filtro
+            and certificado["tipo_documento"] != tipo_filtro
+        ):
+            continue
+
+        if anio_filtro and str(certificado["anio"]) != anio_filtro:
+            continue
+
+        if area_filtro and str(certificado["area_id"]) != area_filtro:
+            continue
+
+        es_activo = (
+            certificado["estado"] == 1
+            if certificado["origen"] == "normal"
+            else certificado["estado"] == "Emitido"
+        )
+
+        if estado_filtro == "activo" and not es_activo:
+            continue
+
+        if estado_filtro == "anulado" and es_activo:
+            continue
+
+        certificados_filtrados.append(certificado)
+
+    # =============================================
+    # RESUMEN GENERAL
+    # =============================================
+
+    total_certificados = len(certificados)
+
+    total_activos = sum(
+        1 for c in certificados
+        if (
+            c["estado"] == 1
+            if c["origen"] == "normal"
+            else c["estado"] == "Emitido"
+        )
+    )
+
+    return render_template(
+        "certificaciones.html",
+        certificados=certificados_filtrados,
+        total_certificados=total_certificados,
+        total_activos=total_activos,
+        areas_disponibles=areas_disponibles,
+        tipos_disponibles=tipos_disponibles,
+        anios_disponibles=anios_disponibles,
+        buscar=buscar,
+        tipo_filtro=tipo_filtro,
+        anio_filtro=anio_filtro,
+        estado_filtro=estado_filtro,
+        area_filtro=area_filtro,
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+
+# =========================================================
+# VER CERTIFICADO
+# CERTIFICADOS NORMALES Y MANUALES
+# =========================================================
+
+@app.route("/certificaciones/ver/<int:id>")
+def ver_certificado(id):
+    import os
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    origen = request.args.get("origen", "normal")
+    conexion = conectar_bd()
+
+    try:
+        if origen == "manual":
+            certificado = conexion.execute("""
+                SELECT archivo_pdf, drive_pdf_id
+                FROM certificaciones_manuales
+                WHERE id = ?
+                  AND estado = 'Emitido'
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash("No se encontró el certificado emitido.", "warning")
+                return redirect(url_for("certificaciones"))
+
+            archivo = certificado["archivo_pdf"]
+            drive_pdf_id = certificado["drive_pdf_id"]
+
+        else:
+            certificado = conexion.execute("""
+                SELECT archivo
+                FROM certificados
+                WHERE id = ?
+                  AND estado = 1
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash("No se encontró el certificado.", "warning")
+                return redirect(url_for("certificaciones"))
+
+            archivo = certificado["archivo"]
+            drive_pdf_id = None
+
+        # Si el certificado manual está en Google Drive
+        if origen == "manual" and drive_pdf_id:
+            try:
+                from google_drive import (
+                    conectar_google_drive,
+                    descargar_archivo
+                )
+
+                servicio = conectar_google_drive()
+
+                contenido, nombre, mime_type = descargar_archivo(
+                    servicio,
+                    drive_pdf_id
+                )
+
+                contenido.seek(0)
+
+                return send_file(
+                    contenido,
+                    as_attachment=False,
+                    download_name=nombre or f"certificado_{id}.pdf",
+                    mimetype="application/pdf"
+                )
+
+            except Exception:
+                app.logger.exception(
+                    "Error al visualizar el certificado %s desde Google Drive",
+                    id
+                )
+
+                flash(
+                    "No se pudo abrir el PDF desde Google Drive.",
+                    "danger"
+                )
+                return redirect(url_for("certificaciones"))
+
+        # Si existe una copia local
+        if archivo:
+            if os.path.isabs(archivo):
+                ruta_local = archivo
+            else:
+                ruta_static = os.path.join("static", archivo)
+                ruta_local = (
+                    ruta_static
+                    if os.path.isfile(ruta_static)
+                    else archivo
+                )
+
+            if os.path.isfile(ruta_local):
+                return send_file(
+                    ruta_local,
+                    as_attachment=False,
+                    mimetype="application/pdf"
+                )
+
+        flash(
+            "El archivo PDF no está disponible localmente ni en Google Drive.",
+            "warning"
+        )
+        return redirect(url_for("certificaciones"))
+
+    finally:
+        conexion.close()
+
+# =========================================================
+# DESCARGAR CERTIFICADO
+# CERTIFICADOS NORMALES Y MANUALES
+# =========================================================
+
+@app.route("/certificaciones/descargar/<int:id>")
+
+def descargar_certificado(id):
+    import io
+    import os
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    origen = request.args.get("origen", "normal")
+    conexion = conectar_bd()
+
+    try:
+        if origen == "manual":
+            certificado = conexion.execute("""
+                SELECT archivo_pdf, drive_pdf_id
+                FROM certificaciones_manuales
+                WHERE id = ?
+                  AND estado = 'Emitido'
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash("No se encontró el certificado emitido.", "warning")
+                return redirect(url_for("certificaciones"))
+
+            archivo = certificado["archivo_pdf"]
+            drive_pdf_id = certificado["drive_pdf_id"]
+
+        else:
+            certificado = conexion.execute("""
+                SELECT archivo
+                FROM certificados
+                WHERE id = ?
+                  AND estado = 1
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash("No se encontró el certificado.", "warning")
+                return redirect(url_for("certificaciones"))
+
+            archivo = certificado["archivo"]
+            drive_pdf_id = None
+
+        # 1. Si no existe localmente, intentar Google Drive.
+        if origen == "manual" and drive_pdf_id:
+            try:
+                from google_drive import (
+                    conectar_google_drive,
+                    descargar_archivo
+                )
+
+                servicio = conectar_google_drive()
+
+                contenido, nombre, mime_type = descargar_archivo(
+                    servicio,
+                    drive_pdf_id
+                )
+
+                contenido.seek(0)
+
+                return send_file(
+                    contenido,
+                    as_attachment=True,
+                    download_name=nombre or f"certificado_{id}.pdf",
+                    mimetype=mime_type or "application/pdf"
+                )
+
+            except Exception:
+                app.logger.exception(
+                    "Error al descargar el certificado %s desde Google Drive",
+                    id
+                )
+
+                flash(
+                    "No se pudo descargar el PDF desde Google Drive. "
+                    "Compruebe la conexión e inténtelo nuevamente.",
+                    "danger"
+                )
+                return redirect(url_for("certificaciones"))
+
+        # 2. Intentar descargar desde el archivo local.
+        if archivo:
+            if os.path.isabs(archivo):
+                ruta_local = archivo
+            else:
+                ruta_static = os.path.join("static", archivo)
+                ruta_local = (
+                    ruta_static
+                    if os.path.isfile(ruta_static)
+                    else archivo
+                )
+
+            if os.path.isfile(ruta_local):
+                return send_file(
+                    ruta_local,
+                    as_attachment=True,
+                    download_name=os.path.basename(ruta_local),
+                    mimetype="application/pdf"
+                )
+
+
+        flash(
+            "El archivo PDF no tiene copia en el Google Drive "
+            "ni está disponible localmente.",
+            "warning"
+        )
+        return redirect(url_for("certificaciones"))
+
+    finally:
+        conexion.close()
+
+# =========================================================
+# CERTIFICACIONES
+# PREPARAR CERTIFICADO DE TEXTO EN ASIGNATURA
+# =========================================================
+
+@app.route("/certificaciones/nuevo")
+def nuevo_certificado():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "nuevo_certificado.html",
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+
+@app.route("/certificaciones/nuevo/texto-asignatura/<int:id>")
+def nuevo_certificado_texto_asignatura(id):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    texto = conexion.execute("""
+        SELECT
+            id,
+            codigo,
+            asignatura,
+            carrera,
+            facultad,
+            anio,
+            periodo_academico
+        FROM textos_asignatura
+        WHERE id = ?
+          AND estado = 1
+    """, (id,)).fetchone()
+
+    if texto is None:
+        conexion.close()
+        return redirect(url_for("textos_asignatura"))
+
+    investigadores = conexion.execute("""
+        SELECT
+            i.id,
+            i.nombre,
+            i.apellido,
+            i.tipo,
+            i.carrera_area,
+            i.cargo,
+            i.facultad,
+            i.grado_academico,
+            i.estado,
+            tai.orden_autor,
+
+            a.id AS area_id,
+            a.codigo AS area_codigo,
+            a.nombre AS area_nombre,
+            a.color AS area_color
+
+        FROM texto_asignatura_investigadores tai
+
+        INNER JOIN investigadores i
+            ON i.id = tai.investigador_id
+
+        LEFT JOIN investigadores_areas ia
+            ON ia.investigador_id = i.id
+
+        LEFT JOIN areas a
+            ON a.id = ia.area_id
+            AND a.estado = 1
+
+        WHERE tai.texto_asignatura_id = ?
+        AND i.estado = 1
+
+        ORDER BY tai.orden_autor ASC
+    """, (id,)).fetchall()
+
+    conexion.close()
+
+    return render_template(
+        "certificado_texto_asignatura.html",
+        texto=texto,
+        investigadores=investigadores,
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+# =========================================================
+# CERTIFICACIONES
+# PREPARAR CERTIFICADO
+# =========================================================
+
+@app.route(
+    "/certificaciones/preparar/texto-asignatura/<int:texto_id>/<int:investigador_id>"
+)
+def preparar_certificado_texto_asignatura(texto_id, investigador_id):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    texto = conexion.execute("""
+        SELECT
+            id,
+            codigo,
+            asignatura,
+            carrera,
+            facultad,
+            anio,
+            periodo_academico
+        FROM textos_asignatura
+        WHERE id = ?
+          AND estado = 1
+    """, (texto_id,)).fetchone()
+
+    if texto is None:
+        conexion.close()
+        return redirect(url_for("textos_asignatura"))
+
+    investigador = conexion.execute("""
+        SELECT
+            i.id,
+            i.nombre,
+            i.apellido,
+            i.tipo,
+            i.carrera,
+            i.carrera_area,
+            i.cargo,
+            i.facultad,
+            i.grado_academico,
+
+            a.id AS area_id,
+            a.codigo AS area_codigo,
+            a.nombre AS area_nombre,
+            a.color AS area_color
+
+        FROM investigadores i
+
+        LEFT JOIN investigadores_areas ia
+            ON ia.investigador_id = i.id
+
+        LEFT JOIN areas a
+            ON a.id = ia.area_id
+            AND a.estado = 1
+
+        WHERE i.id = ?
+          AND i.estado = 1
+
+    """, (investigador_id,)).fetchone()
+
+    if investigador is None:
+        conexion.close()
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+    relacion = conexion.execute("""
+        SELECT id
+        FROM texto_asignatura_investigadores
+        WHERE texto_asignatura_id = ?
+          AND investigador_id = ?
+    """, (texto_id, investigador_id)).fetchone()
+
+    if relacion is None:
+        conexion.close()
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+    conexion.close()
+
+    return render_template(
+        "preparar_certificado_texto_asignatura.html",
+        texto=texto,
+        investigador=investigador,
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+# =========================================================
+# CERTIFICACIONES
+# PREVISUALIZAR CERTIFICADO
+# =========================================================
+
+@app.route(
+    "/certificaciones/previsualizar/texto-asignatura/<int:texto_id>/<int:investigador_id>"
+)
+def previsualizar_certificado_texto_asignatura(texto_id, investigador_id):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    texto = conexion.execute("""
+        SELECT
+            id,
+            codigo,
+            asignatura,
+            carrera,
+            facultad,
+            anio,
+            periodo_academico
+        FROM textos_asignatura
+        WHERE id = ?
+          AND estado = 1
+    """, (texto_id,)).fetchone()
+
+    if texto is None:
+        conexion.close()
+        return redirect(url_for("certificacion_textos_asignatura"))
+
+    investigador = conexion.execute("""
+        SELECT
+            i.id,
+            i.nombre,
+            i.apellido,
+            i.tipo,
+            i.carrera,
+            i.carrera_area,
+            i.cargo,
+            i.facultad,
+            i.grado_academico,
+
+            a.id AS area_id,
+            a.codigo AS area_codigo,
+            a.nombre AS area_nombre,
+            a.color AS area_color
+
+        FROM investigadores i
+
+        LEFT JOIN investigadores_areas ia
+            ON ia.investigador_id = i.id
+
+        LEFT JOIN areas a
+            ON a.id = ia.area_id
+            AND a.estado = 1
+
+        WHERE i.id = ?
+          AND i.estado = 1
+
+    """, (investigador_id,)).fetchone()
+
+    if investigador is None:
+        conexion.close()
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+    relacion = conexion.execute("""
+        SELECT id
+        FROM texto_asignatura_investigadores
+        WHERE texto_asignatura_id = ?
+          AND investigador_id = ?
+    """, (texto_id, investigador_id)).fetchone()
+
+    if relacion is None:
+        conexion.close()
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+    numero, anio, numero_completo = generar_numero_certificado(
+        conexion,
+        investigador["area_codigo"]
+    )
+
+    fecha_emision = datetime.now().strftime("%Y-%m-%d")
+
+    codigo_verificacion = generar_codigo_verificacion(
+        anio,
+        investigador["area_codigo"]
+    )
+
+    ruta_qr = generar_qr_certificado(
+        codigo_verificacion,
+        numero_completo
+    )
+
+    directora = conexion.execute("""
+        SELECT
+            nombre_completo,
+            cargo
+        FROM firmantes_certificados
+        WHERE tipo_firmante = 'DIRECTORA'
+          AND estado = 1
+        ORDER BY id
+        LIMIT 1
+    """).fetchone()
+
+    conexion.close()
+
+    return render_template(
+        "previsualizar_certificado_texto_asignatura.html",
+        texto=texto,
+        investigador=investigador,
+        numero=numero,
+        anio=anio,
+        numero_completo=numero_completo,
+        fecha_emision=fecha_emision,
+        codigo_verificacion=codigo_verificacion,
+        ruta_qr=ruta_qr,
+        directora=directora,
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+# =========================================================
+# GENERAR CERTIFICADO - TEXTO DE ASIGNATURA
+# =========================================================
+
+@app.route(
+    "/certificaciones/generar/texto-asignatura/<int:texto_id>/<int:investigador_id>",
+    methods=["POST"]
+)
+def generar_certificado_texto_asignatura(texto_id, investigador_id):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    # -----------------------------------------------------
+    # Verificar que exista el texto
+    # -----------------------------------------------------
+
+    texto = conexion.execute("""
+        SELECT
+            id,
+            codigo,
+            asignatura,
+            carrera,
+            facultad,
+            anio,
+            periodo_academico
+        FROM textos_asignatura
+        WHERE id = ?
+          AND estado = 1
+    """, (texto_id,)).fetchone()
+
+    if texto is None:
+        conexion.close()
+        return redirect(url_for("textos_asignatura"))
+
+
+    # -----------------------------------------------------
+    # Verificar que exista el investigador
+    # -----------------------------------------------------
+
+    investigador = conexion.execute("""
+        SELECT
+            id,
+            nombre,
+            apellido
+        FROM investigadores
+        WHERE id = ?
+          AND estado = 1
+    """, (investigador_id,)).fetchone()
+
+    if investigador is None:
+        conexion.close()
+
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # Verificar que el investigador sea autor del documento
+    # -----------------------------------------------------
+
+    relacion = conexion.execute("""
+        SELECT id
+        FROM texto_asignatura_investigadores
+        WHERE texto_asignatura_id = ?
+          AND investigador_id = ?
+    """, (texto_id, investigador_id)).fetchone()
+
+    if relacion is None:
+        conexion.close()
+
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # Verificar si ya existe un certificado
+    # -----------------------------------------------------
+
+    certificado_existente = conexion.execute("""
+        SELECT
+            id,
+            numero_completo
+        FROM certificados
+        WHERE tipo_documento = ?
+          AND registro_id = ?
+          AND investigador_id = ?
+          AND estado = 1
+    """, (
+        "Texto de Asignatura",
+        texto_id,
+        investigador_id
+    )).fetchone()
+
+
+    if certificado_existente is not None:
+
+        flash(
+            f"Este investigador ya tiene un certificado emitido "
+            f"para este texto de asignatura. "
+            f"Número: {certificado_existente['numero_completo']}. "
+            f"No se ha generado un nuevo certificado.",
+            "warning"
+        )
+
+        conexion.close()
+
+        return redirect(url_for("certificaciones"))
+
+
+    # -----------------------------------------------------
+    # Obtener área del investigador
+    # -----------------------------------------------------
+
+    area = conexion.execute("""
+        SELECT
+            a.id,
+            a.codigo,
+            a.nombre
+        FROM investigadores_areas ia
+        INNER JOIN areas a
+            ON a.id = ia.area_id
+        WHERE ia.investigador_id = ?
+          AND a.estado = 1
+        LIMIT 1
+    """, (investigador_id,)).fetchone()
+
+    if area is None:
+        conexion.close()
+
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # Obtener directora activa
+    # -----------------------------------------------------
+
+    directora = conexion.execute("""
+        SELECT
+            nombre_completo,
+            cargo
+        FROM firmantes_certificados
+        WHERE tipo_firmante = 'DIRECTORA'
+          AND estado = 1
+        ORDER BY id
+        LIMIT 1
+    """).fetchone()
+
+    if directora is None:
+        conexion.close()
+
+        return redirect(
+            url_for(
+                "nuevo_certificado_texto_asignatura",
+                id=texto_id
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # Obtener responsable activo del área
+    # -----------------------------------------------------
+
+    responsable = conexion.execute("""
+        SELECT
+            nombre_completo,
+            cargo
+        FROM firmantes_certificados
+        WHERE tipo_firmante = 'RESPONSABLE_AREA'
+          AND area_id = ?
+          AND estado = 1
+        ORDER BY id
+        LIMIT 1
+    """, (area["id"],)).fetchone()
+
+    if responsable is None:
+        responsable = {
+            "nombre_completo": None,
+            "cargo": None
+        }
+
+
+    # -----------------------------------------------------
+    # Generar número automático
+    # -----------------------------------------------------
+
+    numero, anio, numero_completo = generar_numero_certificado(
+        conexion,
+        area["codigo"]
+    )
+
+
+    # -----------------------------------------------------
+    # Fecha de emisión
+    # -----------------------------------------------------
+
+    fecha_emision = datetime.now().strftime("%Y-%m-%d")
+
+    # -----------------------------------------------------
+    # Generar código verificación automático
+    # -----------------------------------------------------
+
+    codigo_verificacion = generar_codigo_verificacion(
+        anio,
+        area["codigo"]
+    )
+
+    # -----------------------------------------------------
+    # Registrar certificado
+    # -----------------------------------------------------
+
+    conexion.execute("""
+        INSERT INTO certificados (
+            numero,
+            anio,
+            tipo_documento,
+            registro_id,
+            investigador_id,
+            area_id,
+            plantilla_id,
+            numero_completo,
+            archivo,
+            fecha_emision,
+            estado,
+            usuario,
+            observaciones,
+            director_nombre,
+            director_cargo,
+            responsable_nombre,
+            responsable_cargo,
+            codigo_verificacion
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        numero,
+        anio,
+        "Texto de Asignatura",
+        texto_id,
+        investigador_id,
+        area["id"],
+        None,
+        numero_completo,
+        None,
+        fecha_emision,
+        1,
+        session.get("usuario"),
+        None,
+        directora["nombre_completo"],
+        directora["cargo"],
+        responsable["nombre_completo"],
+        responsable["cargo"],
+        codigo_verificacion
+    ))
+
+
+    # -----------------------------------------------------
+    # Obtener ID del certificado recién creado
+    # -----------------------------------------------------
+
+    certificado_id = conexion.execute("""
+        SELECT id
+        FROM certificados
+        WHERE numero = ?
+          AND anio = ?
+          AND investigador_id = ?
+          AND tipo_documento = ?
+          AND registro_id = ?
+    """, (
+        numero,
+        anio,
+        investigador_id,
+        "Texto de Asignatura",
+        texto_id
+    )).fetchone()[0]
+
+
+    # -----------------------------------------------------
+    # Generar PDF
+    # -----------------------------------------------------
+
+    archivo_pdf = generar_pdf_desde_plantilla_certificado(
+        conexion,
+        certificado_id,
+        codigo_verificacion
+    )
+
+
+    # -----------------------------------------------------
+    # Guardar ruta del PDF
+    # -----------------------------------------------------
+
+    conexion.execute("""
+        UPDATE certificados
+        SET archivo = ?
+        WHERE id = ?
+    """, (
+        archivo_pdf,
+        certificado_id
+    ))
+
+
+    conexion.commit()
+    conexion.close()
+
+
+    return redirect(
+        url_for("certificaciones")
+    )
+
+# =========================================================
+# CERTIFICACIONES
+# CONVERTIR HTML A PDF-CHROME
+# =========================================================
+
+def convertir_html_a_pdf_chrome(ruta_html, ruta_pdf):
+    import subprocess
+    import os
+
+    chrome = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+    if not os.path.exists(chrome):
+        raise FileNotFoundError(
+            "No se encontró Google Chrome en: " + chrome
+        )
+
+    subprocess.run(
+        [
+            chrome,
+            "--headless",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--print-to-pdf=" + os.path.abspath(ruta_pdf),
+            "file:///" + os.path.abspath(ruta_html).replace("\\", "/")
+        ],
+        check=True
+    )
+
+# =========================================================
+# CERTIFICACIONES
+# GENERAR PDF DESDE PLANTILLA - CERTIFICADO
+# =========================================================
+
+def generar_pdf_desde_plantilla_certificado(
+    conexion,
+    certificado_id,
+    codigo_verificacion
+):
+    import os
+    import tempfile
+
+    certificado = conexion.execute("""
+        SELECT
+            c.id,
+            c.numero,
+            c.anio,
+            c.numero_completo,
+            c.codigo_verificacion,
+            c.tipo_documento,
+            c.fecha_emision,
+            c.director_nombre,
+            c.director_cargo,
+
+            t.id AS texto_id,
+            t.codigo,
+            t.asignatura,
+            t.carrera,
+            t.facultad,
+            t.periodo_academico,
+
+            i.id AS investigador_id,
+            i.nombre,
+            i.apellido,
+            i.tipo,
+            i.carrera_area,
+            i.cargo,
+            i.facultad AS investigador_facultad,
+            i.grado_academico,
+
+            a.id AS area_id,
+            a.codigo AS area_codigo,
+            a.nombre AS area_nombre,
+            a.color AS area_color
+
+        FROM certificados c
+
+        INNER JOIN textos_asignatura t
+            ON t.id = c.registro_id
+
+        INNER JOIN investigadores i
+            ON i.id = c.investigador_id
+
+        LEFT JOIN investigadores_areas ia
+            ON ia.investigador_id = i.id
+
+        LEFT JOIN areas a
+            ON a.id = ia.area_id
+            AND a.estado = 1
+
+        WHERE c.id = ?
+    """, (certificado_id,)).fetchone()
+
+    if certificado is None:
+        return None
+
+    directora = {
+        "nombre_completo": certificado["director_nombre"],
+        "cargo": certificado["director_cargo"]
+    }
+
+    # ---------------------------------------------------------
+    # GENERAR CÓDIGO QR
+    # ---------------------------------------------------------
+
+    ruta_qr = generar_qr_certificado(
+        codigo_verificacion,
+        certificado["numero_completo"]
+    )
+
+    # ---------------------------------------------------------
+    # RUTAS FÍSICAS PARA CHROME
+    # ---------------------------------------------------------
+
+    ruta_fondo = os.path.abspath(
+        os.path.join(
+            "static",
+            "certificados",
+            "fondo_produccion_intelectual.png"
+        )
+    ).replace("\\", "/")
+
+    ruta_qr_archivo = os.path.abspath(
+        os.path.join(
+            "static",
+            ruta_qr
+        )
+    ).replace("\\", "/")
+
+    # ---------------------------------------------------------
+    # GENERAR HTML
+    # ---------------------------------------------------------
+
+    html = render_template(
+        "certificado_pdf_texto_asignatura.html",
+
+        texto=certificado,
+        investigador=certificado,
+
+        numero=certificado["numero"],
+        anio=certificado["anio"],
+        numero_completo=certificado["numero_completo"],
+        fecha_emision=certificado["fecha_emision"],
+
+        codigo_verificacion=codigo_verificacion,
+
+        ruta_qr=ruta_qr,
+        ruta_fondo=ruta_fondo,
+        ruta_qr_archivo=ruta_qr_archivo,
+
+        directora=directora,
+
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+    # ---------------------------------------------------------
+    # CARPETA DE CERTIFICADOS
+    # ---------------------------------------------------------
+
+    carpeta_certificados = os.path.join(
+        "static",
+        "certificados"
+    )
+
+    os.makedirs(
+        carpeta_certificados,
+        exist_ok=True
+    )
+
+    # ---------------------------------------------------------
+    # NOMBRE DEL PDF
+    # ---------------------------------------------------------
+
+    nombre_archivo = (
+        f"{certificado['numero_completo']}"
+        f" - "
+        f"{certificado['apellido']}"
+        f" "
+        f"{certificado['nombre']}"
+        f".pdf"
+    )
+
+    caracteres_invalidos = '<>:"/\\|?*'
+
+    for caracter in caracteres_invalidos:
+        nombre_archivo = nombre_archivo.replace(
+            caracter,
+            "_"
+        )
+
+    ruta_pdf = os.path.join(
+        carpeta_certificados,
+        nombre_archivo
+    )
+
+    # ---------------------------------------------------------
+    # CREAR HTML TEMPORAL
+    # ---------------------------------------------------------
+
+    archivo_temporal = tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".html",
+        delete=False,
+        encoding="utf-8"
+    )
+
+    archivo_temporal.write(html)
+    archivo_temporal.close()
+
+    # ---------------------------------------------------------
+    # CONVERTIR HTML A PDF CON GOOGLE CHROME
+    # ---------------------------------------------------------
+
+    try:
+        convertir_html_a_pdf_chrome(
+            archivo_temporal.name,
+            ruta_pdf
+        )
+
+    finally:
+        if os.path.exists(archivo_temporal.name):
+            os.remove(archivo_temporal.name)
+
+    # ---------------------------------------------------------
+    # DEVOLVER RUTA DEL ARCHIVO
+    # ---------------------------------------------------------
+
+    return os.path.join(
+        "certificados",
+        nombre_archivo
+    ).replace("\\", "/")
+
+# =========================================================
+# CERTIFICACIONES
+# GENERAR PDF - TEXTO DE ASIGNATURA
+# =========================================================
+
+def generar_pdf_certificado_texto_asignatura(
+    conexion,
+    certificado_id,
+    codigo_verificacion
+):
+
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import LETTER
+    from reportlab.lib import colors
+    from reportlab.lib.utils import ImageReader
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    from reportlab.platypus import Paragraph
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+    from reportlab.lib.units import mm
+    import os
+
+    # -----------------------------------------------------
+    # OBTENER INFORMACIÓN COMPLETA DEL CERTIFICADO
+    # -----------------------------------------------------
+
+    certificado = conexion.execute("""
+        SELECT
+            c.id,
+            c.numero,
+            c.anio,
+            c.numero_completo,
+            c.codigo_verificacion,
+            c.tipo_documento,
+            c.fecha_emision,
+            c.director_nombre,
+            c.director_cargo,
+
+            t.codigo,
+            t.asignatura,
+            t.carrera,
+            t.facultad,
+            t.periodo_academico,
+
+            i.id AS investigador_id,
+            i.nombre,
+            i.apellido,
+            i.grado_academico,
+
+            a.id AS area_id,
+            a.codigo AS area_codigo,
+            a.nombre AS area_nombre,
+            a.color AS area_color
+
+        FROM certificados c
+
+        INNER JOIN textos_asignatura t
+            ON t.id = c.registro_id
+
+        INNER JOIN investigadores i
+            ON i.id = c.investigador_id
+
+        LEFT JOIN investigadores_areas ia
+            ON ia.investigador_id = i.id
+
+        LEFT JOIN areas a
+            ON a.id = ia.area_id
+            AND a.estado = 1
+
+        WHERE c.id = ?
+
+    """, (certificado_id,)).fetchone()
+
+    if certificado is None:
+        return None
+
+    # -----------------------------------------------------
+    # CÓDIGO DE VERIFICACIÓN
+    # -----------------------------------------------------
+
+    codigo_qr = codigo_verificacion
+
+    ruta_qr = generar_qr_certificado(
+        codigo_qr,
+        certificado["numero_completo"]
+    )
+
+    # -----------------------------------------------------
+    # DIMENSIONES CARTA
+    # -----------------------------------------------------
+
+    ancho_pagina, alto_pagina = LETTER
+
+    # LETTER = 612 x 792 puntos
+    #
+    # 1 mm = 2.834645 puntos
+    #
+    # La plantilla utilizada por la vista previa es:
+    #
+    # 216 mm x 279.4 mm
+    #
+    # ReportLab trabaja en puntos.
+
+    # -----------------------------------------------------
+    # CARPETA DE CERTIFICADOS
+    # -----------------------------------------------------
+
+    carpeta_certificados = os.path.join(
+        "static",
+        "certificados"
+    )
+
+    os.makedirs(
+        carpeta_certificados,
+        exist_ok=True
+    )
+
+    # -----------------------------------------------------
+    # NOMBRE DEL ARCHIVO
+    # -----------------------------------------------------
+
+    nombre_archivo = (
+        f"{certificado['numero_completo']}"
+        f" - "
+        f"{certificado['apellido']}"
+        f" "
+        f"{certificado['nombre']}"
+        f".pdf"
+    )
+
+    caracteres_invalidos = '<>:"/\\|?*'
+
+    for caracter in caracteres_invalidos:
+        nombre_archivo = nombre_archivo.replace(
+            caracter,
+            "_"
+        )
+
+    ruta_pdf = os.path.join(
+        carpeta_certificados,
+        nombre_archivo
+    )
+
+    # -----------------------------------------------------
+    # CREAR PDF
+    # -----------------------------------------------------
+
+    pdf = canvas.Canvas(
+        ruta_pdf,
+        pagesize=LETTER
+    )
+
+    # -----------------------------------------------------
+    # FONDO OFICIAL
+    # -----------------------------------------------------
+
+    ruta_fondo = os.path.join(
+        "static",
+        "certificados",
+        "fondo_produccion_intelectual.png"
+    )
+
+    if os.path.exists(ruta_fondo):
+
+        pdf.drawImage(
+            ImageReader(ruta_fondo),
+            0,
+            0,
+            width=ancho_pagina,
+            height=alto_pagina,
+            preserveAspectRatio=False,
+            mask="auto"
+        )
+
+    # -----------------------------------------------------
+    # ÁREA DE CONTENIDO
+    #
+    # CSS:
+    #
+    # left: 25mm
+    # right: 25mm
+    # top: 53mm
+    # bottom: 32mm
+    # -----------------------------------------------------
+
+    contenido_x = 25 * mm
+    contenido_ancho = ancho_pagina - (50 * mm)
+
+    contenido_top = alto_pagina - (53 * mm)
+
+    # -----------------------------------------------------
+    # NÚMERO DE CERTIFICADO
+    #
+    # CSS:
+    #
+    # top: 0
+    # right: 0
+    # transform: translate(18mm, -17mm)
+    # min-width: 50mm
+    # -----------------------------------------------------
+
+    color_area = (
+        colors.HexColor(certificado["area_color"])
+        if certificado["area_color"]
+        else colors.HexColor("#1F4E79")
+    )
+
+    numero_ancho = 50 * mm
+    numero_alto = 10 * mm
+
+    numero_x = (
+        contenido_x
+        + contenido_ancho
+        - numero_ancho
+        + (18 * mm)
+    )
+
+    numero_y = (
+        contenido_top
+        - numero_alto
+        + (17 * mm)
+    )
+
+    pdf.setFillColor(color_area)
+
+    pdf.roundRect(
+        numero_x,
+        numero_y,
+        numero_ancho,
+        numero_alto,
+        2,
+        fill=1,
+        stroke=0
+    )
+
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 14)
+
+    numero_texto = certificado["numero_completo"]
+
+    numero_text_width = stringWidth(
+        numero_texto,
+        "Helvetica-Bold",
+        14
+    )
+
+    pdf.drawString(
+        numero_x + (numero_ancho - numero_text_width) / 2,
+        numero_y + 3.4 * mm,
+        numero_texto
+    )
+
+    # -----------------------------------------------------
+    # QR
+    #
+    # CSS:
+    #
+    # top: -10mm
+    # right: -6mm
+    # width: 28mm
+    #
+    # imagen: 25mm x 25mm
+    # -----------------------------------------------------
+
+    qr_x = (
+        contenido_x
+        + contenido_ancho
+        - (28 * mm)
+        + (6 * mm)
+    )
+
+    qr_y = (
+        contenido_top
+        - (25 * mm)
+        + (10 * mm)
+    )
+
+    ruta_qr_completa = os.path.join(
+        "static",
+        ruta_qr
+    )
+
+    if os.path.exists(ruta_qr_completa):
+
+        pdf.drawImage(
+            ImageReader(ruta_qr_completa),
+            qr_x,
+            qr_y,
+            width=25 * mm,
+            height=25 * mm,
+            preserveAspectRatio=True,
+            mask="auto"
+        )
+
+    # -----------------------------------------------------
+    # CÓDIGO QR
+    # -----------------------------------------------------
+
+    pdf.setFillColor(colors.HexColor("#111827"))
+    pdf.setFont("Helvetica-Bold", 7)
+
+    codigo_ancho = 28 * mm
+
+    # El código puede ocupar varias líneas.
+    codigo_texto = codigo_verificacion
+
+    codigo_linea = ""
+
+    lineas_codigo = []
+
+    for caracter in codigo_texto:
+
+        prueba = codigo_linea + caracter
+
+        if stringWidth(
+            prueba,
+            "Helvetica-Bold",
+            7
+        ) <= codigo_ancho:
+
+            codigo_linea = prueba
+
+        else:
+
+            if codigo_linea:
+                lineas_codigo.append(codigo_linea)
+
+            codigo_linea = caracter
+
+    if codigo_linea:
+        lineas_codigo.append(codigo_linea)
+
+    codigo_y = qr_y - 3.0 * mm
+
+    for linea in lineas_codigo:
+
+        ancho_linea = stringWidth(
+            linea,
+            "Helvetica-Bold",
+            7
+        )
+
+        pdf.drawString(
+            qr_x + (codigo_ancho - ancho_linea) / 2,
+            codigo_y,
+            linea
+        )
+
+        codigo_y -= 2.8 * mm
+
+    # -----------------------------------------------------
+    # ESTILOS PARA TEXTO
+    # -----------------------------------------------------
+
+    estilo_normal = ParagraphStyle(
+        "CertificadoNormal",
+        fontName="Helvetica",
+        fontSize=14.7,
+        leading=14.7 * 1.45,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor("#111827")
+    )
+
+    estilo_centrado = ParagraphStyle(
+        "CertificadoCentrado",
+        fontName="Helvetica",
+        fontSize=14.7,
+        leading=14.7 * 1.45,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#111827")
+    )
+
+    estilo_nombre = ParagraphStyle(
+        "CertificadoNombre",
+        fontName="Helvetica-Bold",
+        fontSize=21,
+        leading=25,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#111827")
+    )
+
+    estilo_detalle = ParagraphStyle(
+        "CertificadoDetalle",
+        fontName="Helvetica",
+        fontSize=15,
+        leading=15 * 1.35,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor("#111827")
+    )
+
+    estilo_asignatura_titulo = ParagraphStyle(
+        "AsignaturaTitulo",
+        fontName="Helvetica-Bold",
+        fontSize=17,
+        leading=22,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#111827")
+    )
+
+    estilo_asignatura = ParagraphStyle(
+        "Asignatura",
+        fontName="Helvetica-Bold",
+        fontSize=21,
+        leading=27,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#111827")
+    )
+
+    # -----------------------------------------------------
+    # POSICIÓN DEL CUERPO
+    #
+    # CSS:
+    #
+    # top: -12mm
+    # -----------------------------------------------------
+
+    cuerpo_x = contenido_x
+
+    cuerpo_ancho = contenido_ancho
+
+    cuerpo_top = contenido_top + (12 * mm)
+
+    cursor_y = cuerpo_top
+
+    # -----------------------------------------------------
+    # ENCABEZADO
+    # -----------------------------------------------------
+
+    pdf.setFillColor(colors.HexColor("#111827"))
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        14.7
+    )
+
+    texto = "VICERRECTORADO"
+
+    ancho_texto = stringWidth(
+        texto,
+        "Helvetica-Bold",
+        14
+    )
+
+    pdf.drawString(
+        cuerpo_x + (cuerpo_ancho - ancho_texto) / 2,
+        cursor_y,
+        texto
+    )
+
+    cursor_y -= 5 * mm
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        14
+    )
+
+    texto = "Dirección de Investigación, Ciencia y Tecnología"
+
+    ancho_texto = stringWidth(
+        texto,
+        "Helvetica-Bold",
+        14
+    )
+
+    pdf.drawString(
+        cuerpo_x + (cuerpo_ancho - ancho_texto) / 2,
+        cursor_y - 17,
+        texto
+    )
+
+    cursor_y -= 12 * mm
+
+    # -----------------------------------------------------
+    # CERTIFICA QUE
+    # -----------------------------------------------------
+
+    pdf.setFont(
+        "Helvetica",
+        14
+    )
+
+    pdf.drawString(
+        cuerpo_x,
+        cursor_y - 4,
+        "Certifica que:"
+    )
+
+    cursor_y -= 10 * mm
+
+    # -----------------------------------------------------
+    # NOMBRE DEL INVESTIGADOR
+    # -----------------------------------------------------
+
+    nombre_completo = (
+        f"{certificado['nombre']} "
+        f"{certificado['apellido']}"
+    ).strip()
+
+    nombre_parrafo = Paragraph(
+        nombre_completo,
+        estilo_nombre
+    )
+
+    nombre_w, nombre_h = nombre_parrafo.wrap(
+        cuerpo_ancho,
+        40 * mm
+    )
+
+    nombre_parrafo.drawOn(
+        pdf,
+        cuerpo_x,
+        cursor_y - nombre_h
+    )
+
+    cursor_y -= nombre_h + 3 * mm
+
+    # -----------------------------------------------------
+    # LÍNEA DEL NOMBRE
+    #
+    # width: 120mm
+    # -----------------------------------------------------
+
+    linea_nombre_ancho = 120 * mm
+
+    pdf.setStrokeColor(
+        colors.HexColor("#111827")
+    )
+
+    pdf.setLineWidth(0.7)
+
+    pdf.line(
+        cuerpo_x + (cuerpo_ancho - linea_nombre_ancho) / 2,
+        cursor_y,
+        cuerpo_x
+        + (cuerpo_ancho - linea_nombre_ancho) / 2
+        + linea_nombre_ancho,
+        cursor_y
+    )
+
+    cursor_y -= 6 * mm
+
+    # -----------------------------------------------------
+    # INTRODUCCIÓN
+    # -----------------------------------------------------
+
+    introduccion = (
+        "Ha presentado trabajo (s) de investigación, "
+        "el mismo que se adjunta al presente certificado, "
+        "de acuerdo al siguiente detalle:"
+    )
+
+    introduccion_parrafo = Paragraph(
+        introduccion,
+        estilo_normal
+    )
+
+    intro_w, intro_h = introduccion_parrafo.wrap(
+        cuerpo_ancho,
+        50 * mm
+    )
+
+    introduccion_parrafo.drawOn(
+        pdf,
+        cuerpo_x,
+        cursor_y - intro_h
+    )
+
+    cursor_y -= intro_h + 6 * mm
+
+    # -----------------------------------------------------
+    # TABLA DE DETALLES
+    #
+    # width: 65%
+    # -----------------------------------------------------
+
+    tabla_ancho = cuerpo_ancho * 0.65
+
+    tabla_x = (
+        cuerpo_x
+        + (cuerpo_ancho - tabla_ancho) / 2
+    )
+
+    # -----------------------------------------------------
+    # DETALLES NORMALES
+    # -----------------------------------------------------
+
+    def dibujar_detalle(
+        etiqueta,
+        valor,
+        y,
+        ancho_izquierdo,
+        ancho_derecho
+    ):
+
+        pdf.setFont(
+            "Helvetica-Bold",
+            17
+        )
+
+        pdf.drawString(
+            tabla_x,
+            y,
+            etiqueta
+        )
+
+        pdf.setFont(
+            "Helvetica",
+            17
+        )
+
+        pdf.drawString(
+            tabla_x + ancho_izquierdo,
+            y,
+            valor
+        )
+
+        return y - (
+            17 * 1.45
+        )
+
+    ancho_izquierdo = tabla_ancho * 0.60
+    ancho_derecho = tabla_ancho * 0.40
+
+    cursor_tabla = cursor_y
+
+    cursor_tabla = dibujar_detalle(
+        "Nivel de investigación:",
+        "Texto de Asignatura",
+        cursor_tabla,
+        ancho_izquierdo,
+        ancho_derecho
+    )
+
+    cursor_tabla = dibujar_detalle(
+        "Participación:",
+        "Autor",
+        cursor_tabla,
+        ancho_izquierdo,
+        ancho_derecho
+    )
+
+    # -----------------------------------------------------
+    # ASIGNATURA
+    # -----------------------------------------------------
+
+    cursor_tabla -= 4 * mm
+
+    asignatura_titulo = Paragraph(
+        "Asignatura:",
+        estilo_asignatura_titulo
+    )
+
+    titulo_w, titulo_h = asignatura_titulo.wrap(
+        tabla_ancho,
+        20 * mm
+    )
+
+    asignatura_titulo.drawOn(
+        pdf,
+        tabla_x,
+        cursor_tabla - titulo_h
+    )
+
+    cursor_tabla -= titulo_h + 2 * mm
+
+    asignatura_valor = (
+        f"“{certificado['asignatura'] or ''}”"
+    )
+
+    asignatura_parrafo = Paragraph(
+        asignatura_valor,
+        estilo_asignatura
+    )
+
+    asignatura_w, asignatura_h = asignatura_parrafo.wrap(
+        tabla_ancho,
+        40 * mm
+    )
+
+    asignatura_parrafo.drawOn(
+        pdf,
+        tabla_x,
+        cursor_tabla - asignatura_h
+    )
+
+    cursor_tabla -= asignatura_h + 5 * mm
+
+    # -----------------------------------------------------
+    # ÁREA ACADÉMICA
+    # -----------------------------------------------------
+
+    cursor_tabla = dibujar_detalle(
+        "Área Académica:",
+        certificado["area_codigo"] or "No registrada",
+        cursor_tabla,
+        ancho_izquierdo,
+        ancho_derecho
+    )
+
+    # -----------------------------------------------------
+    # PROGRAMA / CARRERA
+    # -----------------------------------------------------
+
+    cursor_tabla = dibujar_detalle(
+        "Programa/Carrera:",
+        certificado["carrera"] or "No registrado",
+        cursor_tabla,
+        ancho_izquierdo,
+        ancho_derecho
+    )
+
+    # -----------------------------------------------------
+    # PERIODO ACADÉMICO
+    # -----------------------------------------------------
+
+    cursor_tabla = dibujar_detalle(
+        "Periodo académico:",
+        certificado["periodo_academico"] or "No registrado",
+        cursor_tabla,
+        ancho_izquierdo,
+        ancho_derecho
+    )
+
+    # -----------------------------------------------------
+    # TIEMPO DE VALIDEZ
+    # -----------------------------------------------------
+
+    cursor_tabla = dibujar_detalle(
+        "Tiempo de validez:",
+        "2 Años",
+        cursor_tabla,
+        ancho_izquierdo,
+        ancho_derecho
+    )
+
+    cursor_y = cursor_tabla - 5 * mm
+
+    # -----------------------------------------------------
+    # TEXTO FINAL
+    # -----------------------------------------------------
+
+    texto_final = (
+        "Es cuanto se certifica, para los fines de Evaluación "
+        "Docente en la Universidad Amazónica de Pando."
+    )
+
+    final_parrafo = Paragraph(
+        texto_final,
+        estilo_normal
+    )
+
+    final_w, final_h = final_parrafo.wrap(
+        cuerpo_ancho,
+        50 * mm
+    )
+
+    final_parrafo.drawOn(
+        pdf,
+        cuerpo_x,
+        cursor_y - final_h
+    )
+
+    cursor_y -= final_h
+
+    # -----------------------------------------------------
+    # FECHA
+    # -----------------------------------------------------
+
+    fecha = certificado["fecha_emision"]
+
+    if fecha:
+
+        partes = fecha.split("-")
+
+        if len(partes) == 3:
+
+            anio = partes[0]
+            mes = partes[1]
+            dia = partes[2]
+
+            meses = {
+                "01": "enero",
+                "02": "febrero",
+                "03": "marzo",
+                "04": "abril",
+                "05": "mayo",
+                "06": "junio",
+                "07": "julio",
+                "08": "agosto",
+                "09": "septiembre",
+                "10": "octubre",
+                "11": "noviembre",
+                "12": "diciembre"
+            }
+
+            fecha_texto = (
+                f"Cobija, {int(dia)} de "
+                f"{meses.get(mes, mes)} de {anio}"
+            )
+
+        else:
+
+            fecha_texto = f"Cobija, {fecha}"
+
+    else:
+
+        fecha_texto = "Cobija"
+
+    fecha_parrafo = Paragraph(
+        fecha_texto,
+        ParagraphStyle(
+            "Fecha",
+            fontName="Helvetica",
+            fontSize=18.7,
+            leading=18.7 * 1.55,
+            alignment=TA_RIGHT,
+            textColor=colors.HexColor("#111827")
+        )
+    )
+
+    fecha_w, fecha_h = fecha_parrafo.wrap(
+        cuerpo_ancho,
+        20 * mm
+    )
+
+    fecha_parrafo.drawOn(
+        pdf,
+        cuerpo_x,
+        cursor_y - fecha_h
+    )
+
+    # -----------------------------------------------------
+    # FIRMA DIRECTORA
+    #
+    # CSS:
+    #
+    # position absolute
+    # left: 50%
+    # bottom: -3mm
+    # width: 75mm
+    # -----------------------------------------------------
+
+    firma_ancho = 75 * mm
+    firma_x = (
+        contenido_x
+        + contenido_ancho / 2
+        - firma_ancho / 2
+    )
+
+    firma_y = (
+        32 * mm
+        - 3 * mm
+    )
+
+    # Línea de firma: 65mm
+
+    linea_firma_ancho = 65 * mm
+
+    pdf.setStrokeColor(
+        colors.HexColor("#111827")
+    )
+
+    pdf.setLineWidth(0.7)
+
+    pdf.line(
+        firma_x + (firma_ancho - linea_firma_ancho) / 2,
+        firma_y + 18 * mm,
+        firma_x
+        + (firma_ancho - linea_firma_ancho) / 2
+        + linea_firma_ancho,
+        firma_y + 18 * mm
+    )
+
+    # Nombre
+
+    pdf.setFillColor(
+        colors.HexColor("#111827")
+    )
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        11
+    )
+
+    nombre_directora = (
+        certificado["director_nombre"]
+        or ""
+    )
+
+    ancho_nombre = stringWidth(
+        nombre_directora,
+        "Helvetica-Bold",
+        11
+    )
+
+    pdf.drawString(
+        firma_x + (firma_ancho - ancho_nombre) / 2,
+        firma_y + 14 * mm,
+        nombre_directora
+    )
+
+    # Cargo
+
+    pdf.setFont(
+        "Helvetica",
+        10
+    )
+
+    cargo_directora = (
+        certificado["director_cargo"]
+        or ""
+    )
+
+    lineas_cargo = []
+
+    palabras = cargo_directora.split()
+
+    linea_actual = ""
+
+    for palabra in palabras:
+
+        prueba = (
+            linea_actual + " " + palabra
+        ).strip()
+
+        if stringWidth(
+            prueba,
+            "Helvetica",
+            10
+        ) <= firma_ancho:
+
+            linea_actual = prueba
+
+        else:
+
+            if linea_actual:
+                lineas_cargo.append(
+                    linea_actual
+                )
+
+            linea_actual = palabra
+
+    if linea_actual:
+        lineas_cargo.append(
+            linea_actual
+        )
+
+    cargo_y = firma_y + 10.5 * mm
+
+    for linea in lineas_cargo:
+
+        ancho_linea = stringWidth(
+            linea,
+            "Helvetica",
+            10
+        )
+
+        pdf.drawString(
+            firma_x + (firma_ancho - ancho_linea) / 2,
+            cargo_y,
+            linea
+        )
+
+        cargo_y -= 3.2 * mm
+
+    # Institución
+
+    pdf.setFont(
+        "Helvetica",
+        10
+    )
+
+    institucion = (
+        "Universidad Amazónica de Pando"
+    )
+
+    ancho_institucion = stringWidth(
+        institucion,
+        "Helvetica",
+        10
+    )
+
+    pdf.drawString(
+        firma_x + (firma_ancho - ancho_institucion) / 2,
+        cargo_y - 1 * mm,
+        institucion
+    )
+
+    # -----------------------------------------------------
+    # FINALIZAR PDF
+    # -----------------------------------------------------
+
+    pdf.save()
+
+    # -----------------------------------------------------
+    # RUTA RELATIVA PARA GUARDAR EN BD
+    # -----------------------------------------------------
+
+    ruta_bd = os.path.join(
+        "certificados",
+        nombre_archivo
+    ).replace("\\", "/")
+
+    return ruta_bd
+
+# =========================================================
+# CERTIFICACIONES NUEVO MÓDULO
+# =========================================================
+@app.route("/certificaciones/nuevo/modulo")
+def nuevo_certificado_modulo():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "nuevo_certificado_modulo.html",
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+# =========================================================
+# CERTIFICACIONES NUEVO MÓDULO TEXTO ASIGNATURA
+# =========================================================
+@app.route("/certificaciones/nuevo/modulo/texto-asignatura")
+def certificacion_textos_asignatura():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    textos = conexion.execute("""
+        SELECT
+            t.id,
+            t.codigo,
+            t.asignatura,
+            t.carrera,
+            t.facultad,
+            t.anio,
+            t.periodo_academico,
+
+            (
+                SELECT COUNT(*)
+                FROM texto_asignatura_investigadores tai
+                INNER JOIN investigadores i
+                    ON i.id = tai.investigador_id
+                WHERE tai.texto_asignatura_id = t.id
+                  AND i.estado = 1
+            ) AS cantidad_investigadores
+
+        FROM textos_asignatura t
+
+        WHERE t.estado = 1
+
+        ORDER BY
+            t.anio DESC,
+            t.id DESC
+    """).fetchall()
+
+    conexion.close()
+
+    return render_template(
+        "certificacion_textos_asignatura.html",
+        textos=textos,
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+# =========================================================
+# CERTIFICACIONES REGISTRO MANUAL
+# =========================================================
+
+@app.route("/certificaciones/nuevo/registro-manual")
+def nuevo_certificado_registro_manual():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "certificacion_registro_manual.html",
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+
+# =========================================================
+# NUEVO CERTIFICADO PRODUCCIÓN INTELECTUAL
+# PREPARAR BORRADOR SIN REGISTRAR EN LA BASE DE DATOS
+# =========================================================
+
+@app.route(
+    "/certificaciones/nuevo/registro-manual/produccion-intelectual",
+    methods=["GET", "POST"]
+)
+def nuevo_certificado_produccion_intelectual():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    campos = [
+        "investigador",
+        "tipo_documento",
+        "participacion",
+        "titulo",
+        "area_facultad",
+        "fecha_publicacion",
+        "categoria",
+        "indexada",
+        "medio_publicacion",
+        "nombre_revista",
+        "doi",
+        "issn",
+        "observaciones"
+    ]
+
+    # Recuperar borrador si ya se había comenzado
+    datos = session.get(
+        "borrador_produccion_intelectual",
+        {}
+    ).copy()
+
+    if request.method == "POST":
+
+        datos = {
+            campo: request.form.get(campo, "").strip()
+            for campo in campos
+        }
+
+        # Validación básica
+        obligatorios = {
+            "investigador": "Debe ingresar el nombre del investigador o autor.",
+            "tipo_documento": "Debe seleccionar el tipo de documento.",
+            "participacion": "Debe seleccionar la participación.",
+            "titulo": "Debe ingresar el título de la producción intelectual.",
+            "area_facultad": "Debe seleccionar el área o facultad."
+        }
+
+        for campo, mensaje in obligatorios.items():
+
+            if not datos.get(campo):
+                session["borrador_produccion_intelectual"] = datos
+
+                flash(mensaje, "warning")
+
+                return render_template(
+                    "certificacion_produccion_intelectual.html",
+                    usuario=session.get("usuario"),
+                    rol=session.get("rol"),
+                    datos_formulario=datos
+                )
+
+        # Guardar únicamente en la sesión.
+        # Todavía NO se inserta en la base de datos.
+        session["borrador_produccion_intelectual"] = datos
+        session.modified = True
+
+        return redirect(
+            url_for(
+                "previsualizar_certificado_produccion_intelectual"
+            )
+        )
+
+    return render_template(
+        "certificacion_produccion_intelectual.html",
+        usuario=session.get("usuario"),
+        rol=session.get("rol"),
+        datos_formulario=datos
+    )
+
+
+# =========================================================
+# PREVISUALIZAR CERTIFICADO - PRODUCCIÓN INTELECTUAL
+# ADMITE BORRADOR TEMPORAL Y CERTIFICADO REGISTRADO
+# =========================================================
+
+@app.route(
+    "/certificaciones/previsualizar/produccion-intelectual",
+    defaults={"id": None}
+)
+@app.route(
+    "/certificaciones/previsualizar/produccion-intelectual/<int:id>"
+)
+def previsualizar_certificado_produccion_intelectual(id=None):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    try:
+
+        # =====================================================
+        # BORRADOR TEMPORAL: AÚN NO REGISTRADO
+        # =====================================================
+
+        if id is None:
+
+            datos = session.get(
+                "borrador_produccion_intelectual"
+            )
+
+            if not datos:
+                flash(
+                    "No hay datos para previsualizar. Complete el formulario.",
+                    "warning"
+                )
+                return redirect(
+                    url_for("nuevo_certificado_produccion_intelectual")
+                )
+
+            certificado = dict(datos)
+
+            # Valores provisionales: no son un número oficial
+            certificado.update({
+                "id": None,
+                "numero_certificado": "BORRADOR",
+                "codigo_verificacion": "",
+                "archivo_qr": None,
+                "archivo_pdf": None,
+                "fecha_registro": None,
+                "estado": "Borrador",
+                "tipo_certificado": "PRODUCCION_INTELECTUAL"
+            })
+
+        # =====================================================
+        # CERTIFICADO YA REGISTRADO
+        # =====================================================
+
+        else:
+
+            certificado = conexion.execute("""
+                SELECT
+                    id,
+                    numero_certificado,
+                    codigo_verificacion,
+                    archivo_qr,
+                    archivo_pdf,
+                    investigador,
+                    tipo_documento,
+                    participacion,
+                    titulo,
+                    area_facultad,
+                    fecha_publicacion,
+                    categoria,
+                    indexada,
+                    medio_publicacion,
+                    nombre_revista,
+                    doi,
+                    issn,
+                    observaciones,
+                    fecha_registro,
+                    estado,
+                    tipo_certificado
+                FROM certificaciones_manuales
+                WHERE id = ?
+                  AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash(
+                    "No se encontró el certificado solicitado.",
+                    "warning"
+                )
+                return redirect(
+                    url_for("nuevo_certificado_produccion_intelectual")
+                )
+
+
+        # =====================================================
+        # ADVERTENCIA POR TÍTULOS SIMILARES
+        # Solo informa; no bloquea la emisión.
+        # =====================================================
+
+        import re
+        import unicodedata
+        from difflib import SequenceMatcher
+
+        def normalizar_titulo_comparacion(texto):
+            texto = str(texto or "").casefold().strip()
+            texto = unicodedata.normalize("NFD", texto)
+            texto = "".join(
+                caracter for caracter in texto
+                if unicodedata.category(caracter) != "Mn"
+            )
+            texto = re.sub(r"[^a-z0-9]+", " ", texto)
+            return " ".join(texto.split())
+
+        titulo_nuevo = normalizar_titulo_comparacion(
+            certificado["titulo"] or ""
+        )
+
+        titulos_similares = []
+
+        if titulo_nuevo:
+            registros_titulos = conexion.execute("""
+                SELECT id, numero_certificado, titulo, investigador, doi
+                FROM certificaciones_manuales
+                WHERE tipo_certificado = 'PRODUCCION_INTELECTUAL'
+                  AND estado IN ('Registrado', 'Emitido')
+                  AND titulo IS NOT NULL
+                  AND TRIM(titulo) <> ''
+                  AND (? IS NULL OR id <> ?)
+                ORDER BY id DESC
+            """, (id, id)).fetchall()
+
+            for registro in registros_titulos:
+                titulo_existente = normalizar_titulo_comparacion(
+                    registro["titulo"]
+                )
+
+                if not titulo_existente:
+                    continue
+
+                similitud = SequenceMatcher(
+                    None,
+                    titulo_nuevo,
+                    titulo_existente
+                ).ratio()
+
+                # Advertir si la similitud es alta o si un título
+                # está contenido casi por completo en el otro.
+                contiene_titulo = (
+                    min(len(titulo_nuevo), len(titulo_existente)) >= 20
+                    and (
+                        titulo_nuevo in titulo_existente
+                        or titulo_existente in titulo_nuevo
+                    )
+                )
+
+                if similitud >= 0.78 or contiene_titulo:
+                    titulos_similares.append({
+                        "id": registro["id"],
+                        "numero_certificado":
+                            registro["numero_certificado"],
+                        "titulo": registro["titulo"],
+                        "investigador": registro["investigador"],
+                        "similitud": round(similitud * 100)
+                    })
+
+            titulos_similares.sort(
+                key=lambda elemento: elemento["similitud"],
+                reverse=True
+            )
+
+            titulos_similares = titulos_similares[:5]
+
+
+        # =====================================================
+        # FIRMANTE
+        # =====================================================
+
+        directora = conexion.execute("""
+            SELECT nombre_completo, cargo
+            FROM firmantes_certificados
+            WHERE tipo_firmante = 'DIRECTORA'
+              AND estado = 1
+            ORDER BY id
+            LIMIT 1
+        """).fetchone()
+
+        # La vista previa utiliza la fecha actual
+        fecha_emision = datetime.now().strftime("%Y-%m-%d")
+
+        return render_template(
+            "previsualizar_certificado_produccion_intelectual.html",
+            certificado=certificado,
+            directora=directora,
+            fecha_emision=fecha_emision,
+            es_borrador=(id is None),
+            usuario=session.get("usuario"),
+            rol=session.get("rol"),
+            titulos_similares=titulos_similares
+        )
+
+    finally:
+        conexion.close()
+
+# =========================================================
+# CERTIFICACIONES
+# GENERAS PDF DESDE PLANTILLA - PRODUCCIÓN INTELECTUAL
+# =========================================================
+
+def generar_pdf_desde_plantilla_produccion_intelectual(
+    conexion,
+    certificado_id,
+    codigo_verificacion
+):
+    import os
+    import tempfile
+
+    certificado = conexion.execute("""
+        SELECT
+            id,
+            numero_certificado,
+            codigo_verificacion,
+            archivo_qr,
+            investigador,
+            tipo_documento,
+            participacion,
+            titulo,
+            area_facultad,
+            fecha_publicacion,
+            categoria,
+            indexada,
+            medio_publicacion,
+            nombre_revista,
+            doi,
+            issn,
+            observaciones,
+            fecha_registro,
+            estado,
+            tipo_certificado
+        FROM certificaciones_manuales
+        WHERE id = ?
+          AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+    """, (certificado_id,)).fetchone()
+
+    if certificado is None:
+        return None
+
+    directora = conexion.execute("""
+        SELECT
+            nombre_completo,
+            cargo
+        FROM firmantes_certificados
+        WHERE tipo_firmante = 'DIRECTORA'
+          AND estado = 1
+        ORDER BY id
+        LIMIT 1
+    """).fetchone()
+
+    if not directora:
+        return None
+
+    # =========================================================
+    # FONDO DEL CERTIFICADO
+    # =========================================================
+
+    ruta_fondo = os.path.abspath(
+        os.path.join(
+            "static",
+            "certificados",
+            "fondo_produccion_intelectual.png"
+        )
+    ).replace("\\", "/")
+
+
+    # =========================================================
+    # QR
+    # =========================================================
+
+    ruta_qr = certificado["archivo_qr"]
+
+    if not ruta_qr:
+        ruta_qr = generar_qr_certificado(
+            codigo_verificacion,
+            certificado["numero_certificado"]
+        )
+
+    ruta_qr_archivo = os.path.abspath(
+        os.path.join(
+            "static",
+            ruta_qr
+        )
+    ).replace("\\", "/")
+
+
+    # =========================================================
+    # FECHA DE EMISIÓN
+    # =========================================================
+
+    fecha_emision = datetime.now().strftime("%Y-%m-%d")
+
+
+    # =========================================================
+    # HTML DEL CERTIFICADO
+    # =========================================================
+
+    html = render_template(
+        "certificado_pdf_produccion_intelectual.html",
+
+        certificado=certificado,
+
+        directora=directora,
+
+        fecha_emision=fecha_emision,
+
+        codigo_verificacion=codigo_verificacion,
+
+        ruta_fondo=ruta_fondo,
+
+        ruta_qr_archivo=ruta_qr_archivo,
+
+        usuario=session.get("usuario"),
+
+        rol=session.get("rol")
+    )
+
+
+    # =========================================================
+    # CARPETA DE CERTIFICADOS
+    # =========================================================
+
+    carpeta_certificados = os.path.join(
+        "static",
+        "certificados"
+    )
+
+    os.makedirs(
+        carpeta_certificados,
+        exist_ok=True
+    )
+
+
+    # =========================================================
+    # NOMBRE DEL PDF
+    # =========================================================
+
+    partes_numero = certificado["numero_certificado"].split("-")
+
+    if len(partes_numero) == 2:
+        numero_completo = (
+            f"Nº DICyT. - DIR. "
+            f"{int(partes_numero[0]):03d}/"
+            f"{partes_numero[1]}"
+        )
+    else:
+        numero_completo = certificado["numero_certificado"]
+
+    nombre_archivo = (
+        f"{numero_completo}"
+        f" - "
+        f"{certificado['investigador']}"
+        f".pdf"
+    )
+
+
+    # Caracteres no permitidos en nombres de Windows
+
+    caracteres_invalidos = '<>:"/\\|?*'
+
+    for caracter in caracteres_invalidos:
+        nombre_archivo = nombre_archivo.replace(
+            caracter,
+            "_"
+        )
+
+
+    ruta_pdf = os.path.join(
+        carpeta_certificados,
+        nombre_archivo
+    )
+
+
+    # =========================================================
+    # ARCHIVO HTML TEMPORAL
+    # =========================================================
+
+    archivo_temporal = tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".html",
+        delete=False,
+        encoding="utf-8"
+    )
+
+    archivo_temporal.write(html)
+
+    archivo_temporal.close()
+
+
+    # =========================================================
+    # CONVERTIR HTML → PDF
+    # =========================================================
+
+    try:
+
+        convertir_html_a_pdf_chrome(
+            archivo_temporal.name,
+            ruta_pdf
+        )
+
+    finally:
+
+        if os.path.exists(
+            archivo_temporal.name
+        ):
+            os.remove(
+                archivo_temporal.name
+            )
+
+
+    # =========================================================
+    # DEVOLVER RUTA RELATIVA
+    # =========================================================
+
+    return os.path.join(
+        "certificados",
+        nombre_archivo
+    ).replace("\\", "/")
+
+# =========================================================
+# GUARDAR CERTIFICADO EN GOOGLE DRIVE
+# =========================================================
+
+def guardar_certificado_en_google_drive(
+    conexion,
+    certificado_id,
+    archivo_pdf
+):
+    """
+    Sube el PDF y el QR a Google Drive por área y año.
+    Las rutas locales se conservan como respaldo.
+    """
+
+    import os
+
+    certificado = conexion.execute("""
+        SELECT
+            numero_certificado,
+            area_facultad,
+            archivo_qr
+        FROM certificaciones_manuales
+        WHERE id = ?
+          AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+    """, (certificado_id,)).fetchone()
+
+    if certificado is None:
+        return
+
+    numero = certificado["numero_certificado"] or ""
+    partes = numero.split("-")
+
+    if len(partes) == 2 and partes[1].isdigit():
+        anio = partes[1]
+    else:
+        from datetime import datetime
+        anio = str(datetime.now().year)
+
+    def resolver_ruta_local(ruta):
+        if not ruta:
+            return None
+
+        ruta = os.path.normpath(ruta)
+
+        if os.path.isabs(ruta):
+            return ruta
+
+        # Las rutas guardadas normalmente son relativas a static.
+        ruta_con_static = os.path.join("static", ruta)
+
+        if os.path.isfile(ruta_con_static):
+            return os.path.abspath(ruta_con_static)
+
+        if os.path.isfile(ruta):
+            return os.path.abspath(ruta)
+
+        return None
+
+    ruta_pdf_local = resolver_ruta_local(archivo_pdf)
+    ruta_qr_local = resolver_ruta_local(certificado["archivo_qr"])
+
+    if not ruta_pdf_local or not os.path.isfile(ruta_pdf_local):
+        app.logger.warning(
+            "No se encontró el PDF local del certificado %s.",
+            certificado_id
+        )
+        return
+
+    if not ruta_qr_local or not os.path.isfile(ruta_qr_local):
+        app.logger.warning(
+            "No se encontró el QR local del certificado %s.",
+            certificado_id
+        )
+        # Podemos subir el PDF aunque falte el QR.
+
+    try:
+        from google_drive import (
+            conectar_google_drive,
+            obtener_carpeta_pdf_certificacion,
+            obtener_carpeta_qr_certificacion,
+            subir_archivo
+        )
+
+        servicio = conectar_google_drive()
+
+        # Subir PDF a CERTIFICACIONES/PDF/ÁREA/AÑO.
+        carpeta_pdf = obtener_carpeta_pdf_certificacion(
+            servicio,
+            certificado["area_facultad"],
+            anio
+        )
+
+        resultado_pdf = subir_archivo(
+            servicio,
+            ruta_pdf_local,
+            os.path.basename(ruta_pdf_local),
+            carpeta_pdf
+        )
+
+        if resultado_pdf and resultado_pdf.get("id"):
+            conexion.execute("""
+                UPDATE certificaciones_manuales
+                SET drive_pdf_id = ?
+                WHERE id = ?
+            """, (resultado_pdf["id"], certificado_id))
+
+        # Subir QR a CERTIFICACIONES/QR/ÁREA/AÑO.
+        if ruta_qr_local and os.path.isfile(ruta_qr_local):
+            carpeta_qr = obtener_carpeta_qr_certificacion(
+                servicio,
+                certificado["area_facultad"],
+                anio
+            )
+
+            resultado_qr = subir_archivo(
+                servicio,
+                ruta_qr_local,
+                os.path.basename(ruta_qr_local),
+                carpeta_qr
+            )
+
+            if resultado_qr and resultado_qr.get("id"):
+                conexion.execute("""
+                    UPDATE certificaciones_manuales
+                    SET drive_qr_id = ?
+                    WHERE id = ?
+                """, (resultado_qr["id"], certificado_id))
+
+    except Exception:
+        # Una falla de Drive no debe impedir conservar la emisión local.
+        app.logger.exception(
+            "No se pudieron subir todos los archivos del certificado %s a Google Drive.",
+            certificado_id
+        )
+
+# =========================================================
+# CERTIFICACIONES
+# GENERAR CERTIFICADO - PRODUCCIÓN INTELECTUAL
+# =========================================================
+
+@app.route(
+    "/certificaciones/generar/produccion-intelectual",
+    defaults={"id": None},
+    methods=["POST"]
+)
+@app.route(
+    "/certificaciones/generar/produccion-intelectual/<int:id>",
+    methods=["POST"]
+)
+def generar_certificado_produccion_intelectual(id=None):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    # =====================================================
+    # CASO 1: EMITIR UN BORRADOR NUEVO
+    # =====================================================
+
+    if id is None:
+
+        datos = session.get("borrador_produccion_intelectual")
+
+        if not datos:
+            conexion.close()
+
+            flash(
+                "No hay datos para emitir. Complete primero el formulario.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("nuevo_certificado_produccion_intelectual")
+            )
+
+        campos_obligatorios = {
+            "investigador": "Debe ingresar el nombre del investigador.",
+            "tipo_documento": "Debe seleccionar el tipo de documento.",
+            "participacion": "Debe seleccionar la participación.",
+            "titulo": "Debe ingresar el título de la producción intelectual.",
+            "area_facultad": "Debe seleccionar el área o facultad."
+        }
+
+        for campo, mensaje in campos_obligatorios.items():
+
+            if not datos.get(campo):
+
+                conexion.close()
+
+                flash(mensaje, "warning")
+
+                return redirect(
+                    url_for("nuevo_certificado_produccion_intelectual")
+                )
+
+
+        # Evitar duplicados por DOI o por coincidencia exacta sin DOI.
+        registros_existentes = conexion.execute("""
+            SELECT id, numero_certificado, estado, investigador,
+                   tipo_documento, participacion, titulo, area_facultad, doi
+            FROM certificaciones_manuales
+            WHERE tipo_certificado = 'PRODUCCION_INTELECTUAL'
+              AND estado IN ('Registrado', 'Emitido')
+            ORDER BY id DESC
+        """).fetchall()
+
+        def normalizar_doi_local(valor):
+            texto = (valor or "").strip().casefold()
+
+            for prefijo in (
+                "https://dx.doi.org/",
+                "http://dx.doi.org/",
+                "https://doi.org/",
+                "http://doi.org/",
+                "doi:"
+            ):
+                if texto.startswith(prefijo):
+                    texto = texto[len(prefijo):]
+                    break
+
+            return "".join(texto.split()).rstrip("/")
+
+        def normalizar_texto_local(valor):
+            return " ".join(str(valor or "").casefold().split())
+
+        doi_nuevo = normalizar_doi_local(datos.get("doi", ""))
+        certificado_existente = None
+        motivo_duplicado = ""
+
+        for registro in registros_existentes:
+            doi_existente = normalizar_doi_local(registro["doi"])
+
+            # El mismo DOI bloquea aunque cambien otros campos.
+            if doi_nuevo and doi_existente and doi_nuevo == doi_existente:
+                certificado_existente = registro
+                motivo_duplicado = (
+                    "El DOI ingresado ya está registrado en otro certificado."
+                )
+                break
+
+            # Si ambos carecen de DOI, comprobar todos los campos principales.
+            if not doi_nuevo and not doi_existente:
+                campos_comparar = (
+                    "investigador",
+                    "tipo_documento",
+                    "participacion",
+                    "titulo",
+                    "area_facultad"
+                )
+
+                if all(
+                    normalizar_texto_local(datos.get(campo, ""))
+                    == normalizar_texto_local(registro[campo])
+                    for campo in campos_comparar
+                ):
+                    certificado_existente = registro
+                    motivo_duplicado = (
+                        "Ya existe un registro con los mismos datos y sin DOI."
+                    )
+                    break
+
+        if certificado_existente is not None:
+            conexion.close()
+
+            flash(
+                f"{motivo_duplicado} No se ha emitido otro certificado. "
+                f"Número existente: "
+                f"{certificado_existente['numero_certificado'] or 'Sin número'}.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "previsualizar_certificado_produccion_intelectual",
+                    id=certificado_existente["id"]
+                )
+            )
+
+
+        archivo_qr = None
+        archivo_pdf = None
+
+        try:
+
+            # Generar número oficial y código de verificación.
+            numero_certificado = generar_numero_certificado_manual(
+                conexion,
+                "PRODUCCION_INTELECTUAL"
+            )
+
+            anio_actual = datetime.now().year
+
+            codigo_verificacion = generar_codigo_verificacion_manual(
+                anio_actual,
+                "PRODUCCION_INTELECTUAL"
+            )
+
+            # Generar el archivo QR.
+            archivo_qr = generar_qr_certificado(
+                codigo_verificacion,
+                numero_certificado
+            )
+
+            # Registrar el certificado dentro de la transacción.
+            # Si falla la generación del PDF, se hará rollback.
+            cursor = conexion.execute("""
+                INSERT INTO certificaciones_manuales (
+                    numero_certificado,
+                    codigo_verificacion,
+                    investigador,
+                    tipo_documento,
+                    participacion,
+                    titulo,
+                    area_facultad,
+                    fecha_publicacion,
+                    categoria,
+                    indexada,
+                    medio_publicacion,
+                    nombre_revista,
+                    doi,
+                    issn,
+                    observaciones,
+                    usuario,
+                    fecha_registro,
+                    estado,
+                    archivo_pdf,
+                    tipo_certificado,
+                    archivo_qr
+                )
+                VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                )
+            """, (
+                numero_certificado,
+                codigo_verificacion,
+                datos.get("investigador", ""),
+                datos.get("tipo_documento", ""),
+                datos.get("participacion", ""),
+                datos.get("titulo", ""),
+                datos.get("area_facultad", ""),
+                datos.get("fecha_publicacion", ""),
+                datos.get("categoria", ""),
+                datos.get("indexada", ""),
+                datos.get("medio_publicacion", ""),
+                datos.get("nombre_revista", ""),
+                datos.get("doi", ""),
+                datos.get("issn", ""),
+                datos.get("observaciones", ""),
+                session.get("usuario_id"),
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Registrado",
+                None,
+                "PRODUCCION_INTELECTUAL",
+                archivo_qr
+            ))
+
+            nuevo_id = cursor.lastrowid
+
+            # Generar el PDF utilizando el registro recién creado.
+            archivo_pdf = (
+                generar_pdf_desde_plantilla_produccion_intelectual(
+                    conexion,
+                    nuevo_id,
+                    codigo_verificacion
+                )
+            )
+
+            if not archivo_pdf:
+
+                raise RuntimeError(
+                    "No se pudo generar el PDF del certificado."
+                )
+
+            # Marcar como emitido solo cuando el PDF se haya generado.
+            conexion.execute("""
+                UPDATE certificaciones_manuales
+                SET archivo_pdf = ?,
+                    estado = ?
+                WHERE id = ?
+                  AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+            """, (
+                archivo_pdf,
+                "Emitido",
+                nuevo_id
+            ))
+
+
+            # Subir el PDF y el QR a Google Drive.
+            guardar_certificado_en_google_drive(
+                conexion,
+                nuevo_id,
+                archivo_pdf
+            )
+
+            # Confirmar el registro y la emisión.
+            conexion.commit()
+
+            # El borrador se elimina únicamente tras emitir correctamente.
+            session.pop("borrador_produccion_intelectual", None)
+            session.modified = True
+
+            flash(
+                "El certificado fue emitido correctamente.",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "previsualizar_certificado_produccion_intelectual",
+                    id=nuevo_id
+                )
+            )
+
+        except Exception as e:
+
+            conexion.rollback()
+
+            app.logger.exception(
+                "Error al emitir certificado de Producción Intelectual"
+            )
+
+            flash(
+                f"No se pudo emitir el certificado: {e}",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "previsualizar_certificado_produccion_intelectual"
+                )
+            )
+
+        finally:
+            conexion.close()
+
+    # =====================================================
+    # CASO 2: CERTIFICADO QUE YA TIENE REGISTRO
+    # =====================================================
+
+    try:
+
+        certificado = conexion.execute("""
+            SELECT
+                id,
+                numero_certificado,
+                codigo_verificacion,
+                archivo_pdf,
+                estado,
+                tipo_certificado
+            FROM certificaciones_manuales
+            WHERE id = ?
+              AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+        """, (id,)).fetchone()
+
+        if certificado is None:
+
+            flash(
+                "No se encontró el certificado.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("nuevo_certificado_produccion_intelectual")
+            )
+
+        # Evitar volver a emitir un certificado ya emitido.
+        if (
+            certificado["estado"] == "Emitido"
+            and certificado["archivo_pdf"]
+        ):
+
+            flash(
+                "Este certificado ya fue emitido.",
+                "info"
+            )
+
+            return redirect(
+                url_for(
+                    "previsualizar_certificado_produccion_intelectual",
+                    id=id
+                )
+            )
+
+        codigo_verificacion = certificado["codigo_verificacion"]
+
+        if not codigo_verificacion:
+
+            flash(
+                "El certificado no tiene código de verificación.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "previsualizar_certificado_produccion_intelectual",
+                    id=id
+                )
+            )
+
+        archivo_pdf = (
+            generar_pdf_desde_plantilla_produccion_intelectual(
+                conexion,
+                id,
+                codigo_verificacion
+            )
+        )
+
+        if not archivo_pdf:
+
+            flash(
+                "No se pudo generar el PDF del certificado.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "previsualizar_certificado_produccion_intelectual",
+                    id=id
+                )
+            )
+
+        conexion.execute("""
+            UPDATE certificaciones_manuales
+            SET archivo_pdf = ?,
+                estado = ?
+            WHERE id = ?
+              AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+        """, (
+            archivo_pdf,
+            "Emitido",
+            id
+        ))
+
+        # Subir el PDF y el QR a Google Drive.
+        guardar_certificado_en_google_drive(
+            conexion,
+            id,
+            archivo_pdf
+        )
+
+        conexion.commit()
+
+        flash(
+            "El certificado fue emitido correctamente.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "previsualizar_certificado_produccion_intelectual",
+                id=id
+            )
+        )
+
+    except Exception as e:
+
+        conexion.rollback()
+
+        app.logger.exception(
+            "Error al generar PDF de Producción Intelectual"
+        )
+
+        flash(
+            f"No se pudo emitir el certificado: {e}",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "previsualizar_certificado_produccion_intelectual",
+                id=id
+            )
+        )
+
+    finally:
+        conexion.close()
+
+
+# =========================================================
+# CERTIFICACIONES
+# DESCARGAR PDF - PRODUCCIÓN INTELECTUAL
+# =========================================================
+
+@app.route(
+    "/certificaciones/descargar/produccion-intelectual/<int:id>"
+)
+def descargar_pdf_produccion_intelectual(id):
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    import os
+    from flask import send_from_directory
+
+    conexion = conectar_bd()
+
+    try:
+        certificado = conexion.execute("""
+            SELECT
+                id,
+                archivo_pdf,
+                estado,
+                tipo_certificado
+            FROM certificaciones_manuales
+            WHERE id = ?
+              AND tipo_certificado = 'PRODUCCION_INTELECTUAL'
+        """, (id,)).fetchone()
+
+    finally:
+        conexion.close()
+
+    if certificado is None:
+        flash("No se encontró el certificado.", "danger")
+        return redirect(url_for("certificaciones"))
+
+    archivo_pdf = certificado["archivo_pdf"]
+
+    if not archivo_pdf:
+        flash(
+            "Este certificado todavía no tiene un PDF generado.",
+            "warning"
+        )
+        return redirect(
+            url_for(
+                "previsualizar_certificado_produccion_intelectual",
+                id=id
+            )
+        )
+
+    carpeta = os.path.abspath("static")
+    ruta_pdf = os.path.abspath(
+        os.path.join(carpeta, archivo_pdf)
+    )
+
+    # Evitar rutas fuera de la carpeta static
+    if os.path.commonpath([carpeta, ruta_pdf]) != carpeta:
+        flash("La ruta del PDF no es válida.", "danger")
+        return redirect(url_for("certificaciones"))
+
+    if not os.path.isfile(ruta_pdf):
+        flash(
+            "No se encontró el archivo PDF. Debes emitir nuevamente el certificado.",
+            "warning"
+        )
+        return redirect(
+            url_for(
+                "previsualizar_certificado_produccion_intelectual",
+                id=id
+            )
+        )
+
+    return send_from_directory(
+        os.path.dirname(ruta_pdf),
+        os.path.basename(ruta_pdf),
+        as_attachment=True
+    )
+
 # Clave secreta para las sesiones
 app.secret_key = "dicyt_clave_secreta_2026"
-
 
 
 # =========================
@@ -1430,7 +5257,7 @@ def editar_usuario(id):
             rol = usuario["rol"]
         else:
             rol = request.form["rol"]
- 
+
             conexion.execute("""
                     UPDATE usuarios
                     SET nombre = ?,
@@ -3534,7 +7361,7 @@ def editar_documento(id):
 @app.route("/documentos/eliminar/<int:id>", methods=["POST"])
 def eliminar_documento(id):
 
-    
+
     if "usuario" not in session:
         return redirect(url_for("login"))
 
@@ -3619,7 +7446,7 @@ def eliminar_documento(id):
             "No se pudo eliminar el documento",
             500
         )
-    
+
 
 # =========================
 # ARCHIVOS PERMITIDOS
@@ -4884,6 +8711,265 @@ def articulos():
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
+
+# =========================================================
+# EXPORTAR EXCEL ARTÍCULOS
+# =========================================================
+
+@app.route("/articulos/exportar")
+def exportar_articulos():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    from io import BytesIO
+    from datetime import datetime
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+    from flask import send_file
+
+    conexion = conectar_bd()
+
+    try:
+        # =============================================
+        # RECUPERAR LOS MISMOS FILTROS DEL LISTADO
+        # =============================================
+
+        buscar = request.args.get("buscar", "").strip()
+        anio = request.args.get("anio", "").strip()
+        estado = request.args.get("estado", "").strip()
+
+        consulta = """
+            SELECT
+                a.id,
+                a.codigo,
+                a.titulo,
+                a.resumen,
+                a.palabras_clave,
+                a.fecha_publicacion,
+                a.anio,
+                r.nombre AS revista_nombre,
+                a.volumen,
+                a.numero,
+                a.paginas,
+                a.doi,
+                a.issn,
+                a.url,
+                a.estado,
+                a.observaciones
+            FROM articulos a
+            LEFT JOIN revistas r
+                ON a.revista_id = r.id
+            WHERE 1 = 1
+        """
+
+        parametros = []
+
+        # BUSCADOR: código, título, DOI e ISSN
+        if buscar:
+            consulta += """
+                AND (
+                    a.codigo LIKE ?
+                    OR a.titulo LIKE ?
+                    OR a.doi LIKE ?
+                    OR a.issn LIKE ?
+                )
+            """
+
+            termino = f"%{buscar}%"
+            parametros.extend([termino, termino, termino, termino])
+
+        # FILTRO POR AÑO
+        if anio:
+            consulta += " AND a.anio = ?"
+            parametros.append(anio)
+
+        # FILTRO POR ESTADO
+        if estado in ("0", "1"):
+            consulta += " AND a.estado = ?"
+            parametros.append(int(estado))
+
+        # MISMO ORDEN QUE EL LISTADO
+        consulta += """
+            ORDER BY a.anio DESC, a.titulo ASC
+        """
+
+        articulos = conexion.execute(
+            consulta,
+            parametros
+        ).fetchall()
+
+        # =============================================
+        # CREAR EL ARCHIVO EXCEL
+        # =============================================
+
+        libro = Workbook()
+        hoja = libro.active
+        hoja.title = "Artículos"
+
+        encabezados = [
+            "Código",
+            "Título",
+            "Autores",
+            "Resumen",
+            "Palabras clave",
+            "Revista",
+            "Año",
+            "Fecha de publicación",
+            "Volumen",
+            "Número",
+            "Páginas",
+            "DOI",
+            "ISSN",
+            "URL",
+            "Estado",
+            "Observaciones"
+        ]
+
+        hoja.append(encabezados)
+
+        # =============================================
+        # ESTILO DEL ENCABEZADO
+        # =============================================
+
+        for celda in hoja[1]:
+            celda.font = Font(
+                bold=True,
+                color="FFFFFF"
+            )
+
+            celda.fill = PatternFill(
+                fill_type="solid",
+                fgColor="217346"
+            )
+
+            celda.alignment = Alignment(
+                horizontal="center",
+                vertical="center",
+                wrap_text=True
+            )
+
+        hoja.row_dimensions[1].height = 30
+
+        # =============================================
+        # AGREGAR LOS ARTÍCULOS Y SUS AUTORES
+        # =============================================
+
+        for articulo in articulos:
+
+            investigadores = conexion.execute("""
+                SELECT
+                    TRIM(
+                        COALESCE(i.nombre, '') || ' ' ||
+                        COALESCE(i.apellido, '')
+                    ) AS nombre_completo
+
+                FROM articulo_investigadores ai
+
+                INNER JOIN investigadores i
+                    ON i.id = ai.investigador_id
+
+                WHERE ai.articulo_id = ?
+
+                ORDER BY
+                    ai.orden_autor ASC,
+                    ai.id ASC
+            """, (articulo["id"],)).fetchall()
+
+            autores = "; ".join(
+                autor["nombre_completo"]
+                for autor in investigadores
+                if autor["nombre_completo"]
+            )
+
+            estado_texto = (
+                "Activo"
+                if articulo["estado"] == 1
+                else "Inactivo"
+            )
+
+            hoja.append([
+                articulo["codigo"] or "",
+                articulo["titulo"] or "",
+                autores,
+                articulo["resumen"] or "",
+                articulo["palabras_clave"] or "",
+                articulo["revista_nombre"] or "",
+                articulo["anio"],
+                articulo["fecha_publicacion"] or "",
+                articulo["volumen"] or "",
+                articulo["numero"] or "",
+                articulo["paginas"] or "",
+                articulo["doi"] or "",
+                articulo["issn"] or "",
+                articulo["url"] or "",
+                estado_texto,
+                articulo["observaciones"] or ""
+            ])
+
+        # =============================================
+        # FORMATO GENERAL DE LAS CELDAS
+        # =============================================
+
+        for fila in hoja.iter_rows(min_row=2):
+            for celda in fila:
+                celda.alignment = Alignment(
+                    vertical="top",
+                    wrap_text=True
+                )
+
+        # Fijar encabezado y habilitar filtros de Excel
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+
+        # Anchos de columnas
+        anchos = {
+            "A": 16,
+            "B": 38,
+            "C": 35,
+            "D": 45,
+            "E": 30,
+            "F": 28,
+            "G": 10,
+            "H": 20,
+            "I": 12,
+            "J": 12,
+            "K": 14,
+            "L": 30,
+            "M": 18,
+            "N": 38,
+            "O": 14,
+            "P": 35
+        }
+
+        for columna, ancho in anchos.items():
+            hoja.column_dimensions[columna].width = ancho
+
+        # =============================================
+        # PREPARAR LA DESCARGA
+        # =============================================
+
+        salida = BytesIO()
+        libro.save(salida)
+        salida.seek(0)
+
+        nombre_archivo = (
+            f"articulos_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
+        )
+
+        return send_file(
+            salida,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
+    finally:
+        conexion.close()
 
 
 # =========================================================
@@ -8961,6 +13047,280 @@ def textos_asignatura():
     )
 
 # =========================================================
+# EXPORTAR TEXTOS EN ASIGNATURA A EXCEL
+# =========================================================
+
+@app.route("/textos-asignatura/exportar")
+def exportar_textos_asignatura():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    from io import BytesIO
+    from datetime import datetime
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+    from flask import send_file
+
+    conexion = conectar_bd()
+
+    try:
+        # ---------------------------------------------
+        # RECUPERAR LOS MISMOS FILTROS DEL LISTADO
+        # ---------------------------------------------
+        buscar = request.args.get("buscar", "").strip()
+        anio = request.args.get("anio", "").strip()
+        estado = request.args.get("estado", "").strip()
+
+        consulta = """
+            SELECT
+                t.id,
+                t.codigo,
+                t.asignatura,
+                t.carrera,
+                t.facultad,
+                t.anio,
+                t.periodo_academico,
+                t.editorial,
+                t.institucion,
+                t.edicion,
+                t.lugar_publicacion,
+                t.fecha_publicacion,
+                t.paginas,
+                t.isbn,
+                t.doi,
+                t.url,
+                t.cdd,
+                t.codigo_uap,
+                t.estado,
+                t.observaciones
+            FROM textos_asignatura t
+            WHERE 1 = 1
+        """
+
+        parametros = []
+
+        if buscar:
+            consulta += """
+                AND (
+                    t.codigo LIKE ?
+                    OR t.asignatura LIKE ?
+                    OR t.carrera LIKE ?
+                    OR t.facultad LIKE ?
+                    OR t.editorial LIKE ?
+                    OR t.institucion LIKE ?
+                    OR t.isbn LIKE ?
+                    OR t.doi LIKE ?
+                )
+            """
+            texto = f"%{buscar}%"
+            parametros.extend([texto] * 8)
+
+        if anio:
+            consulta += " AND t.anio = ?"
+            parametros.append(int(anio))
+
+        if estado in ("0", "1"):
+            consulta += " AND t.estado = ?"
+            parametros.append(int(estado))
+
+        consulta += " ORDER BY t.anio DESC, t.asignatura ASC"
+
+        textos = conexion.execute(
+            consulta, parametros
+        ).fetchall()
+
+        # ---------------------------------------------
+        # CREAR ARCHIVO EXCEL
+        # ---------------------------------------------
+        libro_excel = Workbook()
+        hoja = libro_excel.active
+        hoja.title = "Textos en asignatura"
+
+        encabezados = [
+            "Código",
+            "Asignatura",
+            "Autores",
+            "Carrera",
+            "Facultad",
+            "Año",
+            "Periodo académico",
+            "Editorial",
+            "Institución",
+            "Edición",
+            "Lugar de publicación",
+            "Fecha de publicación",
+            "Páginas",
+            "ISBN",
+            "DOI",
+            "URL",
+            "CDD",
+            "Código UAP",
+            "Estado",
+            "Observaciones",
+        ]
+
+        hoja.append(encabezados)
+
+        # Estilo de encabezado
+        for celda in hoja[1]:
+            celda.font = Font(
+                bold=True,
+                color="FFFFFF",
+                size=11
+            )
+            celda.fill = PatternFill(
+                fill_type="solid",
+                fgColor="217346"
+            )
+            celda.alignment = Alignment(
+                horizontal="center",
+                vertical="center",
+                wrap_text=True
+            )
+
+        hoja.row_dimensions[1].height = 32
+
+        # ---------------------------------------------
+        # AGREGAR REGISTROS Y AUTORES
+        # ---------------------------------------------
+        for texto in textos:
+
+            autores = conexion.execute("""
+                SELECT
+                    TRIM(
+                        COALESCE(i.nombre, '') || ' ' ||
+                        COALESCE(i.apellido, '')
+                    ) AS nombre_completo
+                FROM texto_asignatura_investigadores tai
+                INNER JOIN investigadores i
+                    ON i.id = tai.investigador_id
+                WHERE tai.texto_asignatura_id = ?
+                ORDER BY tai.orden_autor ASC, tai.id ASC
+            """, (texto["id"],)).fetchall()
+
+            # La relación utiliza el ID interno del texto.
+            # Recuperamos los autores mediante su código.
+            if not autores:
+                texto_id = conexion.execute("""
+                    SELECT id
+                    FROM textos_asignatura
+                    WHERE codigo = ?
+                    LIMIT 1
+                """, (texto["codigo"],)).fetchone()
+
+                if texto_id:
+                    autores = conexion.execute("""
+                        SELECT
+                            TRIM(
+                                COALESCE(i.nombre, '') || ' ' ||
+                                COALESCE(i.apellido, '')
+                            ) AS nombre_completo
+                        FROM texto_asignatura_investigadores tai
+                        INNER JOIN investigadores i
+                            ON i.id = tai.investigador_id
+                        WHERE tai.texto_asignatura_id = ?
+                        ORDER BY tai.orden_autor ASC, tai.id ASC
+                    """, (texto_id["id"],)).fetchall()
+
+            nombres_autores = "; ".join(
+                autor["nombre_completo"]
+                for autor in autores
+                if autor["nombre_completo"]
+            )
+
+            hoja.append([
+                texto["codigo"],
+                texto["asignatura"],
+                nombres_autores,
+                texto["carrera"],
+                texto["facultad"],
+                texto["anio"],
+                texto["periodo_academico"],
+                texto["editorial"],
+                texto["institucion"],
+                texto["edicion"],
+                texto["lugar_publicacion"],
+                texto["fecha_publicacion"],
+                texto["paginas"],
+                texto["isbn"],
+                texto["doi"],
+                texto["url"],
+                texto["cdd"],
+                texto["codigo_uap"],
+                "Activo" if texto["estado"] == 1 else "Inactivo",
+                texto["observaciones"],
+            ])
+
+        # ---------------------------------------------
+        # PRESENTACIÓN DE LA HOJA
+        # ---------------------------------------------
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+
+        anchos = {
+            1: 16,
+            2: 35,
+            3: 35,
+            4: 25,
+            5: 25,
+            6: 10,
+            7: 20,
+            8: 22,
+            9: 25,
+            10: 12,
+            11: 25,
+            12: 20,
+            13: 12,
+            14: 20,
+            15: 25,
+            16: 35,
+            17: 15,
+            18: 18,
+            19: 14,
+            20: 40,
+        }
+
+        for numero_columna, ancho in anchos.items():
+            hoja.column_dimensions[
+                get_column_letter(numero_columna)
+            ].width = ancho
+
+        for fila in hoja.iter_rows(min_row=2):
+            for celda in fila:
+                celda.alignment = Alignment(
+                    vertical="top",
+                    wrap_text=True
+                )
+
+        # ---------------------------------------------
+        # PREPARAR DESCARGA
+        # ---------------------------------------------
+        archivo_memoria = BytesIO()
+        libro_excel.save(archivo_memoria)
+        archivo_memoria.seek(0)
+
+        nombre_archivo = (
+            "textos_asignatura_"
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + ".xlsx"
+        )
+
+        return send_file(
+            archivo_memoria,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
+    finally:
+        conexion.close()
+
+# =========================================================
 # VER TEXTO EN ASIGNATURA
 # =========================================================
 
@@ -9002,7 +13362,7 @@ def ver_texto_asignatura(id):
 
     conexion.close()
 
-   
+
     # =====================================================
     # OBTENER NOMBRE DEL ARCHIVO DESDE GOOGLE DRIVE
     # =====================================================
@@ -9481,10 +13841,10 @@ def editar_texto_asignatura(id):
 
 
             return redirect(
-                
+
                 url_for("textos_asignatura")
-                    
-                
+
+
             )
 
 

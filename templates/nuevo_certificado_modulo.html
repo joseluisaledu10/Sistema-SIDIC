@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}
+Seleccionar módulo - Sistema DICyT
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .certificados-contenedor {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .certificados-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .certificados-encabezado h1 {
+        color: #0d3b66;
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .certificados-encabezado p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .btn-volver {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .btn-volver:hover {
+        opacity: 0.9;
+    }
+
+    .opciones-modulo {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 25px;
+    }
+
+    .opcion-modulo {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        border: 1px solid #e1e5ea;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .opcion-modulo:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+        border-color: #0d3b66;
+    }
+
+    .opcion-icono {
+        width: 62px;
+        height: 62px;
+        border-radius: 12px;
+        background: #eaf1f8;
+        color: #0d3b66;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    .opcion-modulo h2 {
+        color: #0d3b66;
+        font-size: 21px;
+        margin-bottom: 10px;
+    }
+
+    .opcion-modulo p {
+        color: #6b7280;
+        line-height: 1.6;
+        font-size: 14px;
+        margin-bottom: 18px;
+        flex-grow: 1;
+    }
+
+    .opcion-lista {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px 0;
+    }
+
+    .opcion-lista li {
+        color: #374151;
+        font-size: 14px;
+        padding: 6px 0;
+    }
+
+    .opcion-lista li i {
+        color: #0d3b66;
+        margin-right: 8px;
+    }
+
+    .opcion-accion {
+        margin-top: auto;
+        color: #0d3b66;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .opcion-deshabilitada {
+        opacity: 0.65;
+        cursor: default;
+    }
+
+    .opcion-deshabilitada:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        border-color: #e1e5ea;
+    }
+
+    .etiqueta-proximamente {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 4px 9px;
+        background: #f1f3f5;
+        color: #6b7280;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+
+        .opciones-modulo {
+            grid-template-columns: 1fr 1fr;
+        }
+
+    }
+
+    @media (max-width: 650px) {
+
+        .opciones-modulo {
+            grid-template-columns: 1fr;
+        }
+
+        .certificados-encabezado {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+    }
+
+</style>
+
+
+<div class="certificados-contenedor">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <div class="certificados-encabezado">
+
+        <div>
+
+            <h1>
+                <i class="fa-solid fa-folder-open"></i>
+                Seleccionar módulo
+            </h1>
+
+            <p>
+                Seleccione el módulo desde el cual desea generar
+                el certificado.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('nuevo_certificado') }}"
+            class="btn-volver"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Volver
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         OPCIONES
+    ====================================================== -->
+
+    <div class="opciones-modulo">
+
+
+        <!-- =================================================
+             TEXTO EN ASIGNATURA
+        ================================================== -->
+
+        <a
+            href="{{ url_for('certificacion_textos_asignatura') }}"
+            class="opcion-modulo"
+        >
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-book"></i>
+
+            </div>
+
+
+            <h2>
+                Texto en Asignatura
+            </h2>
+
+
+            <p>
+                Seleccione un texto en asignatura registrado
+                en el sistema para generar su certificado.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Asignatura
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Programa o carrera
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Investigadores / autores
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Seleccionar texto
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- =================================================
+             ARTÍCULO
+        ================================================== -->
+
+        <div class="opcion-modulo opcion-deshabilitada">
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-newspaper"></i>
+
+            </div>
+
+
+            <h2>
+                Artículo científico
+            </h2>
+
+
+            <p>
+                Seleccione un artículo científico registrado
+                para preparar su certificado.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título del artículo
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Revista
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Investigadores / autores
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Próximamente
+
+                <span class="etiqueta-proximamente">
+                    EN DESARROLLO
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             LIBRO
+        ================================================== -->
+
+        <div class="opcion-modulo opcion-deshabilitada">
+
+            <div class="opcion-icono">
+
+                <i class="fa-solid fa-book-open"></i>
+
+            </div>
+
+
+            <h2>
+                Libro
+            </h2>
+
+
+            <p>
+                Seleccione un libro registrado para preparar
+                su certificado correspondiente.
+            </p>
+
+
+            <ul class="opcion-lista">
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Título del libro
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Editorial
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Investigadores / autores
+                </li>
+
+            </ul>
+
+
+            <div class="opcion-accion">
+
+                Próximamente
+
+                <span class="etiqueta-proximamente">
+                    EN DESARROLLO
+                </span>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}
