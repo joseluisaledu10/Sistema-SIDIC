@@ -973,6 +973,25 @@
             color: #dc2626;
         }
 
+        /* ================================
+        DESAPARICIÓN AUTOMÁTICA
+        ================================ */
+
+        .mensaje-sistema {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .mensaje-sistema.ocultar {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        .mensajes-sistema {
+            transition: opacity 0.5s ease;
+        }
 
     </style>
 
@@ -1750,6 +1769,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const mensajes = document.querySelectorAll(".mensaje-sistema");
+
+    mensajes.forEach(function (mensaje) {
+
+        setTimeout(function () {
+
+            mensaje.classList.add("ocultar");
+
+            setTimeout(function () {
+                mensaje.remove();
+
+                const contenedor = document.querySelector(".mensajes-sistema");
+
+                if (contenedor && contenedor.children.length === 0) {
+                    contenedor.remove();
+                }
+
+            }, 500);
+
+        }, 5000);
+
+    });
+
+});
 </script>
 
 </body>

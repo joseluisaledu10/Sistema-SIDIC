@@ -61,7 +61,7 @@ Textos en asignatura - Sistema DICyT
 
     gap: 8px;
 
-    padding: 10px 17px;
+    padding: 11px 18px;
 
     background: #0d3b66;
 
@@ -532,11 +532,11 @@ Textos en asignatura - Sistema DICyT
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 11px 16px;
+    padding: 10px 18px;
     background: #217346;
     color: #fff;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 600;
     transition: background 0.2s ease;
 }
@@ -929,16 +929,25 @@ Textos en asignatura - Sistema DICyT
                                 <i class="fa-solid fa-pen"></i>
                             </a>
 
-                             <!-- ELIMINAR -->
+                             
+                            <!-- ELIMINAR -->
 
-                            <a
-                                href="{{ url_for('eliminar_texto_asignatura', id=texto['id']) }}"
-                                class="btn-accion btn-eliminar"
-                                title="Eliminar texto"
-                                onclick="return confirm('¿Está seguro de eliminar este texto en asignatura?');"
+                            <form
+                                method="POST"
+                                action="{{ url_for('eliminar_texto_asignatura', id=texto['id']) }}"
+                                onsubmit="return confirm('¿Está seguro de eliminar definitivamente este texto, sus relaciones y sus archivos de Google Drive?');"
+                                style="display: inline-flex; margin: 0;"
                             >
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
+                                <button
+                                    type="submit"
+                                    class="btn-accion btn-eliminar"
+                                    title="Eliminar texto definitivamente"
+                                    style="border: none; cursor: pointer;"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+
 
                         </div>
 

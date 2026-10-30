@@ -601,12 +601,41 @@ tbody tr:last-child td {
 
 }
 
+
+.acciones-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-excel {
+    background: #218739;
+    color: white;
+    text-decoration: none;
+    padding: 11px 18px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.btn-excel:hover {
+    background: #176b2b;
+    color: white;
+}
+
+
 </style>
 
 {% endblock %}
 
 
 {% block content %}
+
 
 
 <!-- =========================================================
@@ -618,34 +647,43 @@ tbody tr:last-child td {
     <div class="pagina-titulo">
 
         <h2>
-
             <i class="fa-solid fa-book"></i>
-
             Libros
-
         </h2>
 
         <p>
-
             Registro y gestión de libros científicos y académicos.
-
         </p>
 
     </div>
 
+    <div class="acciones-encabezado">
 
-    <a
-        href="{{ url_for('nuevo_libro') }}"
-        class="btn-nuevo"
-    >
+        <a
+            href="{{ url_for(
+                'exportar_libros',
+                buscar=buscar,
+                anio=anio,
+                estado=estado
+            ) }}"
+            class="btn-excel"
+        >
+            <i class="fa-solid fa-file-excel"></i>
+            Descargar Excel
+        </a>
 
-        <i class="fa-solid fa-plus"></i>
+        <a
+            href="{{ url_for('nuevo_libro') }}"
+            class="btn-nuevo"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Nuevo libro
+        </a>
 
-        Nuevo libro
-
-    </a>
+    </div>
 
 </div>
+
 
 
 <!-- =========================================================

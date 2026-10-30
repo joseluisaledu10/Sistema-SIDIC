@@ -119,7 +119,7 @@ EXTENSIONES_LOGO_PERMITIDAS = {
     "webp"
 }
 
-DATABASE = "dicyt.db"
+DATABASE = r"D:\Sistema_DICyT\dicyt.db"
 
 def archivo_permitido(nombre_archivo):
 
@@ -160,6 +160,51 @@ def conectar_bd():
     conexion.execute("PRAGMA foreign_keys = ON")
 
     return conexion
+
+# =========================
+# GENERAR CODIGOS DE INVESTIGADORES
+# =========================
+
+def generar_codigo_persona(conexion, tipo):
+
+    prefijos = {
+        "Docente Investigador": "INV",
+        "Estudiante Investigador": "EST"
+    }
+
+    prefijo = prefijos.get(tipo)
+
+    if not prefijo:
+        raise ValueError(
+            "El tipo de investigador no es válido."
+        )
+
+    codigos = conexion.execute("""
+        SELECT codigo
+        FROM investigadores
+        WHERE codigo LIKE ?
+    """, (prefijo + "-%",)).fetchall()
+
+    numeros = []
+
+    for fila in codigos:
+
+        codigo_existente = (
+            fila["codigo"] or ""
+        ).strip()
+
+        partes = codigo_existente.split("-")
+
+        if (
+            len(partes) == 2
+            and partes[0] == prefijo
+            and partes[1].isdigit()
+        ):
+            numeros.append(int(partes[1]))
+
+    numero = max(numeros, default=0) + 1
+
+    return f"{prefijo}-{numero:04d}"
 
 def crear_bd():
 
@@ -684,11 +729,27 @@ def crear_bd():
     """)
 
     # =========================================================
+    # RELACION INVESTIGADORES - CARRERAS
+    # =========================================================
+
+    conexion.execute("""
+        CREATE TABLE IF NOT EXISTS investigadores_carreras (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            investigador_id INTEGER NOT NULL,
+            carrera TEXT NOT NULL,
+            FOREIGN KEY (investigador_id)
+                REFERENCES investigadores(id)
+                ON DELETE CASCADE,
+            UNIQUE (investigador_id, carrera)
+        )
+    """)
+
+    # =========================================================
 
     # TABLA PUBLICACIONES
 
     # =========================================================
-
+   
     # =========================================================
     # TABLA REVISTAS
     # =========================================================
@@ -945,7 +1006,7 @@ def crear_bd():
         )
     """)
 
-
+    
     # =========================================================
     # TABLA AUDITORÍA
     # =========================================================
@@ -967,7 +1028,7 @@ def crear_bd():
             fecha TEXT NOT NULL
         )
     """)
-
+    
     # =========================================================
     # ACTUALIZAR ESTADO DE PUBLICACIONES
     # 1 = ACTIVO
@@ -1041,9 +1102,42 @@ def crear_bd():
                 WHERE estado IS NULL
                 """
             )
+    
 
 
-
+    # ---------------------------------------------------------
+    # MIGRAR CARRERAS ANTIGUAS SOLO SI NO HAY ASOCIACIONES
+    # ---------------------------------------------------------
+    conexion.execute(
+        """
+        INSERT OR IGNORE INTO investigadores_carreras
+            (investigador_id, carrera)
+        SELECT
+            i.id,
+            TRIM(
+                CASE
+                    WHEN i.carrera_area IS NOT NULL
+                         AND TRIM(i.carrera_area) <> ''
+                    THEN i.carrera_area
+                    ELSE COALESCE(i.carrera, '')
+                END
+            )
+        FROM investigadores AS i
+        WHERE TRIM(
+            CASE
+                WHEN i.carrera_area IS NOT NULL
+                     AND TRIM(i.carrera_area) <> ''
+                THEN i.carrera_area
+                ELSE COALESCE(i.carrera, '')
+            END
+        ) <> ''
+        AND NOT EXISTS (
+            SELECT 1
+            FROM investigadores_carreras AS ic
+            WHERE ic.investigador_id = i.id
+        )
+        """
+    )
     conexion.commit()
     conexion.close()
 
@@ -1171,7 +1265,7 @@ def generar_codigo_verificacion(anio, area_codigo):
 
 # =========================================================
 # CERTIFICACIONES
-# CÓDIGO QR
+# CÓDIGO QR 
 # =========================================================
 
 def generar_qr_certificado(codigo_verificacion, numero_completo):
@@ -1410,7 +1504,7 @@ def certificaciones():
         reverse=True
     )
 
-
+    
     # =============================================
     # OPCIONES DE FILTROS AUTOMÁTICAS
     # =============================================
@@ -1737,6 +1831,149 @@ def descargar_certificado(id):
 
     finally:
         conexion.close()
+
+
+
+# =========================================================
+# ELIMINAR CERTIFICADO
+# CERTIFICADOS NORMALES Y MANUALES
+# =========================================================
+
+@app.route("/certificaciones/eliminar/<int:id>", methods=["POST"])
+def eliminar_certificado(id):
+    import os
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    origen = request.form.get("origen", "normal")
+
+    if origen not in ("normal", "manual"):
+        flash("Tipo de certificado no válido.", "danger")
+        return redirect(url_for("certificaciones"))
+
+    conexion = conectar_bd()
+    archivo = None
+    drive_pdf_id = None
+    drive_qr_id = None
+
+    try:
+        if origen == "manual":
+            certificado = conexion.execute("""
+                SELECT archivo_pdf, archivo_qr,
+                       drive_pdf_id, drive_qr_id
+                FROM certificaciones_manuales
+                WHERE id = ?
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash("No se encontró el certificado manual.", "warning")
+                return redirect(url_for("certificaciones"))
+
+            archivo = certificado["archivo_pdf"]
+            drive_pdf_id = certificado["drive_pdf_id"]
+            drive_qr_id = certificado["drive_qr_id"]
+
+            conexion.execute("""
+                DELETE FROM certificaciones_manuales
+                WHERE id = ?
+            """, (id,))
+
+        else:
+            certificado = conexion.execute("""
+                SELECT id, archivo
+                FROM certificados
+                WHERE id = ?
+            """, (id,)).fetchone()
+
+            if certificado is None:
+                flash("No se encontró el certificado.", "warning")
+                return redirect(url_for("certificaciones"))
+
+            archivo = certificado["archivo"]
+
+            conexion.execute("""
+                DELETE FROM certificados
+                WHERE id = ?
+            """, (id,))
+
+        conexion.commit()
+
+        # =================================================
+        # ELIMINAR ARCHIVOS DE GOOGLE DRIVE
+        # =================================================
+
+        if drive_pdf_id or drive_qr_id:
+            try:
+                from google_drive import (
+                    conectar_google_drive,
+                    eliminar_archivo
+                )
+
+                servicio = conectar_google_drive()
+
+                if drive_pdf_id:
+                    eliminar_archivo(servicio, drive_pdf_id)
+
+                if drive_qr_id:
+                    eliminar_archivo(servicio, drive_qr_id)
+
+            except Exception:
+                app.logger.exception(
+                    "No se pudieron eliminar los archivos de Google Drive "
+                    "del certificado %s", id
+                )
+
+        # =================================================
+        # ELIMINAR PDF LOCAL
+        # =================================================
+
+        if archivo:
+            if os.path.isabs(archivo):
+                ruta_local = archivo
+            else:
+                ruta_static = os.path.join(
+                    app.root_path, "static", archivo
+                )
+
+                ruta_local = (
+                    ruta_static
+                    if os.path.isfile(ruta_static)
+                    else os.path.join(app.root_path, archivo)
+                )
+
+            if os.path.isfile(ruta_local):
+                try:
+                    os.remove(ruta_local)
+                except OSError:
+                    app.logger.exception(
+                        "No se pudo eliminar el PDF local del certificado %s",
+                        id
+                    )
+
+        flash("Certificado eliminado correctamente.", "success")
+
+    except Exception:
+        conexion.rollback()
+
+        app.logger.exception(
+            "Error al eliminar el certificado %s (%s)",
+            id,
+            origen
+        )
+
+        flash(
+            "No se pudo eliminar el certificado. "
+            "Puede tener registros relacionados.",
+            "danger"
+        )
+
+    finally:
+        conexion.close()
+
+    return redirect(url_for("certificaciones"))
+
+
 
 # =========================================================
 # CERTIFICACIONES
@@ -3883,7 +4120,7 @@ def previsualizar_certificado_produccion_intelectual(id=None):
                     url_for("nuevo_certificado_produccion_intelectual")
                 )
 
-
+        
         # =====================================================
         # ADVERTENCIA POR TÍTULOS SIMILARES
         # Solo informa; no bloquea la emisión.
@@ -4411,8 +4648,8 @@ def generar_certificado_produccion_intelectual(id=None):
                 return redirect(
                     url_for("nuevo_certificado_produccion_intelectual")
                 )
-
-
+        
+        
         # Evitar duplicados por DOI o por coincidencia exacta sin DOI.
         registros_existentes = conexion.execute("""
             SELECT id, numero_certificado, estado, investigador,
@@ -4604,7 +4841,7 @@ def generar_certificado_produccion_intelectual(id=None):
                 nuevo_id
             ))
 
-
+            
             # Subir el PDF y el QR a Google Drive.
             guardar_certificado_en_google_drive(
                 conexion,
@@ -5257,7 +5494,7 @@ def editar_usuario(id):
             rol = usuario["rol"]
         else:
             rol = request.form["rol"]
-
+ 
             conexion.execute("""
                     UPDATE usuarios
                     SET nombre = ?,
@@ -5933,7 +6170,7 @@ def inicio():
     if "usuario" not in session:
         return redirect(url_for("login"))
 
-    conn = sqlite3.connect("dicyt.db")
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
 
     # =========================================================
@@ -7361,7 +7598,7 @@ def editar_documento(id):
 @app.route("/documentos/eliminar/<int:id>", methods=["POST"])
 def eliminar_documento(id):
 
-
+    
     if "usuario" not in session:
         return redirect(url_for("login"))
 
@@ -7446,7 +7683,7 @@ def eliminar_documento(id):
             "No se pudo eliminar el documento",
             500
         )
-
+    
 
 # =========================
 # ARCHIVOS PERMITIDOS
@@ -7666,6 +7903,8 @@ def investigadores():
     buscar = request.args.get("buscar", "").strip()
     tipo = request.args.get("tipo", "").strip()
     estado = request.args.get("estado", "").strip()
+    carrera = request.args.get("carrera", "").strip()
+    facultad = request.args.get("facultad", "").strip()
 
     consulta = """
         SELECT *
@@ -7687,12 +7926,25 @@ def investigadores():
                 OR apellido LIKE ?
                 OR ci LIKE ?
                 OR correo LIKE ?
+                OR carrera LIKE ?
+                OR carrera_area LIKE ?
+                OR facultad LIKE ?
+                OR EXISTS (
+                    SELECT 1
+                    FROM investigadores_carreras ic
+                    WHERE ic.investigador_id = investigadores.id
+                      AND ic.carrera LIKE ?
+                )
             )
         """
 
         termino = f"%{buscar}%"
 
         parametros.extend([
+            termino,
+            termino,
+            termino,
+            termino,
             termino,
             termino,
             termino,
@@ -7724,23 +7976,974 @@ def investigadores():
         parametros.append(int(estado))
 
     # =====================================================
-    # ORDEN
+    # FILTRO POR CARRERA
+    # =====================================================
+
+    
+    if carrera:
+        consulta += """
+            AND (
+                COALESCE(
+                    NULLIF(TRIM(carrera_area), ''),
+                    TRIM(carrera)
+                ) = ?
+                OR EXISTS (
+                    SELECT 1
+                    FROM investigadores_carreras ic
+                    WHERE ic.investigador_id = investigadores.id
+                      AND TRIM(ic.carrera) = ?
+                )
+            )
+        """
+        parametros.extend([carrera, carrera])
+
+    # =====================================================
+    # FILTRO POR FACULTAD
+    # =====================================================
+
+    if facultad:
+        consulta += " AND facultad = ?"
+        parametros.append(facultad)
+
+    
+    # =====================================================
+    # CONTAR RESULTADOS CON LOS FILTROS APLICADOS
+    # =====================================================
+
+    consulta_conteo = consulta.replace(
+        "SELECT *",
+        "SELECT COUNT(*) AS total",
+        1
+    )
+
+    total_registros = conexion.execute(
+        consulta_conteo,
+        parametros
+    ).fetchone()["total"]
+
+    # =====================================================
+    # PAGINACIÓN: 25 REGISTROS POR PÁGINA
+    # =====================================================
+
+    por_pagina = 25
+
+    pagina = request.args.get("pagina", 1, type=int)
+    pagina = max(pagina, 1)
+
+    total_paginas = max(
+        1,
+        (total_registros + por_pagina - 1) // por_pagina
+    )
+
+    pagina = min(pagina, total_paginas)
+
+    offset = (pagina - 1) * por_pagina
+
+    # =====================================================
+    # ORDEN Y CONSULTA PAGINADA
     # =====================================================
 
     consulta += """
         ORDER BY apellido ASC, nombre ASC
+        LIMIT ? OFFSET ?
     """
 
+    parametros_paginacion = parametros + [
+        por_pagina,
+        offset
+    ]
+
+    consulta_listado = consulta.replace(
+        "SELECT *",
+        """SELECT investigadores.*,
+               (
+                   SELECT GROUP_CONCAT(ic.carrera, ', ')
+                   FROM investigadores_carreras ic
+                   WHERE ic.investigador_id = investigadores.id
+               ) AS carreras_texto""",
+        1
+    )
+
     investigadores = conexion.execute(
-        consulta,
-        parametros
+        consulta_listado,
+        parametros_paginacion
     ).fetchall()
+
+    
+    # CARRERAS OFICIALES + CARRERAS YA REGISTRADAS
+    carreras_registradas = conexion.execute("""
+        SELECT DISTINCT TRIM(carrera) AS carrera
+        FROM (
+            SELECT carrera
+            FROM investigadores_carreras
+            WHERE TRIM(COALESCE(carrera, '')) <> ''
+            UNION
+            SELECT COALESCE(
+                NULLIF(TRIM(carrera_area), ''),
+                TRIM(carrera)
+            ) AS carrera
+            FROM investigadores
+        )
+        WHERE TRIM(COALESCE(carrera, '')) <> ''
+    """).fetchall()
+
+    carreras_lista = set(CARRERAS_INVESTIGADORES)
+
+    carreras_lista.update(
+        fila["carrera"]
+        for fila in carreras_registradas
+        if fila["carrera"]
+    )
+
+    carreras = [
+        {"carrera": carrera_item}
+        for carrera_item in sorted(carreras_lista)
+    ]
+
+
+    facultades = conexion.execute("""
+        SELECT DISTINCT TRIM(facultad) AS facultad
+        FROM investigadores
+        WHERE facultad IS NOT NULL
+          AND TRIM(facultad) <> ''
+        ORDER BY facultad
+    """).fetchall()
+
 
     conexion.close()
 
     return render_template(
         "investigadores.html",
         investigadores=investigadores,
+        carreras=carreras,
+        facultades=facultades,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total_registros=total_registros,
+        usuario=session.get("usuario"),
+        rol=session.get("rol")
+    )
+
+
+# =========================================================
+# EXPORTAR INVESTIGADORES A EXCEL
+# =========================================================
+
+@app.route("/investigadores/exportar")
+def exportar_investigadores():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    try:
+        buscar = request.args.get("buscar", "").strip()
+        tipo = request.args.get("tipo", "").strip()
+        estado = request.args.get("estado", "").strip()
+        carrera = request.args.get("carrera", "").strip()
+        facultad = request.args.get("facultad", "").strip()
+
+        consulta = """
+            SELECT
+                (SELECT GROUP_CONCAT(ic.carrera, ', ')
+                 FROM investigadores_carreras ic
+                 WHERE ic.investigador_id = investigadores.id) AS carreras_texto,
+                codigo,
+                nombre,
+                apellido,
+                ci,
+                correo,
+                telefono,
+                tipo,
+                estado,
+                carrera,
+                facultad,
+                carrera_area,
+                grado_academico,
+                especialidad,
+                cargo,
+                institucion,
+                semestre,
+                matricula,
+                tutor,
+                linea_investigacion,
+                orcid,
+                google_scholar,
+                scopus,
+                scopus_id,
+                researcher_id,
+                perfil,
+                observaciones,
+                usuario
+            FROM investigadores
+            WHERE 1 = 1
+        """
+
+        parametros = []
+
+        
+        if buscar:
+            consulta += """
+                AND (
+                    nombre LIKE ?
+                    OR apellido LIKE ?
+                    OR ci LIKE ?
+                    OR correo LIKE ?
+                    OR carrera LIKE ?
+                    OR carrera_area LIKE ?
+                    OR facultad LIKE ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM investigadores_carreras ic
+                        WHERE ic.investigador_id = investigadores.id
+                          AND ic.carrera LIKE ?
+                    )
+                )
+            """
+            termino = f"%{buscar}%"
+            parametros.extend([termino] * 8)
+
+        if tipo in (
+            "Docente Investigador",
+            "Estudiante Investigador"
+        ):
+            consulta += " AND tipo = ?"
+            parametros.append(tipo)
+
+        
+        if estado in ("0", "1"):
+            consulta += " AND estado = ?"
+            parametros.append(int(estado))
+
+        # FILTRO POR CARRERA
+        if carrera:
+            consulta += """
+                AND (
+                    COALESCE(
+                        NULLIF(TRIM(carrera_area), ''),
+                        TRIM(carrera)
+                    ) = ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM investigadores_carreras ic
+                        WHERE ic.investigador_id = investigadores.id
+                          AND TRIM(ic.carrera) = ?
+                    )
+                )
+            """
+            parametros.extend([carrera, carrera])
+
+        # FILTRO POR FACULTAD
+        if facultad:
+            consulta += """
+                AND TRIM(facultad) = ?
+            """
+            parametros.append(facultad)
+
+        consulta += " ORDER BY apellido ASC, nombre ASC"
+
+
+        registros = conexion.execute(
+            consulta,
+            parametros
+        ).fetchall()
+
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.utils import get_column_letter
+        from io import BytesIO
+        from datetime import datetime
+
+        libro_excel = Workbook()
+        hoja = libro_excel.active
+        hoja.title = "Investigadores"
+
+        encabezados = [
+            "Código",
+            "Nombre",
+            "Apellido",
+            "CI",
+            "Correo",
+            "Teléfono",
+            "Tipo",
+            "Estado",
+            "Carrera",
+            "Facultad",
+            "Área de carrera",
+            "Grado académico",
+            "Especialidad",
+            "Cargo",
+            "Institución",
+            "Semestre",
+            "Matrícula",
+            "Tutor",
+            "Línea de investigación",
+            "ORCID",
+            "Google Scholar",
+            "Scopus",
+            "Scopus ID",
+            "Researcher ID",
+            "Perfil",
+            "Observaciones",
+            "Usuario de registro"
+        ]
+
+        hoja.append(encabezados)
+
+        for investigador in registros:
+            hoja.append([
+                investigador["codigo"],
+                investigador["nombre"],
+                investigador["apellido"],
+                investigador["ci"],
+                investigador["correo"],
+                investigador["telefono"],
+                investigador["tipo"],
+                "Activo" if investigador["estado"] == 1 else "Inactivo",
+                investigador["carreras_texto"] or investigador["carrera_area"] or investigador["carrera"] or "",
+                investigador["facultad"],
+                investigador["carrera_area"],
+                investigador["grado_academico"],
+                investigador["especialidad"],
+                investigador["cargo"],
+                investigador["institucion"],
+                investigador["semestre"],
+                investigador["matricula"],
+                investigador["tutor"],
+                investigador["linea_investigacion"],
+                investigador["orcid"],
+                investigador["google_scholar"],
+                investigador["scopus"],
+                investigador["scopus_id"],
+                investigador["researcher_id"],
+                investigador["perfil"],
+                investigador["observaciones"],
+                investigador["usuario"]
+            ])
+
+        for celda in hoja[1]:
+            celda.font = Font(bold=True, color="FFFFFF")
+            celda.fill = PatternFill(
+                fill_type="solid",
+                fgColor="218739"
+            )
+            celda.alignment = Alignment(
+                horizontal="center",
+                vertical="center",
+                wrap_text=True
+            )
+
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+        hoja.row_dimensions[1].height = 32
+
+        for columna in hoja.columns:
+            letra = get_column_letter(columna[0].column)
+            ancho = max(
+                len(str(celda.value or ""))
+                for celda in columna
+            )
+            hoja.column_dimensions[letra].width = min(
+                ancho + 2,
+                40
+            )
+
+        archivo_memoria = BytesIO()
+        libro_excel.save(archivo_memoria)
+        archivo_memoria.seek(0)
+
+        sufijo = ""
+        if tipo == "Docente Investigador":
+            sufijo = "docentes_"
+        elif tipo == "Estudiante Investigador":
+            sufijo = "estudiantes_"
+
+        nombre_archivo = (
+            "investigadores_"
+            + sufijo
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + ".xlsx"
+        )
+
+        return send_file(
+            archivo_memoria,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
+    finally:
+        conexion.close()
+
+# =========================================================
+# IMPORTAR INVESTIGADORES DESDE EXCEL V3
+# VISTA PREVIA Y CONFIRMACIÓN
+# =========================================================
+
+@app.route("/investigadores/importar", methods=["GET", "POST"])
+def importar_investigadores():
+
+    import os
+    import uuid
+    from openpyxl import load_workbook
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    error = None
+    resultado = None
+    token = session.get("importacion_docentes_token")
+
+    carpeta_temporal = os.path.join(
+        app.instance_path,
+        "importaciones_docentes"
+    )
+    os.makedirs(carpeta_temporal, exist_ok=True)
+
+    def texto(valor):
+        if valor is None:
+            return ""
+
+        if isinstance(valor, float) and valor.is_integer():
+            return str(int(valor))
+
+        return str(valor).strip()
+
+    def leer_excel(ruta):
+
+        libro = load_workbook(
+            ruta,
+            read_only=True,
+            data_only=True
+        )
+
+        try:
+            if "Docentes" not in libro.sheetnames:
+                raise ValueError(
+                    "No se encontró la hoja Docentes."
+                )
+
+            hoja = libro["Docentes"]
+            filas = hoja.iter_rows(values_only=True)
+
+            encabezados_originales = next(filas, None)
+
+            if not encabezados_originales:
+                raise ValueError("El Excel está vacío.")
+
+            encabezados = {
+                texto(valor).casefold(): posicion
+                for posicion, valor in enumerate(
+                    encabezados_originales
+                )
+                if texto(valor)
+            }
+
+            obligatorias = [
+                "codigo_para_importacion",
+                "ci",
+                "nombre_sidic_propuesto",
+                "apellido_sidic_propuesto",
+                "area_id_sidic",
+                "area_codigo_sidic",
+                "carreras_excel",
+                "correo_institucional",
+                "celular",
+                "orcid",
+                "researcher_id",
+                "tipo_propuesto"
+            ]
+
+            faltantes = [
+                columna
+                for columna in obligatorias
+                if columna not in encabezados
+            ]
+
+            if faltantes:
+                raise ValueError(
+                    "Faltan columnas del archivo V3: "
+                    + ", ".join(faltantes)
+                )
+
+            def obtener(fila, columna):
+                posicion = encabezados[columna.casefold()]
+
+                if posicion >= len(fila):
+                    return ""
+
+                return texto(fila[posicion])
+
+            registros = []
+
+            for numero_fila, fila in enumerate(filas, start=2):
+
+                if not any(texto(v) for v in fila):
+                    continue
+
+                codigo = obtener(
+                    fila, "codigo_para_importacion"
+                )
+
+                # Los registros sin código, como Julieth,
+                # no se importan.
+                if not codigo:
+                    continue
+
+                carreras = [
+                    carrera.strip()
+                    for carrera in obtener(
+                        fila, "carreras_excel"
+                    ).split("|")
+                    if carrera.strip()
+                ]
+
+                registros.append({
+                    "fila": numero_fila,
+                    "codigo": codigo,
+                    "ci": obtener(fila, "ci"),
+                    "nombre": obtener(
+                        fila, "nombre_sidic_propuesto"
+                    ),
+                    "apellido": obtener(
+                        fila, "apellido_sidic_propuesto"
+                    ),
+                    "area_id": obtener(
+                        fila, "area_id_sidic"
+                    ),
+                    "area_codigo": obtener(
+                        fila, "area_codigo_sidic"
+                    ),
+                    "carreras": carreras,
+                    "correo": obtener(
+                        fila, "correo_institucional"
+                    ),
+                    "telefono": obtener(fila, "celular"),
+                    "orcid": obtener(fila, "orcid"),
+                    "researcher_id": obtener(
+                        fila, "researcher_id"
+                    ),
+                    "tipo": obtener(
+                        fila, "tipo_propuesto"
+                    )
+                })
+
+            return registros
+
+        finally:
+            libro.close()
+
+    def validar_registros(conexion, registros):
+
+        errores = []
+        muestra = []
+
+        codigos_ci = [
+            registro["ci"]
+            for registro in registros
+            if registro["ci"]
+        ]
+
+        repetidos = {
+            ci for ci in codigos_ci
+            if codigos_ci.count(ci) > 1
+        }
+
+        carreras_validas = set(
+            CARRERAS_INVESTIGADORES
+        )
+
+        validos = []
+
+        for registro in registros:
+
+            fila = registro["fila"]
+            tipo = (
+                registro.get("tipo") or ""
+            ).strip()
+
+            if tipo not in (
+                "Docente Investigador",
+                "Estudiante Investigador"
+            ):
+                errores.append(
+                    f"Fila {fila}: tipo de investigador "
+                    "vacío o no válido."
+                )
+                continue
+
+            registro["tipo"] = tipo
+
+            if not registro["ci"]:
+                errores.append(
+                    f"Fila {fila}: falta el C.I."
+                )
+                continue
+
+            if registro["ci"] in repetidos:
+                errores.append(
+                    f"Fila {fila}: C.I. repetido en el Excel."
+                )
+                continue
+
+            if not registro["nombre"] or not registro["apellido"]:
+                errores.append(
+                    f"Fila {fila}: nombre o apellido vacío."
+                )
+                continue
+
+            if not registro["carreras"]:
+                errores.append(
+                    f"Fila {fila}: no tiene carrera."
+                )
+                continue
+
+            carreras_invalidas = [
+                carrera
+                for carrera in registro["carreras"]
+                if carrera not in carreras_validas
+            ]
+
+            if carreras_invalidas:
+                errores.append(
+                    f"Fila {fila}: carrera no reconocida: "
+                    + ", ".join(carreras_invalidas)
+                )
+                continue
+
+            try:
+                area_id = int(registro["area_id"])
+            except (ValueError, TypeError):
+                errores.append(
+                    f"Fila {fila}: área no válida."
+                )
+                continue
+
+            area = conexion.execute("""
+                SELECT id, nombre, codigo
+                FROM areas
+                WHERE id = ?
+            """, (area_id,)).fetchone()
+
+            if (
+                not area
+                or area["codigo"] != registro["area_codigo"]
+            ):
+                errores.append(
+                    f"Fila {fila}: el área no coincide con SIDIC."
+                )
+                continue
+
+            existente = conexion.execute("""
+                SELECT id
+                FROM investigadores
+                WHERE TRIM(ci) = ?
+                LIMIT 1
+            """, (registro["ci"],)).fetchone()
+
+            if existente:
+                errores.append(
+                    f"Fila {fila}: el C.I. {registro['ci']} "
+                    "ya está registrado en SIDIC."
+                )
+                continue
+
+            registro["area_id"] = area["id"]
+            registro["facultad"] = area["nombre"]
+
+            validos.append(registro)
+
+            if len(muestra) < 20:
+                muestra.append({
+                    "fila_excel": fila,
+                    "codigo": "Se asignará automáticamente",
+                    "ci": registro["ci"],
+                    "nombre": (
+                        registro["nombre"] + " "
+                        + registro["apellido"]
+                    ),
+                    "area": area["nombre"],
+                    "carrera": " | ".join(
+                        registro["carreras"]
+                    ),
+                    "correo": registro["correo"],
+                    "celular": registro["telefono"],
+                    "orcid": registro["orcid"],
+                    "researcher_id": registro["researcher_id"]
+                })
+
+        return validos, errores, muestra
+
+    if request.method == "POST":
+
+        accion = request.form.get("accion", "")
+
+        # -------------------------------------------------
+        # PASO 1: RECIBIR Y REVISAR EL EXCEL
+        # -------------------------------------------------
+
+        if accion == "previsualizar":
+
+            archivo = request.files.get("archivo")
+
+            if not archivo or not archivo.filename:
+                error = "Selecciona el Excel aprobado."
+
+            elif not archivo.filename.lower().endswith(".xlsx"):
+                error = "El archivo debe tener formato .xlsx."
+
+            else:
+                nuevo_token = uuid.uuid4().hex
+                ruta = os.path.join(
+                    carpeta_temporal,
+                    nuevo_token + ".xlsx"
+                )
+
+                try:
+                    archivo.save(ruta)
+
+                    registros = leer_excel(ruta)
+
+                    conexion = conectar_bd()
+
+                    try:
+                        validos, errores, muestra = (
+                            validar_registros(
+                                conexion,
+                                registros
+                            )
+                        )
+                    finally:
+                        conexion.close()
+
+                    # Eliminar una vista previa anterior.
+                    if token:
+                        ruta_anterior = os.path.join(
+                            carpeta_temporal,
+                            token + ".xlsx"
+                        )
+
+                        if os.path.exists(ruta_anterior):
+                            os.remove(ruta_anterior)
+
+                    session["importacion_docentes_token"] = (
+                        nuevo_token
+                    )
+                    token = nuevo_token
+
+                    resultado = {
+                        "total": len(registros),
+                        "validos": len(validos),
+                        "errores": len(errores),
+                        "muestra": muestra,
+                        "detalle_errores": errores[:15],
+                        "puede_importar": (
+                            len(validos) > 0
+                            and len(errores) == 0
+                        )
+                    }
+
+                except Exception as exc:
+                    print(
+                        "Error al revisar importación:",
+                        exc
+                    )
+
+                    if os.path.exists(ruta):
+                        os.remove(ruta)
+
+                    error = str(exc)
+
+        # -------------------------------------------------
+        # PASO 2: CONFIRMAR E IMPORTAR
+        # -------------------------------------------------
+
+        elif accion == "confirmar":
+
+            token_recibido = request.form.get("token", "")
+
+            if (
+                not token
+                or token_recibido != token
+            ):
+                error = (
+                    "La vista previa expiró. "
+                    "Vuelve a seleccionar el Excel."
+                )
+
+            else:
+                ruta = os.path.join(
+                    carpeta_temporal,
+                    token + ".xlsx"
+                )
+
+                if not os.path.exists(ruta):
+                    error = (
+                        "No se encontró el archivo temporal. "
+                        "Vuelve a revisar el Excel."
+                    )
+
+                else:
+                    conexion = conectar_bd()
+
+                    try:
+                        registros = leer_excel(ruta)
+
+                        conexion.execute("BEGIN IMMEDIATE")
+
+                        validos, errores, muestra = (
+                            validar_registros(
+                                conexion,
+                                registros
+                            )
+                        )
+
+                        if errores or not validos:
+                            raise ValueError(
+                                "La validación final detectó "
+                                "problemas. No se importó ningún "
+                                "registro. "
+                                + " | ".join(errores[:10])
+                            )
+
+                        # ================================================
+                        # GENERAR CÓDIGOS SEGÚN TIPO DE INVESTIGADOR
+                        # ================================================
+
+                        for registro in validos:
+
+                            codigo_sidic = generar_codigo_persona(
+                                conexion,
+                                registro["tipo"]
+                            )
+
+                            primera_carrera = (
+                                registro["carreras"][0]
+                            )
+
+                            cursor = conexion.execute("""
+                                INSERT INTO investigadores (
+                                    codigo,
+                                    nombre,
+                                    apellido,
+                                    tipo,
+                                    ci,
+                                    ci_archivo,
+                                    correo,
+                                    telefono,
+                                    carrera,
+                                    carrera_area,
+                                    cargo,
+                                    facultad,
+                                    institucion,
+                                    grado_academico,
+                                    especialidad,
+                                    perfil,
+                                    orcid,
+                                    google_scholar,
+                                    scopus_id,
+                                    scopus,
+                                    researcher_id,
+                                    semestre,
+                                    matricula,
+                                    tutor,
+                                    linea_investigacion,
+                                    estado,
+                                    fotografia,
+                                    observaciones,
+                                    usuario
+                                )
+                                VALUES (
+                                    ?, ?, ?, ?, ?, NULL, ?, ?,
+                                    ?, ?, '', ?, '', '', '', '',
+                                    ?, '', '', '', ?, '', '', '',
+                                    '', 1, '', '', ?
+                                )
+                            """, (
+                                codigo_sidic,
+                                registro["nombre"],
+                                registro["apellido"],
+                                registro["tipo"],
+                                registro["ci"],
+                                registro["correo"],
+                                registro["telefono"],
+                                primera_carrera,
+                                primera_carrera,
+                                registro["facultad"],
+                                registro["orcid"],
+                                registro["researcher_id"],
+                                session.get("usuario")
+                            ))
+
+                            investigador_id = cursor.lastrowid
+
+                            for carrera in registro["carreras"]:
+                                conexion.execute("""
+                                    INSERT INTO investigadores_carreras (
+                                        investigador_id,
+                                        carrera
+                                    )
+                                    VALUES (?, ?)
+                                """, (
+                                    investigador_id,
+                                    carrera
+                                ))
+
+                            conexion.execute("""
+                                INSERT INTO investigadores_areas (
+                                    investigador_id,
+                                    area_id
+                                )
+                                VALUES (?, ?)
+                            """, (
+                                investigador_id,
+                                registro["area_id"]
+                            ))
+
+                        conexion.commit()
+
+                        resultado = {
+                            "importacion_completada": True,
+                            "importados": len(validos),
+                            "omitidos": (
+                                "Los registros sin código "
+                                "de importación, como Julieth, "
+                                "no fueron modificados."
+                            )
+                        }
+
+                        session.pop(
+                            "importacion_docentes_token",
+                            None
+                        )
+
+                        if os.path.exists(ruta):
+                            os.remove(ruta)
+
+                        token = None
+
+                    except Exception as exc:
+                        conexion.rollback()
+
+                        print(
+                            "Error al importar investigadores:",
+                            exc
+                        )
+
+                        error = str(exc)
+
+                    finally:
+                        conexion.close()
+
+    return render_template(
+        "importar_investigadores.html",
+        error=error,
+        resultado=resultado,
+        token=token,
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
@@ -7758,9 +8961,14 @@ def ver_investigador(id):
     conexion = conectar_bd()
 
     investigador = conexion.execute("""
-        SELECT *
+        SELECT investigadores.*,
+               (
+                   SELECT GROUP_CONCAT(ic.carrera, ', ')
+                   FROM investigadores_carreras ic
+                   WHERE ic.investigador_id = investigadores.id
+               ) AS carreras_texto
         FROM investigadores
-        WHERE id = ?
+        WHERE investigadores.id = ?
     """, (id,)).fetchone()
 
     if investigador is None:
@@ -7856,6 +9064,38 @@ def ver_ci_investigador(id):
         )
     )
 
+
+CARRERAS_INVESTIGADORES = [
+    "Administración de Empresas",
+    "Comercio Internacional y Aduanas",
+    "Contaduría Pública",
+    "Ingeniería Comercial",
+    "Turismo Sostenible",
+    "Ciencias Políticas y Gestión Pública",
+    "Derecho",
+    "Sociología",
+    "Relaciones Internacionales y Diplomacia",
+    "Ciencias de la Comunicación Social",
+    "Psicología",
+    "Trabajo Social",
+    "Biología",
+    "Ingeniería Agroforestal",
+    "Ingeniería Ambiental",
+    "Medicina Veterinaria y Zootecnia",
+    "Ingeniería Agropecuaria",
+    "Bioquímica y Farmacia",
+    "Enfermería",
+    "Medicina",
+    "Odontología",
+    "Arquitectura",
+    "Ingeniería Biomédica",
+    "Ingeniería Civil",
+    "Ingeniería de Sistemas",
+    "Ingeniería Financiera",
+    "Ingeniería Industrial",
+]
+
+
 # =========================================================
 # NUEVO INVESTIGADOR
 # =========================================================
@@ -7875,6 +9115,17 @@ def nuevo_investigador():
         nombre = request.form["nombre"].strip()
         apellido = request.form["apellido"].strip()
         tipo = request.form["tipo"].strip()
+        if tipo not in (
+            "Docente Investigador",
+            "Estudiante Investigador"
+        ):
+            flash(
+                "Seleccione un tipo de investigador válido.",
+                "danger"
+            )
+            return redirect(
+                url_for("nuevo_investigador")
+            )
 
         ci = request.form.get("ci", "").strip()
         correo = request.form.get("correo", "").strip()
@@ -7886,9 +9137,23 @@ def nuevo_investigador():
         # DATOS INSTITUCIONALES
         # =====================================================
 
-        carrera_area = request.form.get(
-            "carrera_area", ""
-        ).strip()
+        carreras_seleccionadas = list(dict.fromkeys(
+            carrera.strip()
+            for carrera in request.form.getlist("carreras")
+            if carrera.strip()
+        ))
+
+        if not carreras_seleccionadas or any(
+            carrera not in CARRERAS_INVESTIGADORES
+            for carrera in carreras_seleccionadas
+        ):
+            flash(
+                "Seleccione al menos una carrera válida de la lista.",
+                "danger"
+            )
+            return redirect(url_for("nuevo_investigador"))
+
+        carrera_area = carreras_seleccionadas[0]
 
         cargo = request.form.get(
             "cargo", ""
@@ -8013,96 +9278,147 @@ def nuevo_investigador():
                 )
 
         # =====================================================
-        # GENERAR CÓDIGO DEL INVESTIGADOR
+        # GENERAR CÓDIGO SEGÚN TIPO DE INVESTIGADOR
         # =====================================================
 
         conexion = conectar_bd()
+        try:
 
-        ultimo = conexion.execute("""
-            SELECT codigo
-            FROM investigadores
-            WHERE codigo LIKE 'INV-%'
-            ORDER BY id DESC
-            LIMIT 1
-        """).fetchone()
+            # Bloquear escrituras simultáneas mientras se asigna
+            # el código y se guarda el nuevo investigador.
+            conexion.execute("BEGIN IMMEDIATE")
 
-
-        if ultimo and ultimo["codigo"]:
-
-            try:
-                numero = int(
-                    ultimo["codigo"].replace("INV-", "")
-                ) + 1
-
-            except ValueError:
-                numero = 1
-
-        else:
-            numero = 1
-
-
-        codigo = f"INV-{numero:04d}"
-
-        # =====================================================
-        # SUBIR C.I. A GOOGLE DRIVE
-        # =====================================================
-
-        if ci_archivo and ci_archivo.filename:
-
-            nombre_drive = (
-                f"{codigo} - {nombre} {apellido} - CI.pdf"
+            codigo = generar_codigo_persona(
+                conexion,
+                tipo
             )
 
-            with tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".pdf"
-            ) as archivo_temporal:
+            # =====================================================
+            # SUBIR C.I. A GOOGLE DRIVE
+            # =====================================================
 
-                ruta_temporal = archivo_temporal.name
+            if ci_archivo and ci_archivo.filename:
 
-            ci_archivo.save(ruta_temporal)
+                nombre_drive = (
+                    f"{codigo} - {nombre} {apellido} - CI.pdf"
+                )
 
-            try:
+                with tempfile.NamedTemporaryFile(
+                    delete=False,
+                    suffix=".pdf"
+                ) as archivo_temporal:
 
-                servicio = conectar_google_drive()
+                    ruta_temporal = archivo_temporal.name
 
-                carpeta_investigadores = (
-                    obtener_carpeta_investigadores(
-                        servicio
+                ci_archivo.save(ruta_temporal)
+
+                try:
+
+                    servicio = conectar_google_drive()
+
+                    carpeta_investigadores = (
+                        obtener_carpeta_investigadores(
+                            servicio
+                        )
                     )
+
+                    archivo_drive = subir_archivo(
+                        servicio,
+                        ruta_temporal,
+                        nombre_drive,
+                        carpeta_investigadores
+                    )
+
+                    archivo_ci_id = archivo_drive.get("id")
+
+                finally:
+
+                    if os.path.exists(ruta_temporal):
+                        os.remove(ruta_temporal)
+
+            # =====================================================
+            # OBTENER FACULTAD DESDE EL ÁREA SELECCIONADA
+            # =====================================================
+
+            facultad = ""
+
+            if area_id:
+                area_seleccionada = conexion.execute("""
+                    SELECT nombre
+                    FROM areas
+                    WHERE id = ?
+                """, (area_id,)).fetchone()
+
+                if area_seleccionada:
+                    facultad = area_seleccionada["nombre"]
+
+            # =====================================================
+            # GUARDAR INVESTIGADOR
+            # =====================================================
+
+            cursor = conexion.execute("""
+                INSERT INTO investigadores (
+
+                    codigo,
+                    nombre,
+                    apellido,
+                    tipo,
+                    ci,
+                    ci_archivo,
+                    correo,
+                    telefono,
+
+                    carrera,
+                    carrera_area,
+                    cargo,
+                    facultad,
+                    institucion,
+
+                    grado_academico,
+                    especialidad,
+                    perfil,
+
+                    orcid,
+                    google_scholar,
+                    scopus_id,
+                    scopus,
+                    researcher_id,
+
+                    semestre,
+                    matricula,
+                    tutor,
+                    linea_investigacion,
+
+                    estado,
+                    fotografia,
+                    observaciones,
+                    usuario
+
                 )
 
-                archivo_drive = subir_archivo(
-                    servicio,
-                    ruta_temporal,
-                    nombre_drive,
-                    carpeta_investigadores
+                VALUES (
+
+                    ?, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?,
+                    ?, ?, ?,
+                    ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?,
+                    ?, ?, ?
                 )
 
-                archivo_ci_id = archivo_drive.get("id")
-
-            finally:
-
-                if os.path.exists(ruta_temporal):
-                    os.remove(ruta_temporal)
-
-        # =====================================================
-        # GUARDAR INVESTIGADOR
-        # =====================================================
-
-        cursor = conexion.execute("""
-            INSERT INTO investigadores (
+            """, (
 
                 codigo,
                 nombre,
                 apellido,
                 tipo,
                 ci,
-                ci_archivo,
+                archivo_ci_id,
                 correo,
                 telefono,
 
-                carrera,
+                carrera_area,
                 carrera_area,
                 cargo,
                 facultad,
@@ -8110,11 +9426,11 @@ def nuevo_investigador():
 
                 grado_academico,
                 especialidad,
-                perfil,
+                "",
 
                 orcid,
                 google_scholar,
-                scopus_id,
+                scopus,
                 scopus,
                 researcher_id,
 
@@ -8124,82 +9440,60 @@ def nuevo_investigador():
                 linea_investigacion,
 
                 estado,
-                fotografia,
+                "",
                 observaciones,
-                usuario
-
-            )
-
-            VALUES (
-
-                ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?,
-                ?,
-                ?, ?, ?
-            )
-
-        """, (
-
-            codigo,
-            nombre,
-            apellido,
-            tipo,
-            ci,
-            archivo_ci_id,
-            correo,
-            telefono,
-
-            carrera_area,
-            carrera_area,
-            cargo,
-            facultad,
-            institucion,
-
-            grado_academico,
-            especialidad,
-            "",
-
-            orcid,
-            google_scholar,
-            scopus,
-            scopus,
-            researcher_id,
-
-            semestre,
-            matricula,
-            tutor,
-            linea_investigacion,
-
-            estado,
-            "",
-            observaciones,
-            session.get("usuario")
-        ))
-
-        # =====================================================
-        # GUARDAR ÁREA DEL INVESTIGADOR
-        # =====================================================
-
-        investigador_id = cursor.lastrowid
-
-        if area_id:
-
-            conexion.execute("""
-                INSERT OR IGNORE INTO investigadores_areas (
-                    investigador_id,
-                    area_id
-                )
-                VALUES (?, ?)
-            """, (
-                investigador_id,
-                area_id
+                session.get("usuario")
             ))
 
-        conexion.commit()
-        conexion.close()
+            # =====================================================
+            # GUARDAR ÁREA DEL INVESTIGADOR
+            # =====================================================
+
+            investigador_id = cursor.lastrowid
+
+            conexion.executemany("""
+                INSERT OR IGNORE INTO investigadores_carreras (
+                    investigador_id, carrera
+                ) VALUES (?, ?)
+            """, [
+                (investigador_id, carrera)
+                for carrera in carreras_seleccionadas
+            ])
+
+            if area_id:
+
+                conexion.execute("""
+                    INSERT OR IGNORE INTO investigadores_areas (
+                        investigador_id,
+                        area_id
+                    )
+                    VALUES (?, ?)
+                """, (
+                    investigador_id,
+                    area_id
+                ))
+
+            conexion.commit()
+
+        except Exception as exc:
+
+            conexion.rollback()
+
+            app.logger.exception("Error al registrar investigador")
+
+            flash(
+                "No se pudo registrar el investigador. "
+                "No se guardaron los cambios. Detalle: " + str(exc),
+                "danger"
+            )
+
+            return redirect(
+                url_for("nuevo_investigador")
+            )
+
+        finally:
+
+            conexion.close()
 
 
         return redirect(
@@ -8210,7 +9504,8 @@ def nuevo_investigador():
     return render_template(
         "nuevo_investigador.html",
         usuario=session.get("usuario"),
-        rol=session.get("rol")
+        rol=session.get("rol"),
+        carreras=CARRERAS_INVESTIGADORES
     )
 
 # =========================================================
@@ -8250,17 +9545,47 @@ def editar_investigador(id):
         telefono = request.form.get("telefono", "").strip()
         ci_archivo = request.files.get("ci_archivo")
 
-        carrera_area = request.form.get(
-            "carrera_area", ""
-        ).strip()
+        carreras_seleccionadas = list(dict.fromkeys(
+            carrera.strip()
+            for carrera in request.form.getlist("carreras")
+            if carrera.strip()
+        ))
+
+        if not carreras_seleccionadas or any(
+            carrera not in CARRERAS_INVESTIGADORES
+            for carrera in carreras_seleccionadas
+        ):
+            conexion.close()
+            flash(
+                "Seleccione al menos una carrera válida de la lista.",
+                "danger"
+            )
+            return redirect(url_for("editar_investigador", id=id))
+
+        carrera_area = carreras_seleccionadas[0]
 
         cargo = request.form.get(
             "cargo", ""
         ).strip()
 
-        facultad = request.form.get(
-            "facultad", ""
+        facultad = ""
+
+        # Obtener el área seleccionada
+        area_id = request.form.get(
+            "areas",
+            ""
         ).strip()
+
+        if area_id:
+            area_seleccionada = conexion.execute("""
+                SELECT nombre
+                FROM areas
+                WHERE id = ?
+                  AND estado = 1
+            """, (area_id,)).fetchone()
+
+            if area_seleccionada:
+                facultad = area_seleccionada["nombre"]
 
         institucion = request.form.get(
             "institucion", ""
@@ -8317,14 +9642,6 @@ def editar_investigador(id):
             ""
         ).strip()
 
-        # =================================================
-        # ÁREA DEL INVESTIGADOR
-        # =================================================
-
-        area_id = request.form.get(
-            "areas",
-            ""
-        ).strip()
 
         # =================================================
         # DOCUMENTO DE C.I.
@@ -8430,6 +9747,7 @@ def editar_investigador(id):
                 ci_archivo = ?,
                 correo = ?,
                 telefono = ?,
+                carrera = ?,
                 carrera_area = ?,
                 cargo = ?,
                 facultad = ?,
@@ -8456,6 +9774,7 @@ def editar_investigador(id):
             correo,
             telefono,
             carrera_area,
+            carrera_area,
             cargo,
             facultad,
             institucion,
@@ -8477,6 +9796,20 @@ def editar_investigador(id):
         # =================================================
         # ACTUALIZAR ÁREA DEL INVESTIGADOR
         # =================================================
+
+        conexion.execute("""
+            DELETE FROM investigadores_carreras
+            WHERE investigador_id = ?
+        """, (id,))
+
+        conexion.executemany("""
+            INSERT OR IGNORE INTO investigadores_carreras (
+                investigador_id, carrera
+            ) VALUES (?, ?)
+        """, [
+            (id, carrera)
+            for carrera in carreras_seleccionadas
+        ])
 
         conexion.execute("""
             DELETE FROM investigadores_areas
@@ -8507,6 +9840,25 @@ def editar_investigador(id):
     # MOSTRAR FORMULARIO
     # =====================================================
 
+    carreras_actuales = [
+        fila["carrera"]
+        for fila in conexion.execute("""
+            SELECT carrera
+            FROM investigadores_carreras
+            WHERE investigador_id = ?
+            ORDER BY id
+        """, (id,)).fetchall()
+    ]
+
+    if not carreras_actuales:
+        carrera_anterior = (
+            investigador["carrera_area"]
+            or investigador["carrera"]
+            or ""
+        )
+        if carrera_anterior in CARRERAS_INVESTIGADORES:
+            carreras_actuales = [carrera_anterior]
+
     # OBTENER ÁREA ACTUAL DEL INVESTIGADOR
     area_actual = conexion.execute("""
         SELECT area_id
@@ -8535,7 +9887,9 @@ def editar_investigador(id):
         "editar_investigador.html",
         investigador=investigador,
         areas=areas,
+        carreras=CARRERAS_INVESTIGADORES,
         area_id_actual=area_id_actual,
+        carreras_actuales=carreras_actuales,
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
@@ -8713,7 +10067,7 @@ def articulos():
     )
 
 # =========================================================
-# EXPORTAR EXCEL ARTÍCULOS
+# EXPORTAR EXCELARTÍCULOS
 # =========================================================
 
 @app.route("/articulos/exportar")
@@ -10409,6 +11763,165 @@ def revistas():
         rol=session.get("rol")
     )
 
+
+# =========================================================
+# EXPORTAR REVISTAS A EXCEL
+# =========================================================
+
+@app.route("/revistas/exportar")
+def exportar_revistas():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    try:
+        buscar = request.args.get("buscar", "").strip()
+        estado = request.args.get("estado", "").strip()
+
+        consulta = """
+            SELECT
+                codigo,
+                nombre,
+                issn,
+                issn_electronico,
+                editorial,
+                institucion,
+                pais,
+                ciudad,
+                periodicidad,
+                area_tematica,
+                url,
+                doi,
+                indexacion,
+                fecha_inicio,
+                estado,
+                observaciones,
+                usuario,
+                nombre_archivo
+            FROM revistas
+            WHERE 1=1
+        """
+
+        parametros = []
+
+        if buscar:
+            consulta += """
+                AND (
+                    codigo LIKE ?
+                    OR nombre LIKE ?
+                    OR issn LIKE ?
+                    OR issn_electronico LIKE ?
+                    OR editorial LIKE ?
+                    OR institucion LIKE ?
+                )
+            """
+
+            termino = f"%{buscar}%"
+            parametros.extend([termino] * 6)
+
+        if estado in ("0", "1"):
+            consulta += " AND estado = ?"
+            parametros.append(int(estado))
+
+        consulta += " ORDER BY nombre ASC"
+
+        revistas_excel = conexion.execute(
+            consulta, parametros
+        ).fetchall()
+
+        from openpyxl import Workbook
+
+        libro_excel = Workbook()
+        hoja = libro_excel.active
+        hoja.title = "Revistas"
+
+        encabezados = [
+            "Código", "Nombre de la revista", "ISSN",
+            "E-ISSN", "Editorial", "Institución",
+            "País", "Ciudad", "Periodicidad",
+            "Área temática", "URL", "DOI",
+            "Indexación", "Fecha de inicio", "Estado",
+            "Observaciones", "Usuario de registro",
+            "Nombre del archivo"
+        ]
+
+        hoja.append(encabezados)
+
+        for revista in revistas_excel:
+            hoja.append([
+                revista["codigo"],
+                revista["nombre"],
+                revista["issn"],
+                revista["issn_electronico"],
+                revista["editorial"],
+                revista["institucion"],
+                revista["pais"],
+                revista["ciudad"],
+                revista["periodicidad"],
+                revista["area_tematica"],
+                revista["url"],
+                revista["doi"],
+                revista["indexacion"],
+                revista["fecha_inicio"],
+                "Activa" if revista["estado"] == 1 else "Inactiva",
+                revista["observaciones"],
+                revista["usuario"],
+                revista["nombre_archivo"]
+            ])
+
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.utils import get_column_letter
+
+        for celda in hoja[1]:
+            celda.font = Font(bold=True, color="FFFFFF")
+            celda.fill = PatternFill(
+                fill_type="solid",
+                fgColor="218739"
+            )
+            celda.alignment = Alignment(
+                horizontal="center",
+                vertical="center"
+            )
+
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+
+        for columna in hoja.columns:
+            letra = get_column_letter(columna[0].column)
+            ancho = max(
+                len(str(celda.value or ""))
+                for celda in columna
+            )
+            hoja.column_dimensions[letra].width = min(ancho + 2, 45)
+
+        from io import BytesIO
+
+        archivo_memoria = BytesIO()
+        libro_excel.save(archivo_memoria)
+        archivo_memoria.seek(0)
+
+        nombre_archivo = (
+            "revistas_"
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + ".xlsx"
+        )
+
+        return send_file(
+            archivo_memoria,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
+    finally:
+        conexion.close()
+
+
 # =========================================================
 # NUEVA REVISTA
 # =========================================================
@@ -11538,6 +13051,195 @@ def libros():
         usuario=session.get("usuario"),
         rol=session.get("rol")
     )
+
+
+# =========================================================
+# EXPORTAR LIBROS A EXCEL
+# =========================================================
+
+@app.route("/libros/exportar")
+def exportar_libros():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conexion = conectar_bd()
+
+    try:
+        buscar = request.args.get("buscar", "").strip()
+        anio = request.args.get("anio", "").strip()
+        estado = request.args.get("estado", "").strip()
+
+        consulta = """
+            SELECT
+                codigo,
+                titulo,
+                subtitulo,
+                isbn,
+                editorial,
+                edicion,
+                lugar_publicacion,
+                fecha_publicacion,
+                anio,
+                paginas,
+                doi,
+                url,
+                tipo_libro,
+                estado,
+                observaciones,
+                usuario
+            FROM libros
+            WHERE 1 = 1
+        """
+
+        parametros = []
+
+        # Buscar por código, título, subtítulo, ISBN,
+        # editorial o DOI
+        if buscar:
+            consulta += """
+                AND (
+                    codigo LIKE ?
+                    OR titulo LIKE ?
+                    OR subtitulo LIKE ?
+                    OR isbn LIKE ?
+                    OR editorial LIKE ?
+                    OR doi LIKE ?
+                )
+            """
+
+            texto = f"%{buscar}%"
+            parametros.extend([texto] * 6)
+
+        # Filtrar por año
+        if anio:
+            try:
+                consulta += " AND anio = ?"
+                parametros.append(int(anio))
+            except ValueError:
+                anio = ""
+
+        # Filtrar por estado
+        if estado in ("0", "1"):
+            consulta += " AND estado = ?"
+            parametros.append(int(estado))
+
+        consulta += " ORDER BY anio DESC, titulo ASC"
+
+        libros_excel = conexion.execute(
+            consulta,
+            parametros
+        ).fetchall()
+
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.utils import get_column_letter
+        from io import BytesIO
+        from datetime import datetime
+
+        libro_excel = Workbook()
+        hoja = libro_excel.active
+        hoja.title = "Libros"
+
+        encabezados = [
+            "Código",
+            "Título",
+            "Subtítulo",
+            "ISBN",
+            "Editorial",
+            "Edición",
+            "Lugar de publicación",
+            "Fecha de publicación",
+            "Año",
+            "Páginas",
+            "DOI",
+            "URL",
+            "Tipo de libro",
+            "Estado",
+            "Observaciones",
+            "Usuario de registro"
+        ]
+
+        hoja.append(encabezados)
+
+        for libro in libros_excel:
+            hoja.append([
+                libro["codigo"],
+                libro["titulo"],
+                libro["subtitulo"],
+                libro["isbn"],
+                libro["editorial"],
+                libro["edicion"],
+                libro["lugar_publicacion"],
+                libro["fecha_publicacion"],
+                libro["anio"],
+                libro["paginas"],
+                libro["doi"],
+                libro["url"],
+                libro["tipo_libro"],
+                "Activo" if libro["estado"] == 1 else "Inactivo",
+                libro["observaciones"],
+                libro["usuario"]
+            ])
+
+        # Estilo del encabezado
+        for celda in hoja[1]:
+            celda.font = Font(
+                bold=True,
+                color="FFFFFF"
+            )
+            celda.fill = PatternFill(
+                fill_type="solid",
+                fgColor="218739"
+            )
+            celda.alignment = Alignment(
+                horizontal="center",
+                vertical="center",
+                wrap_text=True
+            )
+
+        # Presentación de la hoja
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+        hoja.row_dimensions[1].height = 30
+
+        for columna in hoja.columns:
+            letra = get_column_letter(columna[0].column)
+
+            ancho = max(
+                len(str(celda.value or ""))
+                for celda in columna
+            )
+
+            hoja.column_dimensions[letra].width = min(
+                ancho + 2,
+                45
+            )
+
+        # Preparar archivo descargable
+        archivo_memoria = BytesIO()
+        libro_excel.save(archivo_memoria)
+        archivo_memoria.seek(0)
+
+        nombre_archivo = (
+            "libros_"
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + ".xlsx"
+        )
+
+        return send_file(
+            archivo_memoria,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
+    finally:
+        conexion.close()
+
 
 # =========================================================
 # NUEVO LIBRO
@@ -13362,7 +15064,7 @@ def ver_texto_asignatura(id):
 
     conexion.close()
 
-
+   
     # =====================================================
     # OBTENER NOMBRE DEL ARCHIVO DESDE GOOGLE DRIVE
     # =====================================================
@@ -13841,10 +15543,10 @@ def editar_texto_asignatura(id):
 
 
             return redirect(
-
+                
                 url_for("textos_asignatura")
-
-
+                    
+                
             )
 
 
@@ -14010,24 +15712,26 @@ def editar_texto_asignatura(id):
     )
 
 
+
 # =========================================================
 # ELIMINAR TEXTO EN ASIGNATURA
 # =========================================================
 
-@app.route("/textos-asignatura/eliminar/<int:id>", methods=["POST", "GET"])
+@app.route("/textos-asignatura/eliminar/<int:id>", methods=["POST"])
 def eliminar_texto_asignatura(id):
 
     if "usuario" not in session:
         return redirect(url_for("login"))
 
-    conexion = sqlite3.connect("dicyt.db")
-    conexion.row_factory = sqlite3.Row
+    conexion = conectar_bd()
+    archivos_drive = []
 
     try:
+        # =====================================================
+        # INICIAR TRANSACCIÓN Y BUSCAR TEXTO
+        # =====================================================
 
-        # =========================================================
-        # BUSCAR EL TEXTO
-        # =========================================================
+        conexion.execute("BEGIN")
 
         texto = conexion.execute("""
             SELECT *
@@ -14036,24 +15740,46 @@ def eliminar_texto_asignatura(id):
         """, (id,)).fetchone()
 
         if texto is None:
-            conexion.close()
+            conexion.rollback()
+            flash("El texto en asignatura no existe.", "warning")
             return redirect(url_for("textos_asignatura"))
 
+        # =====================================================
+        # RECUPERAR IDENTIFICADORES DE GOOGLE DRIVE
+        # =====================================================
 
-        # =========================================================
-        # ELIMINACIÓN LÓGICA
-        # =========================================================
+        archivos_drive = list(dict.fromkeys([
+            texto["archivo"],
+            texto["archivo_isbn"],
+            texto["archivo_codigo_barras"]
+        ]))
+
+        archivos_drive = [
+            archivo for archivo in archivos_drive
+            if archivo and str(archivo).strip()
+        ]
+
+        # =====================================================
+        # ELIMINAR RELACIONES CON INVESTIGADORES
+        # =====================================================
 
         conexion.execute("""
-            UPDATE textos_asignatura
-            SET estado = 0
+            DELETE FROM texto_asignatura_investigadores
+            WHERE texto_asignatura_id = ?
+        """, (id,))
+
+        # =====================================================
+        # ELIMINAR REGISTRO DEFINITIVAMENTE
+        # =====================================================
+
+        conexion.execute("""
+            DELETE FROM textos_asignatura
             WHERE id = ?
         """, (id,))
 
-
-        # =========================================================
-        # AUDITORÍA
-        # =========================================================
+        # =====================================================
+        # REGISTRAR AUDITORÍA
+        # =====================================================
 
         conexion.execute("""
             INSERT INTO auditoria
@@ -14071,23 +15797,97 @@ def eliminar_texto_asignatura(id):
             "ELIMINAR",
             "TEXTOS EN ASIGNATURA",
             id,
-            f"Se eliminó el texto en asignatura: {texto['codigo']} - {texto['asignatura']}"
+            f"Se eliminó definitivamente el texto: "
+            f"{texto['codigo']} - {texto['asignatura']}"
         ))
 
+        # =====================================================
+        # CONFIRMAR CAMBIOS EN SQLITE
+        # =====================================================
 
         conexion.commit()
 
     except Exception as e:
 
         conexion.rollback()
-        print("Error al eliminar texto en asignatura:", e)
+
+        print(
+            "ERROR AL ELIMINAR TEXTO EN ASIGNATURA:",
+            e
+        )
+
+        flash(
+            "No se pudo eliminar el texto. "
+            "No se realizaron cambios definitivos en la base de datos.",
+            "danger"
+        )
+
+        return redirect(url_for("textos_asignatura"))
 
     finally:
-
         conexion.close()
 
+    # =========================================================
+    # ELIMINAR ARCHIVOS DE GOOGLE DRIVE
+    # =========================================================
+
+    archivos_no_eliminados = []
+
+    if archivos_drive:
+
+        try:
+            servicio_drive = conectar_google_drive()
+
+            for archivo_id in archivos_drive:
+
+                try:
+                    eliminar_archivo(
+                        servicio_drive,
+                        archivo_id
+                    )
+
+                except Exception as e:
+
+                    print(
+                        f"ERROR AL ELIMINAR ARCHIVO DE DRIVE "
+                        f"{archivo_id}:",
+                        e
+                    )
+
+                    archivos_no_eliminados.append(archivo_id)
+
+        except Exception as e:
+
+            print(
+                "ERROR AL CONECTAR CON GOOGLE DRIVE:",
+                e
+            )
+
+            archivos_no_eliminados = archivos_drive
+
+    # =========================================================
+    # MENSAJE FINAL
+    # =========================================================
+
+    if archivos_no_eliminados:
+
+        flash(
+            "El registro fue eliminado de SIDIC, pero no se "
+            "pudieron eliminar todos sus archivos de Google Drive. "
+            "Revisa la consola para identificar los pendientes.",
+            "warning"
+        )
+
+    else:
+
+        flash(
+            "El texto en asignatura y sus archivos asociados "
+            "fueron eliminados correctamente.",
+            "success"
+        )
 
     return redirect(url_for("textos_asignatura"))
+
 
 # =========================================================
 # NUEVO TEXTO EN ASIGNATURA
@@ -16459,7 +18259,7 @@ def reporte_gestiones():
     import sqlite3
     from datetime import datetime
 
-    conn = sqlite3.connect("dicyt.db")
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
 
     # =========================================================
@@ -16994,7 +18794,7 @@ def reporte_investigacion():
     fecha_generacion = ahora.strftime("%d/%m/%Y")
     hora_generacion = ahora.strftime("%H:%M:%S")
 
-    conn = sqlite3.connect("dicyt.db")
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
 
     # =========================================================
@@ -17346,4 +19146,4 @@ def perfil():
 
 if __name__ == "__main__":
     crear_bd()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

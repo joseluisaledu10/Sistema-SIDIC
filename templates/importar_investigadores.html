@@ -1,0 +1,732 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.importacion-container {
+    max-width: 1450px;
+    margin: 25px auto;
+}
+
+.importacion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.importacion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.importacion-icono {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: #173D68;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+}
+
+.importacion-titulo h2 {
+    font-size: 24px;
+    font-weight: 750;
+    color: #173D68;
+    margin: 0;
+}
+
+.importacion-titulo p {
+    color: #718096;
+    margin: 5px 0 0;
+    font-size: 13px;
+}
+
+.importacion-card {
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 15px;
+    box-shadow: 0 4px 16px rgba(20, 45, 75, .055);
+    margin-bottom: 22px;
+    overflow: hidden;
+}
+
+.importacion-card-body {
+    padding: 25px;
+}
+
+.importacion-card-title {
+    color: #173D68;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.zona-archivo {
+    border: 2px dashed #b8c9dc;
+    background: #f7faff;
+    border-radius: 13px;
+    padding: 28px 20px;
+    text-align: center;
+    transition: .2s;
+}
+
+.zona-archivo:hover {
+    border-color: #173D68;
+    background: #f0f6fc;
+}
+
+.zona-archivo i {
+    font-size: 42px;
+    color: #238052;
+    margin-bottom: 12px;
+}
+
+.zona-archivo h5 {
+    color: #173D68;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.zona-archivo p {
+    color: #718096;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.archivo-seleccionado {
+    display: none;
+    margin-top: 12px;
+    color: #16804a;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-revisar {
+    background: #173D68;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 22px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.btn-revisar:hover {
+    background: #0f2d50;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-importar {
+    background: #16804a;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 12px 23px;
+    font-weight: 700;
+    transition: .2s;
+}
+
+.btn-importar:hover {
+    background: #11683c;
+    color: white;
+}
+
+.btn-volver {
+    border: 1px solid #d7dee8;
+    border-radius: 9px;
+    padding: 9px 15px;
+    color: #526174;
+    text-decoration: none;
+    font-weight: 600;
+    background: white;
+}
+
+.btn-volver:hover {
+    background: #f5f7fa;
+    color: #173D68;
+}
+
+.indicador {
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 13px;
+    padding: 19px;
+    height: 100%;
+    box-shadow: 0 3px 12px rgba(20, 45, 75, .04);
+}
+
+.indicador-label {
+    color: #718096;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.indicador-numero {
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.indicador-azul { color: #173D68; }
+.indicador-verde { color: #16804a; }
+.indicador-rojo { color: #b42318; }
+
+.tabla-importacion {
+    font-size: 13px;
+    margin-bottom: 0;
+}
+
+.tabla-importacion thead th {
+    background: #173D68;
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+    white-space: nowrap;
+    border-color: #31577e;
+}
+
+.tabla-importacion tbody td {
+    padding: 11px 12px;
+    vertical-align: middle;
+}
+
+.tabla-importacion tbody tr:hover {
+    background: #f3f7fb;
+}
+
+.codigo-investigador {
+    color: #173D68;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.alerta-seguridad {
+    background: #eaf4ed;
+    border: 1px solid #d1e7d7;
+    color: #365c48;
+    border-radius: 11px;
+    padding: 15px 18px;
+}
+
+.alerta-seguridad i {
+    color: #16804a;
+    margin-right: 7px;
+}
+
+.confirmacion-box {
+    background: #f6faf7;
+    border: 1px solid #d9eadf;
+    border-radius: 13px;
+    padding: 22px;
+}
+
+.badge-version {
+    background: #e7f0fa;
+    color: #173D68;
+    padding: 7px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .importacion-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .importacion-card-body {
+        padding: 17px;
+    }
+
+    .importacion-titulo h2 {
+        font-size: 20px;
+    }
+}
+</style>
+
+<div class="container-fluid importacion-container">
+
+    <!-- ENCABEZADO -->
+
+    <div class="importacion-header">
+
+        <div class="importacion-titulo">
+
+            <div class="importacion-icono">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div>
+                <h2>Importación de docentes</h2>
+                <p>
+                    SIDIC · Gestión de investigadores y docentes
+                </p>
+            </div>
+
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge-version">EXCEL V3</span>
+
+            <a href="{{ url_for('investigadores') }}"
+               class="btn-volver">
+                <i class="fa-solid fa-arrow-left"></i>
+                Volver
+            </a>
+        </div>
+
+    </div>
+
+    <!-- MENSAJE DE ERROR -->
+
+    {% if error %}
+        <div class="alert alert-danger rounded-3">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ error }}
+        </div>
+    {% endif %}
+
+    {% if resultado and resultado.importacion_completada %}
+
+        <!-- IMPORTACIÓN COMPLETADA -->
+
+        <div class="importacion-card">
+            <div class="importacion-card-body">
+
+                <div class="alert alert-success border-0 rounded-3 p-4">
+
+                    <h4 class="fw-bold">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Importación completada correctamente
+                    </h4>
+
+                    <p class="mb-2">
+                        Se incorporaron a SIDIC:
+                    </p>
+
+                    <div class="display-4 fw-bold">
+                        {{ resultado.importados }}
+                    </div>
+
+                    <p class="mb-0">
+                        Investigadores registrados correctamente.
+                    </p>
+
+                </div>
+
+                <div class="alerta-seguridad mb-4">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    {{ resultado.omitidos }}
+                </div>
+
+                <a href="{{ url_for('investigadores') }}"
+                   class="btn-revisar d-inline-block text-decoration-none">
+                    <i class="fa-solid fa-users"></i>
+                    Ver investigadores
+                </a>
+
+            </div>
+        </div>
+
+    {% else %}
+
+        <!-- SELECCIÓN DEL ARCHIVO -->
+
+        <div class="importacion-card">
+
+            <div class="importacion-card-body">
+
+                <div class="importacion-card-title">
+                    <i class="fa-solid fa-file-excel me-2"></i>
+                    Seleccionar archivo Excel aprobado
+                </div>
+
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      action="{{ url_for('importar_investigadores') }}">
+
+                    <input type="hidden"
+                           name="accion"
+                           value="previsualizar">
+
+                    <div class="zona-archivo">
+
+                        <i class="fa-solid fa-file-circle-plus"></i>
+
+                        <h5>Selecciona tu archivo Excel</h5>
+
+                        <p>
+                            Archivo de docentes revisado y aprobado.
+                            Formato permitido: .xlsx
+                        </p>
+
+                        <input
+                            type="file"
+                            class="form-control"
+                            id="archivo"
+                            name="archivo"
+                            accept=".xlsx"
+                            required
+                            style="max-width: 480px; margin: auto;"
+                        >
+
+                        <div id="archivoSeleccionado"
+                             class="archivo-seleccionado">
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between
+                                align-items-center flex-wrap gap-3 mt-4">
+
+                        <small class="text-muted">
+                            <i class="fa-solid fa-circle-info"></i>
+                            Se utilizarán los datos revisados del Excel V3.
+                        </small>
+
+                        <button type="submit" class="btn-revisar">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Revisar archivo
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        {% if resultado %}
+
+            <!-- INDICADORES -->
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-4">
+                    <div class="indicador">
+                        <div class="indicador-label">
+                            <i class="fa-solid fa-users me-1"></i>
+                            REGISTROS NUEVOS
+                        </div>
+
+                        <div class="indicador-numero indicador-azul">
+                            {{ resultado.total }}
+                        </div>
+
+                        <small class="text-muted">
+                            Filas con código para importar
+                        </small>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="indicador">
+                        <div class="indicador-label">
+                            <i class="fa-solid fa-circle-check me-1"></i>
+                            REGISTROS VÁLIDOS
+                        </div>
+
+                        <div class="indicador-numero indicador-verde">
+                            {{ resultado.validos }}
+                        </div>
+
+                        <small class="text-muted">
+                            Cumplen las validaciones
+                        </small>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="indicador">
+                        <div class="indicador-label">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            ERRORES
+                        </div>
+
+                        <div class="indicador-numero indicador-rojo">
+                            {{ resultado.errores }}
+                        </div>
+
+                        <small class="text-muted">
+                            Registros que requieren atención
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ESTADO DE VALIDACIÓN -->
+
+            {% if resultado.puede_importar %}
+
+                <div class="alerta-seguridad mb-4">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <strong>Validación satisfactoria.</strong>
+                    El archivo está listo para confirmar.
+                    Todavía no se ha guardado ningún registro.
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-warning rounded-3 mb-4">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    No se puede confirmar la importación.
+                    Revisa los errores encontrados.
+                </div>
+
+            {% endif %}
+
+            <!-- DETALLE DE ERRORES -->
+
+            {% if resultado.detalle_errores %}
+
+                <div class="importacion-card">
+
+                    <div class="importacion-card-body">
+
+                        <h5 class="text-danger fw-bold mb-3">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            Detalle de errores
+                        </h5>
+
+                        <ul class="mb-0">
+                            {% for detalle in resultado.detalle_errores %}
+                                <li class="mb-2">{{ detalle }}</li>
+                            {% endfor %}
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+            <!-- TABLA DE VISTA PREVIA -->
+
+            {% if resultado.muestra %}
+
+                <div class="importacion-card">
+
+                    <div class="importacion-card-body">
+
+                        <div class="d-flex justify-content-between
+                                    align-items-center flex-wrap gap-2 mb-3">
+
+                            <div>
+                                <h5 class="importacion-card-title mb-1">
+                                    <i class="fa-solid fa-table-list me-2"></i>
+                                    Vista previa de docentes
+                                </h5>
+
+                                <small class="text-muted">
+                                    Primeros {{ resultado.muestra|length }}
+                                    registros del archivo.
+                                </small>
+                            </div>
+
+                            <span class="badge-version">
+                                DATOS REVISADOS
+                            </span>
+
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover
+                                          table-bordered tabla-importacion">
+
+                                <thead>
+                                    <tr>
+                                        <th>Fila</th>
+                                        <th>Código SIDIC</th>
+                                        <th>C.I.</th>
+                                        <th>Nombre completo</th>
+                                        <th>Área</th>
+                                        <th>Carreras</th>
+                                        <th>Correo institucional</th>
+                                        <th>Celular</th>
+                                        <th>ORCID</th>
+                                        <th>ResearchGate</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for fila in resultado.muestra %}
+
+                                        <tr>
+                                            <td>{{ fila.fila_excel }}</td>
+
+                                            <td class="codigo-investigador">
+                                                {{ fila.codigo }}
+                                            </td>
+
+                                            <td>{{ fila.ci }}</td>
+
+                                            <td class="fw-semibold">
+                                                {{ fila.nombre }}
+                                            </td>
+
+                                            <td>{{ fila.area }}</td>
+
+                                            <td>{{ fila.carrera }}</td>
+
+                                            <td>
+                                                {{ fila.correo or '-' }}
+                                            </td>
+
+                                            <td>{{ fila.celular or '—' }}</td>
+
+                                            <td>{{ fila.orcid or '—' }}</td>
+
+                                            <td>
+                                                {% if fila.researcher_id %}
+                                                    <a href="{{ fila.researcher_id }}"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                        Ver perfil
+                                                    </a>
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+            <!-- CONFIRMAR IMPORTACIÓN -->
+
+            {% if resultado.puede_importar %}
+
+                <div class="importacion-card">
+
+                    <div class="importacion-card-body">
+
+                        <div class="confirmacion-box">
+
+                            <div class="d-flex align-items-center gap-3 mb-3">
+
+                                <div class="importacion-icono"
+                                     style="background:#16804a;">
+                                    <i class="fa-solid fa-database"></i>
+                                </div>
+
+                                <div>
+                                    <h5 class="fw-bold mb-1"
+                                        style="color:#17633c;">
+                                        Confirmar importación
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Último paso para incorporar los docentes.
+                                    </small>
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted">
+                                Se registrarán
+                                <strong>{{ resultado.validos }}</strong>
+                                investigadores, con sus áreas y todas
+                                sus carreras correspondientes.
+                            </p>
+
+                            <div class="alerta-seguridad mb-3">
+                                <i class="fa-solid fa-lock"></i>
+                                Los cambios se guardarán en una sola
+                                transacción. Si ocurre un error,
+                                se cancelará toda la operación.
+                            </div>
+
+                            <form method="POST"
+                                  action="{{ url_for('importar_investigadores') }}"
+                                  onsubmit="return confirm('¿Confirmas la importación de los investigadores a SIDIC? Esta acción guardará los registros en la base de datos.');">
+
+                                <input type="hidden"
+                                       name="accion"
+                                       value="confirmar">
+
+                                <input type="hidden"
+                                       name="token"
+                                       value="{{ token }}">
+
+                                <button type="submit"
+                                        class="btn-importar">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    Confirmar importación
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const archivo = document.getElementById("archivo");
+    const seleccionado = document.getElementById(
+        "archivoSeleccionado"
+    );
+
+    if (archivo && seleccionado) {
+
+        archivo.addEventListener("change", function () {
+
+            if (this.files.length > 0) {
+
+                seleccionado.style.display = "block";
+
+                seleccionado.innerHTML =
+                    '<i class="fa-solid fa-file-excel"></i> ' +
+                    this.files[0].name;
+
+            } else {
+
+                seleccionado.style.display = "none";
+                seleccionado.textContent = "";
+
+            }
+
+        });
+
+    }
+
+});
+</script>
+
+{% endblock %}

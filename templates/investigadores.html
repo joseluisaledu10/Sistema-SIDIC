@@ -98,9 +98,8 @@ Investigadores - Sistema DICyT
 
     .filtros-grid {
         display: grid;
-        grid-template-columns:
-            1fr 220px 180px auto;
-        gap: 12px;
+        grid-template-columns: 400px 190px 220px 200px 150px auto;
+        gap: 10px;
         align-items: end;
     }
 
@@ -191,6 +190,53 @@ Investigadores - Sistema DICyT
         background-color: #155d98;
     }
 
+    
+    /* BOTONES DE FILTROS */
+
+    
+    .botones-filtros {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .btn-buscar,
+    .btn-limpiar {
+        flex-shrink: 0;
+    }
+
+    .btn-limpiar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 14px;
+        height: 39px;
+        box-sizing: border-box;
+        background-color: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .btn-limpiar:hover {
+        background-color: #e5e7eb;
+        color: #111827;
+    }
+
+    @media (max-width: 900px) {
+        .botones-filtros {
+            flex-wrap: wrap;
+        }
+    }
+
+
 
     /* =========================
        TABLA
@@ -209,13 +255,26 @@ Investigadores - Sistema DICyT
     }
 
 
+    
     .tabla-contenedor {
-
         width: 100%;
-
-        overflow-x: auto;
+        max-height: 560px;
+        overflow: auto;
     }
 
+    /* Mantener visibles los encabezados al desplazarse */
+    .tabla-contenedor thead {
+        background-color: #0d3b66;
+        color: #ffffff;
+    }
+
+    .tabla-contenedor thead th {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background-color: #0d3b66;
+        color: #ffffff;
+    }
 
     table {
 
@@ -539,12 +598,109 @@ Investigadores - Sistema DICyT
 
     }
 
+    
+/* BOTONES DEL ENCABEZADO */
+
+.acciones-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-excel {
+    background: #218739;
+    color: white;
+    text-decoration: none;
+    padding: 11px 18px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.btn-excel:hover {
+    background: #176b2b;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.acciones-encabezado .btn-nuevo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* PAGINACIÓN */
+
+.paginacion-investigadores {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 0;
+}
+
+.paginacion-info {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.paginacion-controles {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pagina-enlace {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 36px;
+    padding: 8px 11px;
+    border: 1px solid #dbe3ec;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #0d3b66;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.pagina-enlace:hover {
+    background: #edf4fa;
+}
+
+.pagina-enlace.pagina-activa {
+    background: #0d3b66;
+    border-color: #0d3b66;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .paginacion-investigadores {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 </style>
 
 {% endblock %}
 
 
 {% block content %}
+
 
 
 <!-- =========================
@@ -566,19 +722,43 @@ Investigadores - Sistema DICyT
 
     </div>
 
+    <div class="acciones-encabezado">
 
-    <a
-        href="{{ url_for('nuevo_investigador') }}"
-        class="btn-nuevo"
-    >
+        <a
+            href="{{ url_for('importar_investigadores') }}"
+            class="btn-excel"
+        >
+            <i class="fa-solid fa-file-import"></i>
+            Importar Excel
+        </a>
 
-        <i class="fa-solid fa-plus"></i>
+        <a
+            href="{{ url_for(
+                'exportar_investigadores',
+                buscar=request.args.get('buscar', ''),
+                tipo=request.args.get('tipo', ''),
+                estado=request.args.get('estado', ''),
+                carrera=request.args.get('carrera', ''),
+                facultad=request.args.get('facultad', '')
+            ) }}"
+            class="btn-excel"
+        >
+            <i class="fa-solid fa-file-excel"></i>
+            Descargar Excel
+        </a>
 
-        Nuevo investigador
+        <a
+            href="{{ url_for('nuevo_investigador') }}"
+            class="btn-nuevo"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Nuevo investigador
+        </a>
 
-    </a>
+    </div>
 
 </div>
+
 
 
 <!-- =========================
@@ -606,12 +786,58 @@ Investigadores - Sistema DICyT
                     type="text"
                     id="buscar"
                     name="buscar"
-                    placeholder="Nombre, apellido, CI..."
+                    placeholder="Nombre, CI, correo, carrera o facultad..."
                     value="{{ request.args.get('buscar', '') }}"
                 >
 
             </div>
 
+            <!-- FILTRO POR CARRERA -->
+
+            <div class="campo-filtro">
+
+                <label for="carrera">Carrera</label>
+
+                <select id="carrera" name="carrera">
+
+                    <option value="">Todas las carreras</option>
+
+                    {% for item in carreras %}
+                        <option
+                            value="{{ item['carrera'] }}"
+                            {% if request.args.get('carrera', '') == item['carrera'] %}selected{% endif %}
+                        >
+                            {{ item['carrera'] }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- FILTRO POR FACULTAD -->
+
+            <div class="campo-filtro">
+
+                <label for="facultad">Facultad</label>
+
+                <select id="facultad" name="facultad">
+
+                    <option value="">Todas las facultades</option>
+
+                    {% for item in facultades %}
+                        <option
+                            value="{{ item['facultad'] }}"
+                            {% if request.args.get('facultad', '') == item['facultad'] %}selected{% endif %}
+                        >
+                            {{ item['facultad'] }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
 
             <!-- TIPO -->
 
@@ -693,22 +919,29 @@ Investigadores - Sistema DICyT
             </div>
 
 
-            <!-- BOTÓN BUSCAR -->
+            
+            <!-- BOTONES DE FILTROS -->
 
-            <div>
+            <div class="botones-filtros">
 
                 <button
                     type="submit"
                     class="btn-buscar"
                 >
-
                     <i class="fa-solid fa-magnifying-glass"></i>
-
                     Buscar
-
                 </button>
 
+                <a
+                    href="{{ url_for('investigadores') }}"
+                    class="btn-limpiar"
+                >
+                    <i class="fa-solid fa-eraser"></i>
+                    Limpiar filtros
+                </a>
+
             </div>
+
 
         </div>
 
@@ -748,7 +981,11 @@ Investigadores - Sistema DICyT
                     </th>
 
                     <th>
-                        Carrera / Área
+                        Carrera
+                    </th>
+
+                    <th>
+                        Facultad
                     </th>
 
                     <th>
@@ -778,7 +1015,7 @@ Investigadores - Sistema DICyT
                     <tr>
 
                         <td>
-                            {{ loop.index }}
+                            {{ (pagina - 1) * 25 + loop.index }}
                         </td>
 
 
@@ -825,7 +1062,11 @@ Investigadores - Sistema DICyT
 
 
                         <td>
-                            {{ investigador['carrera_area'] or '-' }}
+                            {{ investigador['carreras_texto'] or investigador['carrera_area'] or investigador['carrera'] or '-' }}
+                        </td>
+
+                        <td>
+                            {{ investigador['facultad'] or '-' }}
                         </td>
 
 
@@ -922,7 +1163,7 @@ Investigadores - Sistema DICyT
 
                     <tr>
 
-                        <td colspan="8">
+                        <td colspan="9">
 
                             <div class="sin-registros">
 
@@ -949,6 +1190,91 @@ Investigadores - Sistema DICyT
             </tbody>
 
         </table>
+
+    </div>
+
+    <!-- PAGINACIÓN DE INVESTIGADORES -->
+
+    <div class="paginacion-investigadores">
+
+        <div class="paginacion-info">
+            {% if total_registros > 0 %}
+                Mostrando
+                {{ (pagina - 1) * 25 + 1 }}
+                -
+                {{ (pagina - 1) * 25 + investigadores|length }}
+                de {{ total_registros }} investigadores
+            {% else %}
+                No hay investigadores para mostrar.
+            {% endif %}
+        </div>
+
+        {% if total_paginas > 1 %}
+
+            <nav class="paginacion-controles" aria-label="Paginación">
+
+                {% if pagina > 1 %}
+                    <a
+                        class="pagina-enlace"
+                        href="{{ url_for(
+                            'investigadores',
+                            pagina=pagina - 1,
+                            buscar=request.args.get('buscar', ''),
+                            tipo=request.args.get('tipo', ''),
+                            estado=request.args.get('estado', ''),
+                            carrera=request.args.get('carrera', ''),
+                            facultad=request.args.get('facultad', '')
+                        ) }}"
+                    >
+                        <i class="fa-solid fa-chevron-left"></i>
+                        Anterior
+                    </a>
+                {% endif %}
+
+                {% for numero in range(
+                    [pagina - 2, 1]|max,
+                    [pagina + 3, total_paginas + 1]|min
+                ) %}
+
+                    <a
+                        class="pagina-enlace {% if numero == pagina %}pagina-activa{% endif %}"
+                        href="{{ url_for(
+                            'investigadores',
+                            pagina=numero,
+                            buscar=request.args.get('buscar', ''),
+                            tipo=request.args.get('tipo', ''),
+                            estado=request.args.get('estado', ''),
+                            carrera=request.args.get('carrera', ''),
+                            facultad=request.args.get('facultad', '')
+                        ) }}"
+                        {% if numero == pagina %}aria-current="page"{% endif %}
+                    >
+                        {{ numero }}
+                    </a>
+
+                {% endfor %}
+
+                {% if pagina < total_paginas %}
+                    <a
+                        class="pagina-enlace"
+                        href="{{ url_for(
+                            'investigadores',
+                            pagina=pagina + 1,
+                            buscar=request.args.get('buscar', ''),
+                            tipo=request.args.get('tipo', ''),
+                            estado=request.args.get('estado', ''),
+                            carrera=request.args.get('carrera', ''),
+                            facultad=request.args.get('facultad', '')
+                        ) }}"
+                    >
+                        Siguiente
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+
+            </nav>
+
+        {% endif %}
 
     </div>
 

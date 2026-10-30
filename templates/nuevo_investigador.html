@@ -301,6 +301,244 @@ Nuevo Investigador - DICyT
         }
     }
 
+
+/* ========================================
+   SELECTOR MODERNO DE CARRERAS
+======================================== */
+
+.carreras-panel {
+    border: 1px solid #dbe3ed;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.carreras-encabezado {
+    padding: 18px;
+    background: linear-gradient(135deg, #f0f6fc, #ffffff);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.carreras-encabezado label {
+    display: block;
+    color: #0d3b66;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.carreras-descripcion {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+}
+
+.carreras-buscador {
+    position: relative;
+}
+
+.carreras-buscador input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #1e293b;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.carreras-buscador input:focus {
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, .10);
+}
+
+.carreras-icono-busqueda {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+}
+
+.carreras-controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.carreras-controles-grupo {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-carrera {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    border-radius: 7px;
+    padding: 8px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.btn-carrera:hover {
+    border-color: #0d3b66;
+    background: #f0f6fc;
+    color: #0d3b66;
+}
+
+.carreras-contador {
+    color: #0d3b66;
+    background: #eaf2fa;
+    border: 1px solid #d4e4f4;
+    border-radius: 20px;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.carreras-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 16px;
+    background: #f8fafc;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.carrera-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    min-width: 0;
+    padding: 13px;
+    margin: 0;
+    border: 1px solid #dce4ee;
+    border-radius: 9px;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 400;
+    line-height: 1.45;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.carrera-checkbox:hover {
+    border-color: #8baaca;
+    background: #f4f8fd;
+}
+
+.carrera-checkbox:has(input:checked) {
+    border-color: #0d3b66;
+    background: #edf5ff;
+    box-shadow: 0 0 0 1px rgba(13, 59, 102, .08);
+}
+
+.carrera-checkbox input {
+    flex: 0 0 17px;
+    width: 17px;
+    height: 17px;
+    margin: 2px 0 0;
+    accent-color: #0d3b66;
+    cursor: pointer;
+}
+
+.carrera-checkbox span {
+    color: #334155;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.carrera-checkbox:has(input:checked) span {
+    color: #0d3b66;
+    font-weight: 600;
+}
+
+.carrera-checkbox[hidden] {
+    display: none !important;
+}
+
+.carreras-sin-resultados {
+    display: none;
+    padding: 25px 15px;
+    color: #64748b;
+    text-align: center;
+    font-size: 13px;
+}
+
+.carreras-seleccion-resumen {
+    padding: 15px 16px;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+}
+
+.carreras-resumen-titulo {
+    display: block;
+    margin-bottom: 10px;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.carreras-etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.carrera-etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: #eaf2fa;
+    color: #0d3b66;
+    font-size: 12px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.carreras-vacio {
+    color: #94a3b8;
+    font-size: 12px;
+    font-style: italic;
+}
+
+@media (max-width: 650px) {
+    .carreras-checkboxes {
+        grid-template-columns: 1fr;
+        padding: 11px;
+    }
+
+    .carreras-encabezado {
+        padding: 14px;
+    }
+
+    .carreras-controles {
+        align-items: flex-start;
+    }
+
+    .carreras-controles-grupo {
+        width: 100%;
+    }
+}
+
 </style>
 
 {% endblock %}
@@ -507,19 +745,123 @@ Nuevo Investigador - DICyT
             <div class="formulario-grid">
 
 
-                <div class="campo">
+                <div class="campo campo-completo">
 
-                    <label for="carrera_area">
-                        Carrera / Área
-                    </label>
+                    <div class="carreras-panel">
 
-                    <input
-                        type="text"
-                        id="carrera_area"
-                        name="carrera_area"
-                    >
+                        <div class="carreras-encabezado">
+
+                            <label for="buscar_carrera">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                Carreras del investigador *
+                            </label>
+
+                            <span class="carreras-descripcion">
+                                Seleccione una o varias carreras. Puede buscarlas por nombre.
+                            </span>
+
+                            <div class="carreras-buscador">
+
+                                <i class="fa-solid fa-magnifying-glass carreras-icono-busqueda"></i>
+
+                                <input
+                                    type="search"
+                                    id="buscar_carrera"
+                                    placeholder="Escriba el nombre de una carrera..."
+                                    autocomplete="off"
+                                    aria-label="Buscar carreras"
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="carreras-controles">
+
+                            <div class="carreras-controles-grupo">
+
+                                <button
+                                    type="button"
+                                    class="btn-carrera"
+                                    id="seleccionar_carreras_visibles"
+                                >
+                                    <i class="fa-solid fa-check-double"></i>
+                                    Seleccionar visibles
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn-carrera"
+                                    id="limpiar_carreras"
+                                >
+                                    <i class="fa-solid fa-eraser"></i>
+                                    Limpiar selección
+                                </button>
+
+                            </div>
+
+                            <span class="carreras-contador" id="contador_carreras">
+                                0 seleccionadas
+                            </span>
+
+                        </div>
+
+                        <div class="carreras-checkboxes" id="lista_carreras">
+
+                            {% for carrera_item in carreras %}
+
+                            <label class="carrera-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    name="carreras"
+                                    value="{{ carrera_item }}"
+                                >
+
+                                <span>{{ carrera_item }}</span>
+
+                            </label>
+
+                            {% endfor %}
+
+                        </div>
+
+                        <div
+                            class="carreras-sin-resultados"
+                            id="carreras_sin_resultados"
+                            role="status"
+                        >
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            No se encontraron carreras con esa búsqueda.
+                        </div>
+
+                        <div class="carreras-seleccion-resumen">
+
+                            <span class="carreras-resumen-titulo">
+                                <i class="fa-solid fa-list-check"></i>
+                                Carreras seleccionadas
+                            </span>
+
+                            <div
+                                class="carreras-etiquetas"
+                                id="carreras_seleccionadas"
+                                aria-live="polite"
+                            >
+                                <span class="carreras-vacio">
+                                    Aún no seleccionó ninguna carrera.
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <small>
+                        Seleccione todas las carreras que correspondan al investigador.
+                    </small>
 
                 </div>
+
 
 
                 <div class="campo">
@@ -579,7 +921,7 @@ Nuevo Investigador - DICyT
                     </select>
 
                     <small>
-                        Seleccione el área de investigación correspondiente.
+                        Seleccione el área correspondiente.
                     </small>
 
                 </div>
@@ -810,5 +1152,147 @@ Nuevo Investigador - DICyT
     </form>
 
 </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const buscador = document.getElementById("buscar_carrera");
+    const lista = document.getElementById("lista_carreras");
+    const contador = document.getElementById("contador_carreras");
+    const resumen = document.getElementById("carreras_seleccionadas");
+    const sinResultados = document.getElementById("carreras_sin_resultados");
+    const botonSeleccionar = document.getElementById("seleccionar_carreras_visibles");
+    const botonLimpiar = document.getElementById("limpiar_carreras");
+
+    if (
+        !buscador || !lista || !contador || !resumen ||
+        !sinResultados || !botonSeleccionar || !botonLimpiar
+    ) {
+        return;
+    }
+
+    const tarjetas = Array.from(
+        lista.querySelectorAll(".carrera-checkbox")
+    );
+
+    const casillas = tarjetas.map(function (tarjeta) {
+        return tarjeta.querySelector('input[name="carreras"]');
+    }).filter(Boolean);
+
+    function actualizarResumen() {
+
+        const seleccionadas = casillas.filter(function (casilla) {
+            return casilla.checked;
+        });
+
+        contador.textContent =
+            seleccionadas.length +
+            (seleccionadas.length === 1
+                ? " seleccionada"
+                : " seleccionadas");
+
+        resumen.replaceChildren();
+
+        if (seleccionadas.length === 0) {
+
+            const mensaje = document.createElement("span");
+            mensaje.className = "carreras-vacio";
+            mensaje.textContent = "Aún no seleccionó ninguna carrera.";
+
+            resumen.appendChild(mensaje);
+            return;
+        }
+
+        seleccionadas.forEach(function (casilla) {
+
+            const etiqueta = document.createElement("span");
+            etiqueta.className = "carrera-etiqueta";
+
+            const texto = document.createElement("span");
+            texto.textContent = casilla.value;
+
+            const icono = document.createElement("i");
+            icono.className = "fa-solid fa-check";
+            icono.setAttribute("aria-hidden", "true");
+
+            etiqueta.appendChild(texto);
+            etiqueta.appendChild(icono);
+            resumen.appendChild(etiqueta);
+        });
+    }
+
+    function filtrarCarreras() {
+
+        const termino = buscador.value
+            .trim()
+            .toLocaleLowerCase();
+
+        let visibles = 0;
+
+        tarjetas.forEach(function (tarjeta) {
+
+            const casilla = tarjeta.querySelector(
+                'input[name="carreras"]'
+            );
+
+            const texto = casilla.value.toLocaleLowerCase();
+            const coincide = texto.includes(termino);
+
+            tarjeta.hidden = !coincide;
+
+            if (coincide) {
+                visibles++;
+            }
+        });
+
+        sinResultados.style.display =
+            visibles === 0 ? "block" : "none";
+    }
+
+    buscador.addEventListener("input", filtrarCarreras);
+
+    casillas.forEach(function (casilla) {
+        casilla.addEventListener("change", actualizarResumen);
+    });
+
+    botonSeleccionar.addEventListener("click", function () {
+
+        tarjetas.forEach(function (tarjeta) {
+
+            if (tarjeta.hidden) {
+                return;
+            }
+
+            const casilla = tarjeta.querySelector(
+                'input[name="carreras"]'
+            );
+
+            if (casilla && !casilla.checked) {
+                casilla.checked = true;
+                casilla.dispatchEvent(
+                    new Event("change", { bubbles: true })
+                );
+            }
+        });
+
+        actualizarResumen();
+    });
+
+    botonLimpiar.addEventListener("click", function () {
+
+        casillas.forEach(function (casilla) {
+            casilla.checked = false;
+        });
+
+        actualizarResumen();
+    });
+
+    filtrarCarreras();
+    actualizarResumen();
+
+});
+</script>
+
 
 {% endblock %}

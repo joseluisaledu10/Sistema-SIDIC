@@ -1,5 +1,3 @@
-
-
 {% extends "base.html" %}
 
 {% block title %}
@@ -12,8 +10,11 @@ Certificaciones - Sistema DICyT
    CERTIFICACIONES
 ========================================================= */
 .certificaciones-contenedor {
-    max-width: 1200px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
+    box-sizing: border-box;
+    padding: 0 12px;
 }
 
 /* =========================================================
@@ -410,6 +411,19 @@ Certificaciones - Sistema DICyT
     background: #F0DADD;
     border-color: #DDB8BE;
     color: #8B1E2D;
+}
+
+/* ELIMINAR PDF: GRIS OSCURO O NEGRO */
+.btn-eliminar-certificado {
+    background: #e9ecef;
+    color: #495057;
+    border: 1px solid #ced4da;
+    cursor: pointer;
+}
+
+.btn-eliminar-certificado:hover {
+    background: #dee2e6;
+    color: #212529;
 }
 
 /* MÁS OPCIONES */
@@ -900,6 +914,7 @@ Certificaciones - Sistema DICyT
                             {% endif %}
                         </td>
 
+                        
                         <!-- ACCIONES -->
                         <td>
                             <div class="acciones-certificado">
@@ -924,19 +939,35 @@ Certificaciones - Sistema DICyT
                                         id=certificado['id'],
                                         origen=certificado['origen']
                                     ) }}"
-                                   class="btn-accion-certificado"
-                                   title="Descargar PDF"
-                                   aria-label="Descargar PDF">
+                                class="btn-accion-certificado"
+                                title="Descargar PDF"
+                                aria-label="Descargar PDF">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </a>
 
-                                <!-- MÁS OPCIONES: PENDIENTE -->
-                                <a href="#"
-                                   class="btn-accion-certificado disabled"
-                                   title="Más opciones - Próximamente"
-                                   aria-label="Más opciones">
-                                    <i class="fa-solid fa-ellipsis"></i>
-                                </a>
+                                <!-- ELIMINAR CERTIFICADO -->
+                                <form method="POST"
+                                    action="{{ url_for(
+                                        'eliminar_certificado',
+                                        id=certificado['id']
+                                    ) }}"
+                                    style="display:inline;"
+                                    onsubmit="return confirm(
+                                        '¿Estás seguro de que deseas eliminar este certificado? Esta acción no se puede deshacer.'
+                                    );">
+
+                                    <input type="hidden"
+                                        name="origen"
+                                        value="{{ certificado['origen'] }}">
+
+                                    <button type="submit"
+                                            class="btn-accion-certificado btn-eliminar-certificado"
+                                            title="Eliminar certificado"
+                                            aria-label="Eliminar certificado">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+
                             </div>
                         </td>
                     </tr>
