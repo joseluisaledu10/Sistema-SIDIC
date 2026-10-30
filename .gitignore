@@ -28,3 +28,8 @@ Thumbs.db
 # Variables de entorno
 .env
 .env.*
+
+# Datos locales y archivos de respaldo SIDIC
+respaldos/
+static/certificados/qr/
+importacion_docentes_aprobados.xlsx
